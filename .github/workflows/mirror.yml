@@ -17,5 +17,5 @@ jobs:
         run: |
           git config user.name "Raphael Plett"  # Replace with your username
           git config user.email "plettraphael@gmail.com"  # Replace with your email
-          git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/raphaelplt/kinoticketing_ui.git
+          git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/raphaelplt/kinoticketing_ui
           git push --mirror
