@@ -5,6 +5,9 @@ on:
     branches:
       - main  # Replace 'main' with your main branch name if different
 
+permissions:
+  contents: write
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
