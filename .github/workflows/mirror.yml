@@ -1,0 +1,21 @@
+name: Mirror to Personal Repo
+
+on:
+  push:
+    branches:
+      - main  # Replace 'main' with your main branch name if different
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history
+
+      - name: Mirror changes
+        run: |
+          git config user.name "Raphael Plett"  # Replace with your username
+          git config user.email "plettraphael@gmail.com"  # Replace with your email
+          git remote set-url origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/raphaelplt/kinoticketing_ui.git
+          git push --mirror
