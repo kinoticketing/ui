@@ -1,60 +1,65 @@
 <script lang=ts>
     import { writable } from 'svelte/store';
   
-    // @ts-ignore
-    let row_count: int;
-    // @ts-ignore
-    let col_count: int;
+    // TODO: some logic errors remain regarding the row and column count when using the buttons
+    let row_count: number;
+    let col_count: number;
+
+    let hall_name: string;
   
-    // @ts-ignore
-    let rows = writable([]); // Array von Arrays für die Sitzplätze
+    let rows = writable<string[][]>([[]]); // Array von Arrays für die Sitzplätze
   
     function addRow() {
-      // @ts-ignore
+      row_count++;
+      
       rows.update((r) => [...r, []]);
     }
   
     function removeRow() {
+      row_count--;
+      
       rows.update((r) => r.slice(0, -1));
     }
 
     function removeAll() {
+      row_count = 0; 
+      col_count = 0;
+
       rows.update((r) => []);
     }
   
-    // @ts-ignore
-    function addColumn(rowIndex) {
+    function addColumn(rowIndex: number) {
+      col_count++;
+      
       rows.update((r) => {
-        // @ts-ignore
         r[rowIndex].push("Sitz");
         return r;
       });
     }
   
-    // @ts-ignore
-    function removeColumn(rowIndex) {
+    function removeColumn(rowIndex: number) {
+      col_count--;
+
       rows.update((r) => {
-        // @ts-ignore
         r[rowIndex].pop();
         return r;
       });
     }
   
     function addColumnToAllRows() {
-      // @ts-ignore
+      col_count++;
+
       rows.update((r) => {
         return r.map((row) => [...row, "Sitz"]);
       });
     }
 
     function preview() {
-      // @ts-ignore
-      for (let i = 0; i < row_count; i++) {
-        addRow();
-      }
-      for (let i = 0; i < col_count; i++) {
-        addColumnToAllRows();
-      }
+      rows.set(Array.from({ length: row_count }, () => Array(col_count).fill("Sitz")));
+    }
+
+    function safe() {
+      console.log(hall_name, row_count, col_count, $rows);
     }
   </script>
 
@@ -62,7 +67,22 @@
     <h1>Saal anlegen</h1>
     
     <div class="container">
+      
+      <div class="row-buttons">
+        <button on:click={addRow}>Reihe hinzufügen</button>
+        <button on:click={removeRow}>Reihe entfernen</button>
+        <button on:click={addColumnToAllRows}>Spalte zu allen Reihen hinzufügen</button>
+        <button on:click={removeAll}>Alle Reihen löschen</button>
+      </div>
+      <div class="inputs">
+        <input type="text" placeholder="Name des Saals" bind:value={hall_name} />
+        <input type="number" min= "0" placeholder="Anzahl Reihen" bind:value={row_count} on:change={preview} />
+        <input type="number" min= "0" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} on:change={preview} />
+        <button on:click={safe}>Speichern</button>
+      </div>
+
       <div class="seat-grid">
+
         {#each $rows as row, rowIndex}
           <div class="seat-row">
             {#each row as seat}
@@ -72,19 +92,6 @@
             <button on:click={() => removeColumn(rowIndex)}>-</button>
           </div>
         {/each}
-      </div>
-    
-      <div class="row-buttons">
-        <button on:click={addRow}>Reihe hinzufügen</button>
-        <button on:click={removeRow}>Reihe entfernen</button>
-        <button on:click={addColumnToAllRows}>Spalte zu allen Reihen hinzufügen</button>
-        <button on:click={removeAll}>Alle Reihen löschen</button>
-      </div>
-      <div class="inputs">
-        <input type="text" placeholder="Name des Saals" />
-        <input type="number" placeholder="Anzahl Reihen" bind:value={row_count} />
-        <input type="number" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} />
-        <button on:click={preview}>Speichern</button>
       </div>
     </div>
 
@@ -169,6 +176,7 @@
       justify-content: center;
       gap: 10px;
       margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     .inputs button {
