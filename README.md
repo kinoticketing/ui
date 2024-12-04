@@ -8,7 +8,9 @@ Dieses Repository klont man mit folgendem Befehl:
 Um Änderungen, die bereits auf das Repository gepusht wurden, lokal "herunterzuladen", verwende folgenden Befehl:
 - `git pull`
 
-> [!CAUTION] Niemals auf main pushen!
+> [!CAUTION] 
+> Niemals auf main pushen!
+> 
 > Wir arbeiten mit Branches. So ist sichergestellt, dass der main-Branch immer heil bleibt.
 >
 > Wenn ihr an etwas arbeitet, erstellt einen Branch, auf dem ihr entwickelt.
