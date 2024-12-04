@@ -1,38 +1,30 @@
-# create-svelte
+# Kinoticketreservervierungssystem
+## Collaborating (kleiner git-guide)
+Hier ein kurzer guide mit den wichtigsten git Befehlen, um effektiv zusammenzuarbeiten. Und ein paar good practices, an die wir uns alle halten sollten.
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Dieses Repository klont man mit folgendem Befehl:
+- `git clone https://github.com/kinoticketing/ui`
 
-## Creating a project
+Um Änderungen, die bereits auf das Repository gepusht wurden, lokal "herunterzuladen", verwende folgenden Befehl:
+- `git pull`
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> [!CAUTION] 
+> Niemals auf main pushen!
+> 
+> Wir arbeiten mit Branches. So ist sichergestellt, dass der main-Branch immer heil bleibt.
+>
+> Wenn ihr an etwas arbeitet, erstellt einen Branch, auf dem ihr entwickelt.
+>
+> - `git branch [NAME]`
+> - `git checkout [NAME]`
+> - `git commit -m "FEAT: implemented checkout button"` 
+>   - **"FEAT" für feature-Entwicklung benutzen**
+>   - **"FIX" für Entwicklung rund um Fehlerbehebung benutzen**
+> - `git push -u origin [NAME]`
+>
+> Sofern das Feature fertig entwickelt ist, muss eine pull request angelegt werden, die den Feature Branch mit dem main Branch merged.
+> 
+> Sobald alle Änderungen auf den Branch gepusht wurden, könnt ihr in dem Repository auf GitHub auf euren Branch navigieren und unter "Contribute" auf "Open pull request" drücken.
+> 
+> Dann evtl nen Titel und eine kurze Beschreibung hinzufügen und einen reviewer. Schließlich dann auf Create pull request und dann schauen wir ob der bereit zum mergen ist.
+  
