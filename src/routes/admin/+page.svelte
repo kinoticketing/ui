@@ -1,46 +1,96 @@
-<script>
+<script lang=ts>
     import { writable } from 'svelte/store';
   
+    // @ts-ignore
+    let row_count: int;
+    // @ts-ignore
+    let col_count: int;
+  
+    // @ts-ignore
     let rows = writable([]); // Array von Arrays für die Sitzplätze
   
     function addRow() {
+      // @ts-ignore
       rows.update((r) => [...r, []]);
     }
   
     function removeRow() {
       rows.update((r) => r.slice(0, -1));
     }
+
+    function removeAll() {
+      rows.update((r) => []);
+    }
   
+    // @ts-ignore
     function addColumn(rowIndex) {
       rows.update((r) => {
+        // @ts-ignore
         r[rowIndex].push("Sitz");
         return r;
       });
     }
   
+    // @ts-ignore
     function removeColumn(rowIndex) {
       rows.update((r) => {
+        // @ts-ignore
         r[rowIndex].pop();
         return r;
       });
     }
   
     function addColumnToAllRows() {
+      // @ts-ignore
       rows.update((r) => {
         return r.map((row) => [...row, "Sitz"]);
       });
     }
+
+    function preview() {
+      // @ts-ignore
+      for (let i = 0; i < row_count; i++) {
+        addRow();
+      }
+      for (let i = 0; i < col_count; i++) {
+        addColumnToAllRows();
+      }
+    }
   </script>
+
+  <main>
+    <h1>Saal anlegen</h1>
+    
+    <div class="container">
+      <div class="seat-grid">
+        {#each $rows as row, rowIndex}
+          <div class="seat-row">
+            {#each row as seat}
+              <div class="seat">{seat}</div>
+            {/each}
+            <button on:click={() => addColumn(rowIndex)}>+</button>
+            <button on:click={() => removeColumn(rowIndex)}>-</button>
+          </div>
+        {/each}
+      </div>
+    
+      <div class="row-buttons">
+        <button on:click={addRow}>Reihe hinzufügen</button>
+        <button on:click={removeRow}>Reihe entfernen</button>
+        <button on:click={addColumnToAllRows}>Spalte zu allen Reihen hinzufügen</button>
+        <button on:click={removeAll}>Alle Reihen löschen</button>
+      </div>
+      <div class="inputs">
+        <input type="text" placeholder="Name des Saals" />
+        <input type="number" placeholder="Anzahl Reihen" bind:value={row_count} />
+        <input type="number" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} />
+        <button on:click={preview}>Speichern</button>
+      </div>
+    </div>
+
+  </main>
   
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-  
     h1 {
       text-align: center;
       margin: 20px 0;
@@ -113,27 +163,24 @@
     .row-buttons button:hover {
       background-color: #218838;
     }
+
+    .inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .inputs button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
   
-  <h1>Saal anlegen</h1>
   
-  <div class="container">
-    <div class="seat-grid">
-      {#each $rows as row, rowIndex}
-        <div class="seat-row">
-          {#each row as seat, seatIndex}
-            <div class="seat">{seat}</div>
-          {/each}
-          <button on:click={() => addColumn(rowIndex)}>+</button>
-          <button on:click={() => removeColumn(rowIndex)}>-</button>
-        </div>
-      {/each}
-    </div>
-  
-    <div class="row-buttons">
-      <button on:click={addRow}>Reihe hinzufügen</button>
-      <button on:click={removeRow}>Reihe entfernen</button>
-      <button on:click={addColumnToAllRows}>Spalte zu allen Reihen hinzufügen</button>
-    </div>
-  </div>
   
