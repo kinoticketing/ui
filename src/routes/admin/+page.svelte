@@ -1,194 +1,213 @@
-<script lang=ts>
-    import { writable } from 'svelte/store';
-  
-    // TODO: some logic errors remain regarding the row and column count when using the buttons
-    let row_count: number;
-    let col_count: number;
+<script lang="ts">
+  import { writable } from "svelte/store";
 
-    let hall_name: string;
-  
-    let rows = writable<string[][]>([[]]); // Array von Arrays für die Sitzplätze
-  
-    function addRow() {
+  let row_count: number;
+  let col_count: number;
+  let hall_name: string;
+
+  // Default Sitztypen
+  let seatTypes = ["Regular", "VIP", "Behindert"];
+  let rows = writable<string[][]>([[]]);
+  let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
+
+  function addRow() {
       row_count++;
-      
-      rows.update((r) => [...r, []]);
-    }
-  
-    function removeRow() {
+      rows.update((r) => [...r, Array(col_count).fill("Regular")]);
+  }
+
+  function removeRow() {
       row_count--;
-      
       rows.update((r) => r.slice(0, -1));
-    }
+  }
 
-    function removeAll() {
-      row_count = 0; 
-      col_count = 0;
-
-      rows.update((r) => []);
-    }
-  
-    function addColumn(rowIndex: number) {
+  function addColumn(rowIndex: number) {
       col_count++;
-      
       rows.update((r) => {
-        r[rowIndex].push("Sitz");
-        return r;
+          r[rowIndex].push("Regular");
+          return r;
       });
-    }
-  
-    function removeColumn(rowIndex: number) {
+  }
+
+  function removeColumn(rowIndex: number) {
       col_count--;
-
       rows.update((r) => {
-        r[rowIndex].pop();
-        return r;
+          r[rowIndex].pop();
+          return r;
       });
-    }
-  
-    function addColumnToAllRows() {
+  }
+
+  function removeAll() {
+      row_count = 0;
+      col_count = 0;
+      rows.update(() => []);
+  }
+
+  function addColumnToAllRows() {
       col_count++;
+      rows.update((r) => r.map((row) => [...row, "Regular"]));
+  }
 
-      rows.update((r) => {
-        return r.map((row) => [...row, "Sitz"]);
-      });
-    }
+  function preview() {
+      rows.set(Array.from({ length: row_count }, () => Array(col_count).fill("Regular")));
+  }
 
-    function preview() {
-      rows.set(Array.from({ length: row_count }, () => Array(col_count).fill("Sitz")));
-    }
-
-    function safe() {
+  function safe() {
+      if (!hall_name || hall_name.trim() === "") {
+          alert("Bitte geben Sie einen Namen für den Saal ein.");
+          return;
+      }
       console.log(hall_name, row_count, col_count, $rows);
-    }
-  </script>
+  }
 
-  <main>
-    <h1>Saal anlegen</h1>
-    
-    <div class="container">
-      
-      <div class="row-buttons">
-        <button on:click={addRow}>Reihe hinzufügen</button>
-        <button on:click={removeRow}>Reihe entfernen</button>
-        <button on:click={addColumnToAllRows}>Spalte zu allen Reihen hinzufügen</button>
-        <button on:click={removeAll}>Alle Reihen löschen</button>
-      </div>
+  function changeSeatType(rowIndex: number, colIndex: number, newType: string) {
+      rows.update((r) => {
+          r[rowIndex][colIndex] = newType;
+          return r;
+      });
+      $activeDropdown = null; 
+  }
+
+  function toggleDropdown(rowIndex: number, colIndex: number) {
+      activeDropdown = activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex
+          ? null
+          : { rowIndex, colIndex };
+  }
+</script>
+
+<main>
+  <h1>Saal anlegen</h1>
+  <div class="container">
       <div class="inputs">
-        <input type="text" placeholder="Name des Saals" bind:value={hall_name} />
-        <input type="number" min= "0" placeholder="Anzahl Reihen" bind:value={row_count} on:change={preview} />
-        <input type="number" min= "0" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} on:change={preview} />
-        <button on:click={safe}>Speichern</button>
+          <input type="text" placeholder="Name des Saals" bind:value={hall_name} />
+          <input type="number" min="0" placeholder="Anzahl Reihen" bind:value={row_count} on:change={preview} />
+          <input type="number" min="0" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} on:change={preview} />
+          <button class="safe-btn" on:click={safe}>Speichern</button>
+          <button class="delete-btn" on:click={removeAll}>Alle Reihen löschen</button>
       </div>
 
       <div class="seat-grid">
-
-        {#each $rows as row, rowIndex}
-          <div class="seat-row">
-            {#each row as seat}
-              <div class="seat">{seat}</div>
-            {/each}
-            <button on:click={() => addColumn(rowIndex)}>+</button>
-            <button on:click={() => removeColumn(rowIndex)}>-</button>
-          </div>
-        {/each}
+          {#each $rows as row, rowIndex}
+              <div class="seat-row">
+                  {#each row as seat, colIndex}
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <!-- svelte-ignore a11y-no-static-element-interactions -->
+                      <div class="seat" on:click={() => toggleDropdown(rowIndex, colIndex)}>
+                          {seat}
+                          {#if activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex}
+                              <div class="dropdown">
+                                  {#each seatTypes as type}
+                                      <div class="dropdown-item" on:click={() => changeSeatType(rowIndex, colIndex, type)}>
+                                          {type}
+                                      </div>
+                                  {/each}
+                              </div>
+                          {/if}
+                      </div>
+                  {/each}
+                  <button on:click={() => addColumn(rowIndex)}>+</button>
+                  <button on:click={() => removeColumn(rowIndex)}>-</button>
+              </div>
+          {/each}
       </div>
-    </div>
+  </div>
+</main>
 
-  </main>
-  
-  <style>
-    h1 {
+<style>
+  h1 {
       text-align: center;
       margin: 20px 0;
-    }
-  
-    .container {
-      flex: 1;
+  }
+
+  .container {
       padding: 20px;
-      overflow-y: auto;
-    }
-  
-    .seat-grid {
+  }
+
+  .seat-grid {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      margin-bottom: 20px;
-    }
-  
-    .seat-row {
+      margin-top: 10px;
+  }
+
+  .seat-row {
       display: flex;
-      align-items: center;
       gap: 5px;
-    }
-  
-    .seat {
-      width: 40px;
-      height: 40px;
+  }
+
+  .seat {
+      position: relative;
+      width: 50px;
+      height: 50px;
       border: 1px solid #ccc;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #f9f9f9;
       border-radius: 4px;
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 12px;
+      background-color: #f0f0f0;
       cursor: pointer;
-    }
-  
-    .seat-row button {
+  }
+
+  .seat:hover {
+      background-color: #e0e0e0;
+  }
+
+  .dropdown {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      z-index: 10;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .dropdown-item {
+      padding: 5px 10px;
+      cursor: pointer;
+  }
+
+  .dropdown-item:hover {
+      background-color: #f0f0f0;
+  }
+
+  .inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+  }
+
+  .safe-btn,
+  .delete-btn {
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+  }
+
+  .safe-btn {
+      background-color: #28a745;
+      color: white;
+  }
+
+  .delete-btn {
+      background-color: #dc3545;
+      color: white;
+  }
+
+  .seat-row button {
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 4px;
       padding: 5px 10px;
       cursor: pointer;
-    }
-  
-    .seat-row button:hover {
+  }
+
+  .seat-row button:hover {
       background-color: #0056b3;
-    }
-  
-    .row-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-  
-    .row-buttons button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  
-    .row-buttons button:hover {
-      background-color: #218838;
-    }
-
-    .inputs {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-    .inputs button {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
-  
-  
-  
+  }
+</style>
