@@ -16,5 +16,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
     throw new Error(data.Error || 'Keine Filme gefunden.');
   }
 
-  return { movies: data.Search }; // OMDB liefert die Filme unter `Search`
+//   return { movies: data.Search }; // OMDB liefert die Filme unter `Search`
+return { movies: data.Search.map((movie: { imdbID: any; }) => ({ ...movie, id: movie.imdbID })) };
+
 };
