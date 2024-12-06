@@ -21,6 +21,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "^9.6.0",
+		"@types/node": "^22.10.1",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
@@ -37,5 +38,8 @@
 	"type": "module",
 	"directories": {
 		"test": "tests"
+	},
+	"dependencies": {
+		"dotenv": "^16.4.7"
 	}
 }
