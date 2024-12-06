@@ -17,6 +17,13 @@
 			<p><strong>Actors:</strong> {data.movie.Actors}</p>
 			<p><strong>Plot:</strong> {data.movie.Plot}</p>
 			<p><strong>IMDb Rating:</strong> {data.movie.imdbRating}</p>
+			<a
+				href={`https://www.imdb.com/title/${data.movie.imdbID}/`}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				Schau den Trailer auf IMDb
+			</a>
 		</div>
 	</div>
 </main>
@@ -24,8 +31,5 @@
 <style>
 	main {
 		padding: 2rem;
-	}
-	.img {
-		object-fit: cover;
 	}
 </style>
