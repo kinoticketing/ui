@@ -17,6 +17,10 @@
 			<p><strong>Actors:</strong> {data.movie.Actors}</p>
 			<p><strong>Plot:</strong> {data.movie.Plot}</p>
 			<p><strong>IMDb Rating:</strong> {data.movie.imdbRating}</p>
+			<p><strong>Runtime:</strong> {data.movie.Runtime}</p>
+			<p><strong>Language:</strong> {data.movie.Language}</p>
+			<p><strong>Country:</strong> {data.movie.Country}</p>
+			<p><strong>Awards:</strong> {data.movie.Awards}</p>
 			<a
 				href={`https://www.imdb.com/title/${data.movie.imdbID}/`}
 				target="_blank"
