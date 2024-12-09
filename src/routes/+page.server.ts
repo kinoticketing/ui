@@ -1,4 +1,8 @@
 import { neon } from '@neondatabase/serverless';
+import 'dotenv/config';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const connectionString: string = process.env.DATABASE_URL as string;
 console.log("TEST:" + connectionString);
