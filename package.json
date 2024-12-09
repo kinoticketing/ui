@@ -40,7 +40,7 @@
 		"test": "tests"
 	},
 	"dependencies": {
-		"dotenv": "^16.4.7"
+		"dotenv": "^16.4.7",
 		"vercel": "^39.1.3"
 	}
 }
