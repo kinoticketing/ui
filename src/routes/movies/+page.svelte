@@ -18,7 +18,7 @@
 		<button on:click={() => goto(`?query=${query}`)}>Suchen</button>
 	</div>
 	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-		{#each data.movies as movie}
+		{#each data.movies.slice().sort((a, b) => parseInt(b.Year) - parseInt(a.Year)) as movie}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
