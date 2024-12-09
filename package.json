@@ -41,5 +41,6 @@
 	},
 	"dependencies": {
 		"dotenv": "^16.4.7"
+		"vercel": "^39.1.3"
 	}
 }
