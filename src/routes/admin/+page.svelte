@@ -1,213 +1,45 @@
-<script lang="ts">
-  import { writable } from "svelte/store";
-
-  let row_count: number;
-  let col_count: number;
-  let hall_name: string;
-
-  // Default Sitztypen
-  let seatTypes = ["Regular", "VIP", "Behindert"];
-  let rows = writable<string[][]>([[]]);
-  let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
-
-  function addRow() {
-      row_count++;
-      rows.update((r) => [...r, Array(col_count).fill("Regular")]);
-  }
-
-  function removeRow() {
-      row_count--;
-      rows.update((r) => r.slice(0, -1));
-  }
-
-  function addColumn(rowIndex: number) {
-      col_count++;
-      rows.update((r) => {
-          r[rowIndex].push("Regular");
-          return r;
-      });
-  }
-
-  function removeColumn(rowIndex: number) {
-      col_count--;
-      rows.update((r) => {
-          r[rowIndex].pop();
-          return r;
-      });
-  }
-
-  function removeAll() {
-      row_count = 0;
-      col_count = 0;
-      rows.update(() => []);
-  }
-
-  function addColumnToAllRows() {
-      col_count++;
-      rows.update((r) => r.map((row) => [...row, "Regular"]));
-  }
-
-  function preview() {
-      rows.set(Array.from({ length: row_count }, () => Array(col_count).fill("Regular")));
-  }
-
-  function safe() {
-      if (!hall_name || hall_name.trim() === "") {
-          alert("Bitte geben Sie einen Namen für den Saal ein.");
-          return;
-      }
-      console.log(hall_name, row_count, col_count, $rows);
-  }
-
-  function changeSeatType(rowIndex: number, colIndex: number, newType: string) {
-      rows.update((r) => {
-          r[rowIndex][colIndex] = newType;
-          return r;
-      });
-      $activeDropdown = null; 
-  }
-
-  function toggleDropdown(rowIndex: number, colIndex: number) {
-      activeDropdown = activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex
-          ? null
-          : { rowIndex, colIndex };
-  }
+<script>
+    let adminName = "Admin";
 </script>
 
 <main>
-  <h1>Saal anlegen</h1>
-  <div class="container">
-      <div class="inputs">
-          <input type="text" placeholder="Name des Saals" bind:value={hall_name} />
-          <input type="number" min="0" placeholder="Anzahl Reihen" bind:value={row_count} on:change={preview} />
-          <input type="number" min="0" placeholder="Anzahl Sitze pro Reihe" bind:value={col_count} on:change={preview} />
-          <button class="safe-btn" on:click={safe}>Speichern</button>
-          <button class="delete-btn" on:click={removeAll}>Alle Reihen löschen</button>
-      </div>
+    <h1>Willkommen, {adminName}!</h1>
+    <p>Dies ist die Administrationsseite für das Kinoticketreservierungsprogramm.</p>
+    <p>Hier können Sie Reservierungen verwalten, Filme hinzufügen, Vorstellungen anlegen und vieles mehr.</p>
+    <div>
+        <button on:click={() => window.location.href = '/admin/create-hall'}>Saal erstellen</button>
+        <button on:click={() => window.location.href = '/admin/create-screening'}>Vorstellung erstellen</button>
+        <button on:click={() => window.location.href = '/admin/manage-reservations'}>Reservierungen verwalten</button>
+    </div>
 
-      <div class="seat-grid">
-          {#each $rows as row, rowIndex}
-              <div class="seat-row">
-                  {#each row as seat, colIndex}
-                      <!-- svelte-ignore a11y-click-events-have-key-events -->
-                      <!-- svelte-ignore a11y-no-static-element-interactions -->
-                      <div class="seat" on:click={() => toggleDropdown(rowIndex, colIndex)}>
-                          {seat}
-                          {#if activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex}
-                              <div class="dropdown">
-                                  {#each seatTypes as type}
-                                      <div class="dropdown-item" on:click={() => changeSeatType(rowIndex, colIndex, type)}>
-                                          {type}
-                                      </div>
-                                  {/each}
-                              </div>
-                          {/if}
-                      </div>
-                  {/each}
-                  <button on:click={() => addColumn(rowIndex)}>+</button>
-                  <button on:click={() => removeColumn(rowIndex)}>-</button>
-              </div>
-          {/each}
-      </div>
-  </div>
+    <style>
+        button {
+            margin: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </main>
 
 <style>
-  h1 {
-      text-align: center;
-      margin: 20px 0;
-  }
+    main {
+        padding: 2rem;
+        text-align: center;
+    }
 
-  .container {
-      padding: 20px;
-  }
+    h1 {
+        color: #2c3e50;
+    }
 
-  .seat-grid {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-  }
-
-  .seat-row {
-      display: flex;
-      gap: 5px;
-  }
-
-  .seat {
-      position: relative;
-      width: 50px;
-      height: 50px;
-      border: 1px solid #ccc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 4px;
-      font-size: 12px;
-      background-color: #f0f0f0;
-      cursor: pointer;
-  }
-
-  .seat:hover {
-      background-color: #e0e0e0;
-  }
-
-  .dropdown {
-      position: absolute;
-      top: 60px;
-      left: 0;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      z-index: 10;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .dropdown-item {
-      padding: 5px 10px;
-      cursor: pointer;
-  }
-
-  .dropdown-item:hover {
-      background-color: #f0f0f0;
-  }
-
-  .inputs {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-  }
-
-  .safe-btn,
-  .delete-btn {
-      padding: 10px;
-      font-size: 14px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-  }
-
-  .safe-btn {
-      background-color: #28a745;
-      color: white;
-  }
-
-  .delete-btn {
-      background-color: #dc3545;
-      color: white;
-  }
-
-  .seat-row button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 5px 10px;
-      cursor: pointer;
-  }
-
-  .seat-row button:hover {
-      background-color: #0056b3;
-  }
+    p {
+        color: #34495e;
+    }
 </style>
