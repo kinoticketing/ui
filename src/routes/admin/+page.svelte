@@ -7,8 +7,8 @@
     <p>Dies ist die Administrationsseite für das Kinoticketreservierungsprogramm.</p>
     <p>Hier können Sie Reservierungen verwalten, Filme hinzufügen, Vorstellungen anlegen und vieles mehr.</p>
     <div>
-        <button on:click={() => window.location.href = '/admin/create-hall'}>Saal erstellen</button>
-        <button on:click={() => window.location.href = '/admin/create-screening'}>Vorstellung erstellen</button>
+        <button on:click={() => window.location.href = '/admin/manage-halls'}>Säle verwalten</button>
+        <button on:click={() => window.location.href = '/admin/manage-screenings'}>Vorstellungen verwalten</button>
         <button on:click={() => window.location.href = '/admin/manage-reservations'}>Reservierungen verwalten</button>
     </div>
 
