@@ -10,6 +10,7 @@
     let saveMessage: string | null = null;
     let searchError: string | null = null; // Fehlernachricht für die Suche
 
+    // Filme suchen
     async function fetchMovies() {
         if (!movieQuery.trim()) {
             searchResults = [];
@@ -33,13 +34,16 @@
         }
     }
 
+    // Film auswählen
     function selectMovie(movie: { movie_id: string; title: string }) {
         selectedMovie = movie;
         searchResults = [];
         movieQuery = '';
     }
 
-    async function submitForm() {
+    // Vorstellung erstellen
+    async function submitForm(event: Event) {
+        event.preventDefault(); // Standard-Formularaktion verhindern
         saveMessage = null;
 
         if (!selectedMovie || !hall_id || !showtime) {
@@ -48,20 +52,20 @@
         }
 
         const formData = new FormData();
-        formData.append('actionType', 'createShowtime');
-        formData.append('movie_id', selectedMovie.movie_id);
+        formData.append('movie_id', selectedMovie.movie_id); // IMDB-ID direkt speichern
         formData.append('hall_id', String(hall_id));
         formData.append('showtime', showtime);
 
         try {
             const response = await fetch('/admin/manage-screenings/create-screening', {
                 method: 'POST',
-                body: formData
+                body: formData,
             });
 
             if (response.ok) {
                 const result = await response.json();
                 saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
+                // Felder zurücksetzen
                 selectedMovie = null;
                 hall_id = null;
                 showtime = null;
@@ -71,141 +75,158 @@
                 saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
             }
         } catch (error) {
-            saveMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
             console.error('Netzwerkfehler:', error);
+            saveMessage = 'Ein Netzwerkfehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
         }
     }
 </script>
 
 <main>
-    <h1>Neue Vorstellung erstellen</h1>
+    <div class="container">
+        <h1>Neue Vorstellung erstellen</h1>
 
-    {#if saveMessage}
-        <p class="feedback">{saveMessage}</p>
-    {/if}
-
-    <div class="form">
-        <label>
-            Film suchen:
-            <input type="text" bind:value={movieQuery} placeholder="Film suchen..." on:input={fetchMovies} />
-        </label>
-
-        {#if searchError}
-            <p class="error">{searchError}</p>
+        {#if saveMessage}
+            <p class="feedback">{saveMessage}</p>
         {/if}
 
-        {#if searchResults.length > 0}
-            <ul class="search-results">
-                {#each searchResults as movie}
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-                    <li on:click={() => selectMovie(movie)}>{movie.title}</li>
-                {/each}
-            </ul>
-        {:else if movieQuery.trim() !== ''}
-            <p class="no-results">Keine Filme gefunden. Versuchen Sie es mit einem anderen Suchbegriff.</p>
-        {/if}
+        <form on:submit={submitForm} class="form">
+            <label>
+                Film suchen:
+                <input
+                    type="text"
+                    bind:value={movieQuery}
+                    placeholder="Film suchen..."
+                    on:input={fetchMovies}
+                />
+            </label>
 
-        {#if selectedMovie}
-            <p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
-        {/if}
+            {#if searchError}
+                <p class="error">{searchError}</p>
+            {/if}
 
-        <label>
-            Saal:
-            <select bind:value={hall_id}>
-                <option value="" disabled selected>Saal auswählen</option>
-                {#each data.halls as hall}
-                    <option value={hall.hall_id}>{hall.name}</option>
-                {/each}
-            </select>
-        </label>
+            {#if searchResults.length > 0}
+                <ul class="search-results">
+                    {#each searchResults as movie}
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                        <li on:click={() => selectMovie(movie)}>{movie.title}</li>
+                    {/each}
+                </ul>
+            {/if}
 
-        <label>
-            Datum und Uhrzeit:
-            <input type="datetime-local" bind:value={showtime} />
-        </label>
+            {#if selectedMovie}
+                <p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
+                <input type="hidden" name="movie_id" value={selectedMovie.movie_id} />
+            {/if}
 
-        <button class="submit-btn" on:click={submitForm}>Vorstellung erstellen</button>
+            <label>
+                Saal:
+                <select name="hall_id" bind:value={hall_id}>
+                    <option value="" disabled selected>Saal auswählen</option>
+                    {#each data.halls as hall}
+                        <option value={hall.hall_id}>{hall.name}</option>
+                    {/each}
+                </select>
+            </label>
+
+            <label>
+                Datum und Uhrzeit:
+                <input type="datetime-local" name="showtime" bind:value={showtime} />
+            </label>
+
+            <button type="submit" class="submit-btn">Vorstellung erstellen</button>
+        </form>
     </div>
 </main>
 
-
-
 <style>
-	h1 {
-		text-align: center;
-		margin-bottom: 20px;
-	}
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-	.form {
-		display: flex;
-		flex-direction: column;
-		gap: 15px;
-		max-width: 400px;
-		margin: 0 auto;
-	}
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+    }
 
-	label {
-		display: flex;
-		flex-direction: column;
-		font-weight: bold;
-	}
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
 
-	input, select {
-		padding: 8px;
-		font-size: 14px;
-	}
+    label {
+        font-weight: bold;
+        color: #444;
+    }
 
-	.search-results {
-		list-style-type: none;
-		padding: 0;
-		background-color: #f9f9f9;
-		border: 1px solid #ddd;
-		border-radius: 5px;
-		max-height: 150px;
-		overflow-y: auto;
-		margin-top: 5px;
-	}
+    input,
+    select {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+    }
 
-	.search-results li {
-		padding: 10px;
-		cursor: pointer;
-	}
+    input:focus,
+    select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
 
-	.search-results li:hover {
-		background-color: #e0e0e0;
-	}
+    .search-results {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: #fff;
+    }
 
-	.no-results {
-		color: #666;
-		font-style: italic;
-		margin-top: 5px;
-	}
+    .search-results li {
+        padding: 10px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
 
-	.error {
-		color: red;
-		font-size: 14px;
-		margin-top: 10px;
-	}
+    .search-results li:hover {
+        background-color: #f1f1f1;
+    }
 
-	.submit-btn {
-		background-color: #28a745;
-		color: white;
-		padding: 10px;
-		border: none;
-		border-radius: 5px;
-		font-size: 16px;
-		cursor: pointer;
-	}
+    .error {
+        color: red;
+        font-size: 14px;
+    }
 
-	.submit-btn:hover {
-		background-color: #218838;
-	}
+    .feedback {
+        text-align: center;
+        font-size: 16px;
+        color: green;
+        margin-bottom: 20px;
+    }
 
-	.feedback {
-		text-align: center;
-		color: green;
-		font-size: 16px;
-		margin-bottom: 20px;
-	}
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
 </style>
