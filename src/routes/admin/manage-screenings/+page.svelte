@@ -3,7 +3,7 @@
 		showtimes: {
 			showtime_id: number;
 			showtime: string;
-			movie_title: string;
+			movie_title: string; // IMDB-ID wird als Titel verwendet
 			hall_name: string;
 		}[];
 	};
@@ -20,7 +20,7 @@
 		<ul class="showtime-list">
 			{#each data.showtimes as showtime}
 				<li class="showtime-item">
-					<p><strong>Film:</strong> {showtime.movie_title}</p>
+					<p><strong>Film (IMDB-ID):</strong> {showtime.movie_title}</p>
 					<p><strong>Saal:</strong> {showtime.hall_name}</p>
 					<p><strong>Datum und Uhrzeit:</strong> {new Date(showtime.showtime).toLocaleString()}</p>
 				</li>
@@ -30,9 +30,9 @@
 		<p>Es sind keine Vorstellungen vorhanden.</p>
 	{/if}
 
-	<button class="create-showtime-btn" on:click={goToCreateScreening}
-		>Neue Vorstellung erstellen</button
-	>
+	<button class="create-showtime-btn" on:click={goToCreateScreening}>
+		Neue Vorstellung erstellen
+	</button>
 </main>
 
 <style>
@@ -54,6 +54,11 @@
 		margin-bottom: 10px;
 		border: 1px solid #ddd;
 		border-radius: 5px;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+
+	.showtime-item p {
+		margin: 5px 0;
 	}
 
 	.create-showtime-btn {
@@ -66,6 +71,7 @@
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
+		transition: background 0.3s ease;
 	}
 
 	.create-showtime-btn:hover {

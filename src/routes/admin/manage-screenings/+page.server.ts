@@ -1,5 +1,5 @@
 import pkg from 'pg';
-const {Pool} = pkg;
+const { Pool } = pkg;
 
 const pool = new Pool({
 	user: process.env.PGUSER,
@@ -7,22 +7,21 @@ const pool = new Pool({
 	database: process.env.PGDATABASE,
 	password: process.env.PGPASSWORD,
 	port: 5432,
-    ssl: {
-        rejectUnauthorized: false // Fix für self-signed certificate error
-    }
+	ssl: {
+		rejectUnauthorized: false // Fix für self-signed certificate error
+	}
 });
 
 export async function load() {
 	try {
-		// Abfrage der Vorstellungen inklusive Filmname und Saalname
+		// Abfrage der Vorstellungen inklusive Film-ID (IMDB-ID) und Saalname
 		const result = await pool.query(`
             SELECT 
                 s.showtime_id,
                 s.showtime,
-                m.title AS movie_title,
+                s.movie_id AS movie_title, -- IMDB-ID als Titel nutzen
                 c.name AS hall_name
             FROM showtimes s
-            JOIN movies m ON s.movie_id = m.movie_id
             JOIN cinema_halls c ON s.hall_id = c.hall_id
             ORDER BY s.showtime ASC
         `);
