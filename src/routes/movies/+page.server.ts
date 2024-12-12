@@ -1,20 +1,39 @@
 import type { PageServerLoad } from './$types';
 import 'dotenv/config';
+import { sql } from '@vercel/postgres';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const apiKey = process.env.VITE_OMDB_API_KEY;
-	const query = url.searchParams.get('query') || 'hangover';
-	const maxResults = 50; // Anzahl der gewünschten Filme
-	const moviesPerPage = 10; // OMDb gibt maximal 10 Filme pro Seite zurück
-	const totalPages = Math.ceil(maxResults / moviesPerPage);
-
+	const query = url.searchParams.get('query') || '';
 	let movies: any[] = [];
 	let error = null;
 
 	try {
-		// Filme von mehreren Seiten abrufen
-		for (let page = 1; page <= totalPages; page++) {
-			const response = await fetch(`https://www.omdbapi.com/?apikey=${apiKey}&s=${query}&page=${page}`);
+		// Abruf der movie_ids aus der Tabelle `showtimes`
+		const { rows: showtimes } = await sql`SELECT DISTINCT movie_id FROM showtimes`;
+		const availableMovieIds = showtimes.map((row) => row.movie_id);
+
+		// Wenn keine Suchanfrage, alle Filme aus der Tabelle `showtimes` laden
+		if (!query) {
+			// Für jeden `movie_id` die Details aus OMDb abrufen
+			const omdbResponses = await Promise.all(
+				availableMovieIds.map((id) =>
+					fetch(`https://www.omdbapi.com/?apikey=${apiKey}&i=${id}&type=movie`).then((res) => res.json())
+				)
+			);
+
+			// Filme mit gültigen Daten hinzufügen
+			movies = omdbResponses
+				.filter((movie) => movie.Response !== 'False') // Nur gültige Filme
+				.map((movie) => ({
+					id: movie.imdbID,
+					Title: movie.Title,
+					Year: movie.Year,
+					Poster: movie.Poster !== 'N/A' ? movie.Poster : 'default-fallback-image.png',
+				}));
+		} else {
+			// OMDb API abfragen mit Such-Query
+			const response = await fetch(`https://www.omdbapi.com/?apikey=${apiKey}&s=${query}&type=movie`);
 
 			if (!response.ok) {
 				throw new Error('Fehler beim Abrufen der Daten.');
@@ -24,16 +43,14 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 
 			if (data.Response === 'False') {
 				error = data.Error || 'Keine Filme gefunden.';
-				break;
-			}
-
-			movies = movies.concat(
-				data.Search.map((movie: { imdbID: any }) => ({ ...movie, id: movie.imdbID }))
-			);
-
-			// Abbrechen, wenn weniger als 10 Ergebnisse auf der letzten Seite zurückkommen
-			if (data.Search.length < moviesPerPage) {
-				break;
+			} else {
+				// Filme filtern, die in der Tabelle `showtimes` existieren
+				movies = data.Search.filter((movie: { imdbID: string }) =>
+					availableMovieIds.includes(movie.imdbID)
+				).map((movie: { imdbID: any }) => ({
+					...movie,
+					id: movie.imdbID,
+				}));
 			}
 		}
 	} catch (err) {
@@ -41,7 +58,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	}
 
 	return { 
-		movies: movies.slice(0, maxResults), // Beschränkung auf maxResults
+		movies,
 		query,
 		error
 	};
