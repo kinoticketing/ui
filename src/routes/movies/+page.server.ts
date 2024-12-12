@@ -1,6 +1,11 @@
 import type { PageServerLoad } from './$types';
 import 'dotenv/config';
-import { sql } from '@vercel/postgres';
+import pkg from 'pg';
+const {Pool} = pkg;
+
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+});
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const apiKey = process.env.VITE_OMDB_API_KEY;
@@ -10,8 +15,10 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 
 	try {
 		// Abruf der movie_ids aus der Tabelle `showtimes`
-		const { rows: showtimes } = await sql`SELECT DISTINCT movie_id FROM showtimes`;
-		const availableMovieIds = showtimes.map((row) => row.movie_id);
+		const client = await pool.connect();
+		const res = await client.query('SELECT DISTINCT movie_id FROM showtimes');
+		const availableMovieIds = res.rows.map((row) => row.movie_id);
+		client.release();
 
 		// Wenn keine Suchanfrage, alle Filme aus der Tabelle `showtimes` laden
 		if (!query) {
