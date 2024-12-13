@@ -38,7 +38,7 @@
 		rows.set(Array.from({ length: row_count }, () => Array(col_count).fill('Regular')));
 	}
 
-	async function safe() {
+	async function save() {
 		saveMessage = null; // Nachricht zurücksetzen
 		const formData = new FormData();
 		formData.append('hall_name', hall_name);
@@ -101,7 +101,7 @@
 				bind:value={col_count}
 				on:change={preview}
 			/>
-			<button class="safe-btn" on:click={safe}>Speichern</button>
+			<button class="safe-btn" on:click={save}>Speichern</button>
 			<button class="delete-btn" on:click={removeAll}>Alle Reihen löschen</button>
 		</div>
 
