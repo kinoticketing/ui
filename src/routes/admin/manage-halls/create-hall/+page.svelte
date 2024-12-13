@@ -12,16 +12,6 @@
 	let rows = writable<string[][]>([[]]);
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
 
-	function addRow() {
-		row_count++;
-		rows.update((r) => [...r, Array(col_count).fill('Regular')]);
-	}
-
-	function removeRow() {
-		row_count--;
-		rows.update((r) => r.slice(0, -1));
-	}
-
 	function addColumn(rowIndex: number) {
 		col_count++;
 		rows.update((r) => {
@@ -42,11 +32,6 @@
 		row_count = 0;
 		col_count = 0;
 		rows.update(() => []);
-	}
-
-	function addColumnToAllRows() {
-		col_count++;
-		rows.update((r) => r.map((row) => [...row, 'Regular']));
 	}
 
 	function preview() {

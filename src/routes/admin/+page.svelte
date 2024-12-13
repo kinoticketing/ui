@@ -11,25 +11,22 @@
         <button on:click={() => window.location.href = '/admin/manage-screenings'}>Vorstellungen verwalten</button>
         <button on:click={() => window.location.href = '/admin/manage-reservations'}>Reservierungen verwalten</button>
     </div>
-
-    <style>
-        button {
-            margin: 0.5rem;
-            padding: 0.5rem 1rem;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-    </style>
 </main>
 
 <style>
+    button {
+        margin: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #2980b9;
+    }
     main {
         padding: 2rem;
         text-align: center;
