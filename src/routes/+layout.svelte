@@ -78,11 +78,24 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     margin-top: 1rem;
+    flex: 1 1 auto;
   }
 
   @media (min-width: 600px) {
     nav input {
       margin-top: 0;
+      flex: 0 1 200px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    nav ul {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    nav input {
+      width: 100%;
     }
   }
 
