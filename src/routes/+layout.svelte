@@ -1,5 +1,6 @@
 <script>
   import "../app.css";
+  import "./layout.css";
   const currentYear = new Date().getFullYear();
   let companyName = "Kinoticketreservierungssystem";
 </script>
@@ -9,10 +10,10 @@
     <div class="logo-and-links">
       <h1>{companyName}</h1>
       <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/movies">Movies</a></li>
-        <li><a href="/reservations">Reservations</a></li>
-        <li><a href="/about">About</a></li>
+        <li><a class="link dark" href="/">Home</a></li>
+        <li><a class="link dark" href="/movies">Movies</a></li>
+        <li><a class="link dark" href="/reservations">Reservations</a></li>
+        <li><a class="link dark" href="/about">About</a></li>
       </ul>
     </div>
     <input type="text" placeholder="Suche..." />
@@ -24,99 +25,43 @@
 </main>
 
 <footer>
-  <p>© {companyName} {currentYear}</p>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h2><a class="link" href="/about">About Us</a></h2>
+      <p>Your go-to platform for reserving movie tickets quickly and easily.</p>
+    </div>
+
+    <div class="footer-section">
+      <h2>Quick Links</h2>
+      <ul>
+        <li><a class="link" href="/terms">Terms of Service</a></li>
+        <li><a class="link" href="/privacy">Privacy Policy</a></li>
+        <li><a class="link" href="/contact">Contact</a></li>
+        <li><a class="link" href="/faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h2>Follow Us</h2>
+      <div class="social-icons">
+        <ul>
+          <li><a class="link" href="#"><img src="/img/facebook-icon.png" alt="Facebook Logo" />Facebook</a></li>
+          <li><a class="link" href="#"><img src="/img/x-icon.png" alt="X Logo" />X</a></li>
+          <li><a class="link" href="#"><img src="/img/instagram-icon.png" alt="Instagram Logo" />Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-section">
+      <h2>Newsletter</h2>
+      <form>
+        <input type="email" placeholder="Your email" />
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© {companyName} {currentYear}. All rights reserved.</p>
+  </div>
 </footer>
-
-<style>
-  /* Header and Navigation */
-  header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
-  }
-
-  nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .logo-and-links {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  nav h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-
-  nav ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-  }
-
-  nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 1rem;
-  }
-
-  nav ul li a:hover {
-    text-decoration: underline;
-  }
-
-  nav input {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-top: 1rem;
-    flex: 1 1 auto;
-  }
-
-  @media (min-width: 600px) {
-    nav input {
-      margin-top: 0;
-      flex: 0 1 200px;
-    }
-  }
-
-  @media (max-width: 600px) {
-    nav ul {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    nav input {
-      width: 100%;
-    }
-  }
-
-  /* Main Content Section */
-  main {
-    padding: 1rem;
-    min-height: calc(100vh - 120px); /* Adjust based on header and footer height */
-  }
-
-  /* Footer */
-  footer {
-    background-color: #f1f1f1;
-    text-align: center;
-    padding: 1rem;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-  }
-
-  footer p {
-    margin: 0;
-    color: #555;
-  }
-</style>
