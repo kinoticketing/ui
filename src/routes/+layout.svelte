@@ -227,4 +227,5 @@ background-color: #f0f0f0;
 .dropdown-menu :global(svg) {
 margin-right: 0.5rem;
 }
+  
 </style>
