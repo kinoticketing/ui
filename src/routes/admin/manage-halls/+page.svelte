@@ -1,8 +1,29 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	export let data: { halls: { hall_id: number; name: string; capacity: number }[] };
 
+	// Zur Detailseite navigieren
+	function goToDetail(hall_id: number) {
+		goto(`/admin/manage-halls/${hall_id}`);
+	}
+
+	// Saal löschen
+	async function deleteHall(hall_id: number) {
+		const response = await fetch(`/admin/manage-halls/${hall_id}`, {
+			method: 'DELETE'
+		});
+
+		if (response.ok) {
+			// Seite neu laden, um die Liste zu aktualisieren
+			location.reload();
+		} else {
+			alert('Fehler beim Löschen des Saals.');
+		}
+	}
+
 	function goToCreateHall() {
-		window.location.href = '/admin/manage-halls/create-hall';
+		goto('/admin/manage-halls/create-hall');
 	}
 </script>
 
@@ -12,9 +33,14 @@
 	{#if data.halls.length > 0}
 		<ul class="hall-list">
 			{#each data.halls as hall}
-				<li class="hall-item">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+				<li class="hall-item" on:click={() => goToDetail(hall.hall_id)}>
 					<p><strong>Name:</strong> {hall.name}</p>
 					<p><strong>Kapazität:</strong> {hall.capacity} Sitzplätze</p>
+					<button class="delete-btn" on:click|stopPropagation={() => deleteHall(hall.hall_id)}>
+						Saal löschen
+					</button>
 				</li>
 			{/each}
 		</ul>
@@ -44,6 +70,27 @@
 		margin-bottom: 10px;
 		border: 1px solid #ddd;
 		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.hall-item:hover {
+		background-color: #e9ecef;
+	}
+
+	.delete-btn {
+		background-color: #dc3545;
+		color: white;
+		border: none;
+		padding: 5px 10px;
+		border-radius: 3px;
+		cursor: pointer;
+		font-size: 14px;
+		margin-top: 10px;
+	}
+
+	.delete-btn:hover {
+		background-color: #c82333;
 	}
 
 	.create-hall-btn {
