@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let data: { movie: any }; // Der Film wird vom Server geladen
+	export let data: { movie: any; showtimes: { time: string; hall: string }[] };
 </script>
 
 <main>
@@ -18,29 +18,17 @@
 				<p><strong>Actors:</strong> {data.movie.Actors}</p>
 				<p><strong>Plot:</strong> {data.movie.Plot}</p>
 				<p><strong>IMDb Rating:</strong> {data.movie.imdbRating}</p>
-				<p><strong>Runtime:</strong> {data.movie.Runtime}</p>
-				<p><strong>Language:</strong> {data.movie.Language}</p>
-				<p><strong>Country:</strong> {data.movie.Country}</p>
-				<p><strong>Awards:</strong> {data.movie.Awards}</p>
-				<a
-					href={`https://www.imdb.com/title/${data.movie.imdbID}/`}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Schau den Trailer auf IMDb
-				</a>
 			</div>
 		</div>
+
+		<!-- Vorstellungen anzeigen -->
+		<h2 class="mt-6 text-2xl font-semibold">Vorstellungen</h2>
 		<ul>
-			<li>vorstellung 1</li>
-			<li>vorstellung 2</li>
-			<li>vorstellung 3</li>
-			<li>vorstellung 4</li>
-			<li>vorstellung 5</li>
-			<li>vorstellung 6</li>
-			<li>vorstellung 7</li>
-			<li>vorstellung 8</li>
-			<li>vorstellung 9</li>
+			{#each data.showtimes as showtime}
+				<li>
+					<strong>Zeit:</strong> {showtime.time} | <strong>Saal:</strong> {showtime.hall}
+				</li>
+			{/each}
 		</ul>
 	</div>
 </main>
