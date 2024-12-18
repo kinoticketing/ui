@@ -24,8 +24,6 @@
 			showMenu = false;
 		}
 	}
-
-  const minimumScreenWidthFullyExtendedSearchBar = "1020px";
   
 </script>
 
@@ -70,7 +68,7 @@
       />
 			<div class="account-dropdown">
 				<button class="account-icon" on:click={toggleMenu}>
-					<Icon icon="mdi:account-circle" width="24" height="24" />
+					<Icon icon="mdi:account-circle" width="38" height="38" />
 				</button>
 				{#if showMenu}
 					<div class="dropdown-menu" transition:fade={{ duration: 100 }}>
@@ -311,7 +309,7 @@
 	}
 
 	.footer-section form {
-		display: flex;
+		display:inline-block;
 		gap: 0.5rem;
 	}
 
@@ -320,6 +318,7 @@
 		flex: 1;
 		border: 1px solid #ccc;
 		border-radius: 4px;
+    margin-bottom: 4px;
 	}
 
 	.footer-section form button {
@@ -369,7 +368,7 @@
     margin-left: 10px;
 	}
 
-  @media screen and (max-width: 1030px) {
+  @media screen and (max-width: 1050px) {
     .navbarItemText {
       display: none;
     }
@@ -394,6 +393,11 @@
 		border: none;
 		cursor: pointer;
 		padding: 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 40px;
 	}
 
 	.dropdown-menu {
