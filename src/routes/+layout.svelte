@@ -1,9 +1,11 @@
 <script>
 	// @ts-nocheck ???
+  
 
 	import '../app.css';
 	import Icon from '@iconify/svelte';
 	import { fade } from 'svelte/transition';
+  import { onMount } from 'svelte';
 
 	const currentYear = new Date().getFullYear();
 	const isSignedIn = false; // HAS TO BE SET DYNAMICALLY; HARDCODED FOR TESTING PURPOSES
@@ -22,6 +24,9 @@
 			showMenu = false;
 		}
 	}
+
+  const minimumScreenWidthFullyExtendedSearchBar = "1020px";
+  
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -58,7 +63,11 @@
 			</ul>
 		</div>
 		<div class="search-and-account">
-			<input type="text" placeholder="Suche..." class="search-input" />
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Suche..."
+      />
 			<div class="account-dropdown">
 				<button class="account-icon" on:click={toggleMenu}>
 					<Icon icon="mdi:account-circle" width="24" height="24" />
@@ -156,10 +165,13 @@
   .logo-and-links a {
 		display: flex;
 		align-items: center;
+    white-space: nowrap;
     border: 1px solid white;
     border-radius: 10px;
     padding: 8px;
 	}
+
+  
 
   .logo-and-links a:hover {
     background-color: #f1f1f1;
@@ -340,17 +352,41 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+    flex: 1;
+      justify-content: flex-end; /* Align to the right when there's extra space */
+
 	}
 
 	.search-input {
+    flex: 1;
+    width: 100%;
+    min-width: 58px; /* Minimum usable width */
+    max-width: 300px; /* Maximum width for readability */
 		padding: 0.5rem 1rem;
 		border: 1px solid #ddd;
 		border-radius: 20px;
 		font-size: 1rem;
+    margin-left: 10px;
 	}
+
+  @media screen and (max-width: 1030px) {
+    .navbarItemText {
+      display: none;
+    }
+    
+    .logo-and-links a {
+      padding: 8px;
+      justify-content: center;
+    }
+
+    .search-input {
+      max-width: 58px;
+    }
+  }
 
 	.account-dropdown {
 		position: relative;
+    flex-shrink: 0; /* Prevent the dropdown from shrinking */
 	}
 
 	.account-icon {
