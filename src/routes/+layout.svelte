@@ -156,9 +156,30 @@
 <style>
 	/* Header and Navigation */
 
+  header {
+		background-color: #333;
+		color: #fff;
+		padding: 0 1rem;
+	}
+
+  nav {
+		display: flex;
+    flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+	}
+  
+
+
   .navbarItemText {
     margin-left: 8px;
   }
+
+  .logo-and-links {
+		display: flex;
+    flex-wrap: wrap;
+		align-items: center;
+	}
 
   .logo-and-links a {
 		display: flex;
@@ -168,9 +189,6 @@
     border-radius: 10px;
     padding: 8px;
 	}
-
-  
-
   .logo-and-links a:hover {
     background-color: #f1f1f1;
     color: #333;
@@ -182,36 +200,21 @@
     border-color: #cecece;
   }
 
-	header {
-		background-color: #333;
-		color: #fff;
-		padding: 1rem;
-	}
-
-	nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.logo-and-links {
-		display: flex;
-		align-items: center;
-	}
-
 	nav h1 {
 		margin: 0;
 		font-size: 1.5rem;
 		margin-right: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 	}
 
 	nav ul {
 		list-style: none;
 		display: flex;
 		gap: 1rem;
-		margin: 0;
 		padding: 0;
 		font-size: 1rem;
+    margin: 0;
 	}
 
 	nav ul li a {
@@ -352,8 +355,8 @@
 		align-items: center;
 		gap: 1rem;
     flex: 1;
-      justify-content: flex-end; /* Align to the right when there's extra space */
-
+    justify-content: flex-end; /* Align to the right when there's extra space */
+    margin: 1rem 0;
 	}
 
 	.search-input {
