@@ -31,10 +31,30 @@
 		<div class="logo-and-links">
 			<h1>{companyName}</h1>
 			<ul>
-				<li><a class="link dark" href="/">Home</a></li>
-				<li><a class="link dark" href="/movies">Movies</a></li>
-				<li><a class="link dark" href="/reservations">Reservations</a></li>
-				<li><a class="link dark" href="/about">About</a></li>
+				<li>
+          <a class="link dark" href="/">
+            <Icon icon="mdi:home" width="24" height="24" />
+            <div class="navbarItemText">Home</div>
+          </a>
+        </li>
+        <li>
+          <a class="link dark" href="/movies">
+            <Icon icon="mdi:movie" width="24" height="24" />
+            <div class="navbarItemText">Movies</div>
+          </a>
+        </li>
+        <li>
+          <a class="link dark" href="/reservations">
+            <Icon icon="mdi:ticket" width="24" height="24" />
+            <div class="navbarItemText">Reservations</div>
+          </a>
+        </li>
+        <li>
+          <a class="link dark" href="/about">
+            <Icon icon="mdi:information" width="24" height="24" />
+            <div class="navbarItemText">About</div>
+          </a>
+        </li>
 			</ul>
 		</div>
 		<div class="search-and-account">
@@ -128,6 +148,30 @@
 
 <style>
 	/* Header and Navigation */
+
+  .navbarItemText {
+	margin-left: 8px;
+  }
+
+  .logo-and-links a {
+		display: flex;
+		align-items: center;
+	border: 1px solid white;
+	border-radius: 10px;
+	padding: 8px;
+	}
+
+  .logo-and-links a:hover {
+	background-color: #f1f1f1;
+	color: #333;
+	text-decoration: none;
+  }
+
+  .logo-and-links a:active {
+	background-color: #cecece;
+	border-color: #cecece;
+  }
+
 	header {
 		background-color: #333;
 		color: #fff;
@@ -138,11 +182,13 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		flex-wrap: wrap;
 	}
 
 	.logo-and-links {
 		display: flex;
 		align-items: center;
+		flex-wrap: wrap;
 	}
 
 	nav h1 {
@@ -187,6 +233,27 @@
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
+	}
+
+	@media (max-width: 768px) {
+		nav ul {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		nav ul li {
+			width: 100%;
+			text-align: center;
+		}
+
+		.search-and-account {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.search-input {
+			width: 100%;
+		}
 	}
 
 	/* Main Content Section */
@@ -367,4 +434,10 @@
 	.dropdown-menu :global(svg) {
 		margin-right: 0.5rem;
 	}
+
+  
+
+	
+
+  
 </style>
