@@ -29,8 +29,8 @@
 
 <header>
 	<nav>
+		<h1>{companyName}</h1>
 		<div class="logo-and-links">
-			<h1>{companyName}</h1>
 			<ul>
 				<li>
 					<a class="link dark" href="/">
