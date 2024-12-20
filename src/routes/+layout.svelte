@@ -4,6 +4,7 @@
 	import '../app.css';
 	import Icon from '@iconify/svelte';
 	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
 
 	const currentYear = new Date().getFullYear();
 	const isSignedIn = false; // HAS TO BE SET DYNAMICALLY; HARDCODED FOR TESTING PURPOSES
@@ -28,40 +29,40 @@
 
 <header>
 	<nav>
+		<h1>{companyName}</h1>
 		<div class="logo-and-links">
-			<h1>{companyName}</h1>
 			<ul>
 				<li>
-          <a class="link dark" href="/">
-            <Icon icon="mdi:home" width="24" height="24" />
-            <div class="navbarItemText">Home</div>
-          </a>
-        </li>
-        <li>
-          <a class="link dark" href="/movies">
-            <Icon icon="mdi:movie" width="24" height="24" />
-            <div class="navbarItemText">Movies</div>
-          </a>
-        </li>
-        <li>
-          <a class="link dark" href="/reservations">
-            <Icon icon="mdi:ticket" width="24" height="24" />
-            <div class="navbarItemText">Reservations</div>
-          </a>
-        </li>
-        <li>
-          <a class="link dark" href="/about">
-            <Icon icon="mdi:information" width="24" height="24" />
-            <div class="navbarItemText">About</div>
-          </a>
-        </li>
+					<a class="link dark" href="/">
+						<Icon icon="mdi:home" width="24" height="24" />
+						<div class="navbarItemText">Home</div>
+					</a>
+				</li>
+				<li>
+					<a class="link dark" href="/movies">
+						<Icon icon="mdi:movie" width="24" height="24" />
+						<div class="navbarItemText">Movies</div>
+					</a>
+				</li>
+				<li>
+					<a class="link dark" href="/reservations">
+						<Icon icon="mdi:ticket" width="24" height="24" />
+						<div class="navbarItemText">Reservations</div>
+					</a>
+				</li>
+				<li>
+					<a class="link dark" href="/about">
+						<Icon icon="mdi:information" width="24" height="24" />
+						<div class="navbarItemText">About</div>
+					</a>
+				</li>
 			</ul>
 		</div>
 		<div class="search-and-account">
-			<input type="text" placeholder="Suche..." class="search-input" />
+			<input type="text" class="search-input" placeholder="Suche..." />
 			<div class="account-dropdown">
 				<button class="account-icon" on:click={toggleMenu}>
-					<Icon icon="mdi:account-circle" width="24" height="24" />
+					<Icon icon="mdi:account-circle" width="38" height="38" />
 				</button>
 				{#if showMenu}
 					<div class="dropdown-menu" transition:fade={{ duration: 100 }}>
@@ -119,15 +120,15 @@
 			<div class="social-icons">
 				<!-- svelte-ignore a11y-invalid-attribute -->
 				<a class="icon-link" href="#" aria-label="Facebook">
-					<Icon icon="logos:facebook" width=24px height=24px/>
+					<Icon icon="logos:facebook" width="24px" height="24px" />
 				</a>
 				<!-- svelte-ignore a11y-invalid-attribute -->
 				<a class="icon-link" href="#" aria-label="X (Twitter)">
-					<Icon icon="devicon:twitter" width=24px height=24px/>
+					<Icon icon="devicon:twitter" width="24px" height="24px" />
 				</a>
 				<!-- svelte-ignore a11y-invalid-attribute -->
 				<a class="icon-link" href="#" aria-label="Instagram">
-					<Icon icon="skill-icons:instagram" width=24px height=24px/>
+					<Icon icon="skill-icons:instagram" width="24px" height="24px" />
 				</a>
 			</div>
 		</div>
@@ -149,61 +150,64 @@
 <style>
 	/* Header and Navigation */
 
-  .navbarItemText {
-	margin-left: 8px;
-  }
-
-  .logo-and-links a {
-		display: flex;
-		align-items: center;
-	border: 1px solid white;
-	border-radius: 10px;
-	padding: 8px;
-	}
-
-  .logo-and-links a:hover {
-	background-color: #f1f1f1;
-	color: #333;
-	text-decoration: none;
-  }
-
-  .logo-and-links a:active {
-	background-color: #cecece;
-	border-color: #cecece;
-  }
-
 	header {
 		background-color: #333;
 		color: #fff;
-		padding: 1rem;
+		padding: 0 1rem;
 	}
 
 	nav {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
-		flex-wrap: wrap;
+	}
+
+	.navbarItemText {
+		margin-left: 8px;
 	}
 
 	.logo-and-links {
 		display: flex;
-		align-items: center;
 		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.logo-and-links a {
+		display: flex;
+		align-items: center;
+		white-space: nowrap;
+		border: 1px solid white;
+		border-radius: 10px;
+		padding: 8px;
+	}
+
+	.logo-and-links a:hover {
+		background-color: #f1f1f1;
+		color: #333;
+		text-decoration: none;
+	}
+
+	.logo-and-links a:active {
+		background-color: #cecece;
+		border-color: #cecece;
 	}
 
 	nav h1 {
 		margin: 0;
 		font-size: 1.5rem;
 		margin-right: 2rem;
+		margin-top: 1rem;
+		margin-bottom: 1rem;
 	}
 
 	nav ul {
 		list-style: none;
 		display: flex;
 		gap: 1rem;
-		margin: 0;
 		padding: 0;
 		font-size: 1rem;
+		margin: 0;
 	}
 
 	nav ul li a {
@@ -233,27 +237,6 @@
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-	}
-
-	@media (max-width: 768px) {
-		nav ul {
-			flex-direction: column;
-			width: 100%;
-		}
-
-		nav ul li {
-			width: 100%;
-			text-align: center;
-		}
-
-		.search-and-account {
-			width: 100%;
-			justify-content: center;
-		}
-
-		.search-input {
-			width: 100%;
-		}
 	}
 
 	/* Main Content Section */
@@ -322,7 +305,7 @@
 	}
 
 	.footer-section form {
-		display: flex;
+		display: inline-block;
 		gap: 0.5rem;
 	}
 
@@ -331,6 +314,7 @@
 		flex: 1;
 		border: 1px solid #ccc;
 		border-radius: 4px;
+		margin-bottom: 4px;
 	}
 
 	.footer-section form button {
@@ -363,17 +347,41 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+		flex: 1;
+		justify-content: flex-end; /* Align to the right when there's extra space */
+		margin: 1rem 0;
 	}
 
 	.search-input {
+		flex: 1;
+		width: 100%;
+		min-width: 58px; /* Minimum usable width */
+		max-width: 300px; /* Maximum width for readability */
 		padding: 0.5rem 1rem;
 		border: 1px solid #ddd;
 		border-radius: 20px;
 		font-size: 1rem;
+		margin-left: 10px;
+	}
+
+	@media screen and (max-width: 1050px) {
+		.navbarItemText {
+			display: none;
+		}
+
+		.logo-and-links a {
+			padding: 8px;
+			justify-content: center;
+		}
+
+		.search-input {
+			max-width: 58px;
+		}
 	}
 
 	.account-dropdown {
 		position: relative;
+		flex-shrink: 0; /* Prevent the dropdown from shrinking */
 	}
 
 	.account-icon {
@@ -381,6 +389,11 @@
 		border: none;
 		cursor: pointer;
 		padding: 0;
+		color: white;
+		display: flex;
+		align-items: center;
+		width: 40px;
+		height: 40px;
 	}
 
 	.dropdown-menu {
@@ -434,10 +447,4 @@
 	.dropdown-menu :global(svg) {
 		margin-right: 0.5rem;
 	}
-
-  
-
-	
-
-  
 </style>
