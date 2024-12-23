@@ -1,5 +1,6 @@
 import pkg from 'pg';
 const {Pool} = pkg;
+import type { RequestEvent } from '@sveltejs/kit';
 
 const pool = new Pool({
 	user: process.env.PGUSER,
@@ -22,3 +23,17 @@ export async function load() {
 		return { halls: [] }; // Rückgabe eines leeren Arrays bei Fehler
 	}
 }
+
+export const actions = {
+	delete: async ({ params }: RequestEvent) => {
+		// Sicherstellen, dass hall_id vorhanden ist
+		const { hall_id } = params as { hall_id: string };
+		try {
+			await pool.query('DELETE FROM cinema_halls WHERE hall_id = $1', [hall_id]);
+			return { success: true };
+		} catch (error) {
+			console.error('Fehler beim Löschen des Saals:', error);
+			return { success: false };
+		}
+	}
+};
