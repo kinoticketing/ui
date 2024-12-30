@@ -36,14 +36,25 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	// Vorstellungen abrufen
 	const res = await client.query(
-		'SELECT showtime AS time, hall_id AS hall FROM showtimes WHERE movie_id = $1',
+		'SELECT showtime_id, showtime AS time, hall_id AS hall FROM showtimes WHERE movie_id = $1',
 		[id]
 	);
-
 	await client.end();
 
+	// showtime_id -> id mappen, damit "showtime.id" korrekt ist
+	const showtimes = res.rows.map((row) => {
+		return {
+			id: row.showtime_id,
+			time: row.time,
+			hall: row.hall
+		};
+	});
+
 	return {
-		movie: data,
-		showtimes: res.rows // Vorstellungen zurückgeben
+		movie: {
+			...data,
+			id 
+		},
+		showtimes
 	};
 };
