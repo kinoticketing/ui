@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { signIn } from '@auth/sveltekit/client';
+	import { signIn, signOut } from '@auth/sveltekit/client';
 	import Icon from '@iconify/svelte';
+	import { page } from '$app/stores';
 
 	let email = '';
 	let password = '';
 	let showPassword = false;
 
 	function handleLogin() {
-		// Implement login logic here
+		// Implement login logic here if you're keeping email/password login
 		console.log('Login attempted', { email, password });
 	}
 
@@ -19,43 +20,48 @@
 <div class="login-container">
 	<h2>Login to Cinema System</h2>
 
-	<div class="auth-providers">
-		<button on:click={() => signIn('google')} class="provider-btn google">
-			<Icon icon="logos:google-icon" />
-			Log in with Google
-		</button>
+	{#if $page.data.session && $page.data.session.user}
+		<p>Signed in as {$page.data.session.user.email}</p>
+		<button on:click={() => signOut()} class="login-btn">Sign out</button>
+	{:else}
+		<div class="auth-providers">
+			<button on:click={() => signIn('google')} class="provider-btn google">
+				<Icon icon="logos:google-icon" />
+				Log in with Google
+			</button>
 
-		<button on:click={() => signIn('github')} class="provider-btn github">
-			<Icon icon="mdi:github" />
-			Log in with GitHub
-		</button>
-	</div>
-
-	<div class="spacer">
-		<span>or</span>
-	</div>
-
-	<form on:submit|preventDefault={handleLogin}>
-		<div class="input-group user-group">
-			<input type="text" bind:value={email} placeholder="Email or Username" required />
-		</div>
-
-		<div class="input-group password-group">
-			<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
-			<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
-				<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+			<button on:click={() => signIn('github')} class="provider-btn github">
+				<Icon icon="mdi:github" />
+				Log in with GitHub
 			</button>
 		</div>
 
-		<button type="submit" class="login-btn">Login</button>
-	</form>
+		<div class="spacer">
+			<span>or</span>
+		</div>
 
-	<p class="forgot-password">
-		<a href="/auth/forgot-password">Forgot password?</a>
-	</p>
-	<p class="create-account">
-		<a href="/auth/register">Don't have an account? Create Account</a>
-	</p>
+		<form on:submit|preventDefault={handleLogin}>
+			<div class="input-group user-group">
+				<input type="text" bind:value={email} placeholder="Email or Username" required />
+			</div>
+
+			<div class="input-group password-group">
+				<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
+				<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
+					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+				</button>
+			</div>
+
+			<button type="submit" class="login-btn">Login</button>
+		</form>
+
+		<p class="forgot-password">
+			<a href="/auth/forgot-password">Forgot password?</a>
+		</p>
+		<p class="create-account">
+			<a href="/auth/register">Don't have an account? Create Account</a>
+		</p>
+	{/if}
 </div>
 
 <style>

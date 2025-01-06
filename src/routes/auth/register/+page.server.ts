@@ -1,6 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import pkg from 'pg';
+import bcrypt from 'bcrypt';
+// import { skip } from 'node:test';
 const { Pool } = pkg;
 
 const pool = new Pool({
@@ -12,7 +14,8 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const username = formData.get('username');
 		const email = formData.get('email');
-		const password = formData.get('password');
+		const password = formData.get('password') as string;
+        let canDirect = false;
 
 		if (!username || !email || !password) {
 			return fail(400, { message: 'Missing required fields' });
@@ -33,22 +36,25 @@ export const actions: Actions = {
 			}
 
 			// TODO: Hash the password (use a proper hashing library like bcrypt in production)
-			const hashedPassword = password; // Replace with actual hashing
+			const hashedPassword = await bcrypt.hash(password, 10);
 
 			// Insert new user
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const result = await client.query(
 				'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
 				[username, email, hashedPassword]
 			);
-            console.log(result); //remove later
 
 			client.release();
 
-			// Redirect to login page after successful registration
-			throw redirect(303, '/auth/login');
+			// Flag for redirect
+            canDirect = true;
 		} catch (error) {
 			console.error('Error creating account:', error);
 			return fail(500, { message: 'An error occurred while creating the account' });
 		}
+        if (canDirect){
+            throw redirect(303, '/auth/login')
+        }
 	}
 };
