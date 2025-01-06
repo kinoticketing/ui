@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let data: { movie: any; showtimes: { time: string; hall: string }[] };
+	export let data: { movie: any; showtimes: { id: string; time: string; hall: string }[] };
 </script>
 
 <main>
@@ -40,15 +40,20 @@
 			<ul>
 				{#each data.showtimes as showtime}
 					<li class="showtime-card">
-						<strong>Zeit:</strong>
-						{new Date(showtime.time).toLocaleString('de-DE', {
-							weekday: 'short',
-							year: 'numeric',
-							month: 'short',
-							day: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit'
-						})} Uhr | <strong>Saal:</strong> {showtime.hall} | <strong>Dauer:</strong> {data.movie.Runtime}
+						<a class="showtime-link" href={`/movies/${data.movie.id}/${showtime.id}`}>
+							<strong>Zeit:</strong>
+							{new Date(showtime.time).toLocaleString('de-DE', {
+								weekday: 'short',
+								year: 'numeric',
+								month: 'short',
+								day: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit'
+							})} Uhr | <strong>Saal:</strong>
+							{showtime.hall}
+							| <strong>Dauer:</strong>
+							{data.movie.Runtime}
+						</a>
 					</li>
 				{/each}
 			</ul>
@@ -128,13 +133,23 @@
 		transition:
 			transform 0.3s ease,
 			box-shadow 0.3s ease;
+		position: relative; /* falls du damit arbeiten möchtest */
+		padding: 0; /* wir überlassen das Padding eher dem Link selbst */
 	}
 
-	.showtime-card:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+	.showtime-link {
+		display: block; 
+		text-decoration: none; 
+		color: inherit; 
+		padding: 1rem; 
+		border-radius: 8px; 
+		transition: color 0.2s ease; 
 	}
 
+	.showtime-card:hover .showtime-link {
+		color: #2c3e50; /* z.B. dunkleres Blau beim Hover */
+		text-decoration: none; /* sicherstellen, dass nichts unterstrichen wird */
+	}
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.movie-details {
