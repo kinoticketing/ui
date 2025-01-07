@@ -2,36 +2,48 @@
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
+	import toast from 'svelte-french-toast';
+	import { onMount } from 'svelte';
 
 	let email = '';
 	let password = '';
 	let showPassword = false;
 
+	// Handle Github login with callbackUrl
+	function handleGithubLogin() {
+		signIn('github', { 
+			callbackUrl: '/auth/account'
+		});
+	}
+
 	function handleLogin() {
-		// Implement login logic here if you're keeping email/password login
 		console.log('Login attempted', { email, password });
 	}
 
 	function togglePasswordVisibility() {
 		showPassword = !showPassword;
 	}
+
+	// Show toast on successful login
+	onMount(() => {
+    if (browser && $page.data.session?.user) {
+        toast.success('Successfully logged in!', {
+            icon: '✅',  // Using an emoji instead of Icon component
+            duration: 3000,
+            style: 'border-radius: 10px; background: #333; color: #fff;'
+        });
+    }
+});
 </script>
 
 <div class="login-container">
-	<h2>Login to Cinema System</h2>
+	{#if !$page.data.session?.user}
+		<h2>Login to Cinema System</h2>
 
-	{#if $page.data.session && $page.data.session.user}
-		<p>Signed in as {$page.data.session.user.email}</p>
-		<button on:click={() => signOut()} class="login-btn">Sign out</button>
-	{:else}
 		<div class="auth-providers">
-			<button on:click={() => signIn('google')} class="provider-btn google">
-				<Icon icon="logos:google-icon" />
-				Log in with Google
-			</button>
-
-			<button on:click={() => signIn('github')} class="provider-btn github">
-				<Icon icon="mdi:github" />
+			<button on:click={handleGithubLogin} class="provider-btn github">
+				<Icon icon="mdi:github" width="24" height="24" />
 				Log in with GitHub
 			</button>
 		</div>
@@ -48,7 +60,7 @@
 			<div class="input-group password-group">
 				<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
 				<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
-					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
 				</button>
 			</div>
 
@@ -98,11 +110,6 @@
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.9rem;
-	}
-
-	.google {
-		background-color: #4285f4;
-		color: white;
 	}
 
 	.github {
