@@ -17,8 +17,8 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	trustHost: true,
 	session: {
 		strategy: 'database',
-		maxAge: 30 * 24 * 60 * 60, // 30 days
-		updateAge: 24 * 60 * 60 // 24 hours
+		maxAge: 15 * 60, // 15 min
+		updateAge: 5 * 60 // 5min
 	},
 	cookies: {
 		sessionToken: {
