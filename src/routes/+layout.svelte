@@ -3,8 +3,12 @@
 
 	import '../app.css';
 	import Icon from '@iconify/svelte';
-	import { fade } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
+	import { signIn, signOut } from '@auth/sveltekit/client';
+	import { goto } from '$app/navigation';
 
 	const currentYear = new Date().getFullYear();
 	const isSignedIn = false; // HAS TO BE SET DYNAMICALLY; HARDCODED FOR TESTING PURPOSES
@@ -21,6 +25,15 @@
 	function handleClickOutside(event) {
 		if (showMenu && !event.target.closest('.account-dropdown')) {
 			showMenu = false;
+		}
+	}
+
+	async function handleLogout() {
+		try {
+			await signOut({ redirect: false });
+			await goto('/auth/login');
+		} catch (error) {
+			console.error('Logout error:', error);
 		}
 	}
 </script>
@@ -65,24 +78,28 @@
 					<Icon icon="mdi:account-circle" width="38" height="38" />
 				</button>
 				{#if showMenu}
-					<div class="dropdown-menu" transition:fade={{ duration: 100 }}>
+					<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
 						<ul>
 							<li>
 								<a href="/settings">
-									<Icon icon="mdi:cog" />
+									<Icon icon="mdi:cog" width="20" height="20" />
 									Settings
 								</a>
 							</li>
 							<li>
-								{#if isSignedIn}
-									<a href="/account">
-										<Icon icon="mdi:account" />
-										Account
+								{#if !$page.data.session?.user}
+									<a href="/auth/login">
+										<Icon icon="mdi:login" width="20" height="20" />
+										Sign In
 									</a>
 								{:else}
-									<a href="/auth/login">
-										<Icon icon="mdi:login" />
-										Sign In
+									<a href="/auth/account">
+										<Icon icon="mdi:account-circle-outline" width="20" height="20" />
+										My Account
+									</a>
+									<a href="/auth/login" on:click|preventDefault={handleLogout} class="logout-link">
+										<Icon icon="mdi:logout" width="20" height="20" />
+										Sign Out
 									</a>
 								{/if}
 							</li>
@@ -399,13 +416,26 @@
 	.dropdown-menu {
 		position: absolute;
 		right: 0;
-		top: 100%;
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		min-width: 200px;
+		top: calc(100% + 10px);
+		background: #ffffff;
+		border-radius: 12px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+		min-width: 220px;
 		z-index: 10;
-		overflow: hidden; /* This will clip the hover effect to the rounded corners */
+		padding: 8px;
+		transform-origin: top right;
+	}
+
+	.dropdown-menu::before {
+		content: '';
+		position: absolute;
+		top: -8px;
+		right: 13px;
+		width: 16px;
+		height: 16px;
+		background: #ffffff;
+		transform: rotate(45deg);
+		box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.04);
 	}
 
 	.dropdown-menu ul {
@@ -414,37 +444,42 @@
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-	}
-
-	.dropdown-menu li {
-		width: 100%;
+		gap: 4px;
 	}
 
 	.dropdown-menu li a {
 		display: flex;
 		align-items: center;
-		padding: 0.75rem 1rem;
+		padding: 12px 16px;
 		color: #333;
 		text-decoration: none;
-		transition: background-color 0.2s;
-		width: 100%;
-	}
-
-	.dropdown-menu li:first-child a {
-		border-top-left-radius: 8px;
-		border-top-right-radius: 8px;
-	}
-
-	.dropdown-menu li:last-child a {
-		border-bottom-left-radius: 8px;
-		border-bottom-right-radius: 8px;
+		transition: all 0.2s ease;
+		border-radius: 8px;
+		font-weight: 500;
 	}
 
 	.dropdown-menu li a:hover {
-		background-color: #f0f0f0;
+		background-color: #f5f5f5;
+		transform: translateX(4px);
 	}
 
 	.dropdown-menu :global(svg) {
-		margin-right: 0.5rem;
+		margin-right: 12px;
+		width: 20px;
+		height: 20px;
+	}
+
+	.dropdown-menu li:not(:last-child) {
+		border-bottom: 1px solid #f0f0f0;
+		margin-bottom: 4px;
+		padding-bottom: 4px;
+	}
+
+	.logout-link {
+		color: #dc3545 !important;
+	}
+
+	.logout-link:hover {
+		background-color: #fff5f5 !important;
 	}
 </style>
