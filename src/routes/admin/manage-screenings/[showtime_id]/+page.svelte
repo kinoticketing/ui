@@ -1,21 +1,7 @@
-<!-- src/routes/admin/manage-screenings/[showtime_id]/+page.svelte -->
 <script lang="ts">
 	export let data;
 	const { screening } = data;
-	/*
-	  screening enthält:
-	  {
-		showtime_id,
-		movie_id,
-		hall_id,
-		showtime,
-		hall_name,
-		capacity,
-		seat_plan
-	  }
-	*/
 
-	// Falls seat_plan nicht existiert, nimm ein leeres Array (oder null)
 	let seatPlan = screening?.seat_plan ?? [];
 
 	function handleSeatClick(rowIndex: number, colIndex: number) {
@@ -24,7 +10,6 @@
 
 	async function updateSeatPlan() {
 		const formData = new FormData();
-		// Beispiel: Schick current seatPlan als JSON
 		formData.append('new_seat_plan', JSON.stringify(seatPlan));
 
 		const response = await fetch('?/updateSeatPlan', {
@@ -55,34 +40,78 @@
 
 		<h2>Sitzplan</h2>
 		{#if Array.isArray(seatPlan) && seatPlan.length > 0}
-			{#each seatPlan as row, rowIndex}
-				<div class="seat-row">
-					{#each row as seat, colIndex}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<!-- svelte-ignore a11y-no-static-element-interactions -->
-						<div class="seat" on:click={() => handleSeatClick(rowIndex, colIndex)}>
-							<!-- Wenn seat nur ein String ist, gib ihn direkt aus -->
-							{seat}
-						</div>
-					{/each}
-				</div>
-			{/each}
+			<div class="seat-plan">
+				{#each seatPlan as row, rowIndex}
+					<div class="seat-row">
+						{#each row as seat, colIndex}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
+							<div class="seat" on:click={() => handleSeatClick(rowIndex, colIndex)}>
+								{seat}
+							</div>
+						{/each}
+					</div>
+				{/each}
+			</div>
 		{:else}
 			<p>Kein Sitzplan vorhanden.</p>
 		{/if}
 
-		<button on:click={updateSeatPlan}>Sitzplan speichern</button>
+		<button class="save-button" on:click={updateSeatPlan}>Sitzplan speichern</button>
 	{/if}
 </main>
 
 <style>
+	main {
+		padding: 20px;
+		font-family: Arial, sans-serif;
+	}
+
+	h1 {
+		color: #333;
+	}
+
+	h2 {
+		margin-top: 20px;
+		color: #555;
+	}
+
+	.seat-plan {
+		display: grid;
+		gap: 10px;
+		margin-top: 20px;
+	}
+
 	.seat-row {
 		display: flex;
 		gap: 8px;
 	}
+
 	.seat {
-		padding: 6px 10px;
+		padding: 10px;
 		border: 1px solid #ccc;
+		border-radius: 4px;
+		background-color: #f9f9f9;
 		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+	.seat:hover {
+		background-color: #e0e0e0;
+	}
+
+	.save-button {
+		margin-top: 20px;
+		padding: 10px 20px;
+		background-color: #007bff;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+	.save-button:hover {
+		background-color: #0056b3;
 	}
 </style>
