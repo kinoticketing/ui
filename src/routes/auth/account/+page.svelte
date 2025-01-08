@@ -3,14 +3,15 @@
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Loader } from '@googlemaps/js-api-loader';
+	// import { Loader } from '@googlemaps/js-api-loader'; // Commented out Google Maps import
 
 	export let data: PageData;
 
 	let showChangePassword = false;
+	let showEditAddress = false;
 	let newPassword = '';
 	let confirmPassword = '';
-	let addressInput: HTMLInputElement;
+	// let addressInput: HTMLInputElement; // Commented out Google autocomplete reference
 	let address = {
 		street_address: '',
 		city: '',
@@ -24,11 +25,11 @@
 		{ id: 2, type: 'Mastercard', last4: '5555' }
 	];
 
+	// Commented out Google Maps setup
+	/*
 	onMount(async () => {
 		try {
-			
-			const apiKey = 'AIzaSyBV_ZaVSN28DS3PrimZaumzLxDpCfQyODo';
-
+			const apiKey = 'YOUR_API_KEY';
 			const loader = new Loader({
 				apiKey,
 				version: 'weekly',
@@ -37,16 +38,13 @@
 
 			await loader.load();
 
-			// Create the autocomplete object
 			const options = {
-				componentRestrictions: { country: 'de' }, // Restrict to Germany
+				componentRestrictions: { country: 'de' },
 				fields: ['formatted_address', 'address_components']
 			};
 
 			const autocomplete = new window.google.maps.places.Autocomplete(addressInput, options);
 
-			// Re-enable input fields
-			// Cast NodeList elements to HTMLInputElement
 			const addressFields = document.querySelectorAll(
 				'.address-fields input'
 			) as NodeListOf<HTMLInputElement>;
@@ -58,7 +56,6 @@
 				const place = autocomplete.getPlace();
 				if (!place.address_components) return;
 
-				// Reset values
 				address = {
 					street_address: '',
 					city: '',
@@ -67,7 +64,6 @@
 					country: ''
 				};
 
-				// Parse address components
 				place.address_components.forEach((component) => {
 					const type = component.types[0];
 					switch (type) {
@@ -94,6 +90,29 @@
 			console.error('Error:', error);
 		}
 	});
+	*/
+
+	async function handleUpdateAddress() {
+		try {
+			const response = await fetch('/api/user/address', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(address)
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update address');
+			}
+
+			showEditAddress = false;
+			// You might want to show a success message here
+		} catch (error) {
+			console.error('Error updating address:', error);
+			// Handle error (show error message to user)
+		}
+	}
 
 	function handleChangePassword() {
 		console.log('Password change attempted', { newPassword, confirmPassword });
@@ -129,39 +148,45 @@
 
 		<div class="section">
 			<h3>Address Information</h3>
-			<div class="input-group address-search-group">
-				<input
-					bind:this={addressInput}
-					type="text"
-					placeholder="Search for your address"
-					class="address-search"
-					id="address-input"
-					autocomplete="off"
-				/>
-			</div>
-
-			<div class="address-fields">
-				<div class="input-group">
-					<input
-						type="text"
-						bind:value={address.street_address}
-						placeholder="Street Address"
-						disabled
-					/>
+			{#if showEditAddress}
+				<form on:submit|preventDefault={handleUpdateAddress}>
+					<div class="address-fields">
+						<div class="input-group">
+							<input type="text" bind:value={address.street_address} placeholder="Street Address" />
+						</div>
+						<div class="input-group">
+							<input type="text" bind:value={address.city} placeholder="City" />
+						</div>
+						<div class="input-group">
+							<input type="text" bind:value={address.state} placeholder="State" />
+						</div>
+						<div class="input-group">
+							<input type="text" bind:value={address.postal_code} placeholder="Postal Code" />
+						</div>
+						<div class="input-group">
+							<input type="text" bind:value={address.country} placeholder="Country" />
+						</div>
+					</div>
+					<button type="submit" class="btn primary">Update Address</button>
+					<button type="button" class="btn secondary" on:click={() => (showEditAddress = false)}>
+						Cancel
+					</button>
+				</form>
+			{:else}
+				<div class="address-display">
+					{#if address.street_address}
+						<p>{address.street_address}</p>
+						<p>{address.city}, {address.state} {address.postal_code}</p>
+						<p>{address.country}</p>
+					{:else}
+						<p>No address provided</p>
+					{/if}
+					<button class="btn primary" on:click={() => (showEditAddress = true)}>
+						<Icon icon="mdi:pencil" />
+						Edit Address
+					</button>
 				</div>
-				<div class="input-group">
-					<input type="text" bind:value={address.city} placeholder="City" disabled />
-				</div>
-				<div class="input-group">
-					<input type="text" bind:value={address.state} placeholder="State" disabled />
-				</div>
-				<div class="input-group">
-					<input type="text" bind:value={address.postal_code} placeholder="Postal Code" disabled />
-				</div>
-				<div class="input-group">
-					<input type="text" bind:value={address.country} placeholder="Country" disabled />
-				</div>
-			</div>
+			{/if}
 		</div>
 
 		<div class="section">
@@ -242,6 +267,14 @@
 	h3 {
 		text-align: center;
 		margin-bottom: 1.5rem;
+	}
+
+	.address-display {
+		margin-bottom: 1rem;
+	}
+
+	.address-display p {
+		margin: 0.25rem 0;
 	}
 
 	.address-search-group {

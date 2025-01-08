@@ -13,6 +13,37 @@ const pool = new Pool({
 	}
 });
 
+export async function updateUserAddress(
+	userId: string,
+	address: {
+		street_address: string;
+		city: string;
+		state: string;
+		postal_code: string;
+		country: string;
+	}
+) {
+	const { rows } = await pool.query(
+		`UPDATE users 
+         SET street_address = $1,
+             city = $2,
+             state = $3,
+             postal_code = $4,
+             country = $5
+         WHERE id = $6
+         RETURNING street_address, city, state, postal_code, country`,
+		[
+			address.street_address,
+			address.city,
+			address.state,
+			address.postal_code,
+			address.country,
+			userId
+		]
+	);
+	return rows[0];
+}
+
 export const NeonAdapter: Adapter = {
 	async createUser(user) {
 		const { rows } = await pool.query(
@@ -69,34 +100,36 @@ export const NeonAdapter: Adapter = {
 				'INSERT INTO sessions (session_token, user_id, expires) VALUES ($1, $2, $3) RETURNING id, session_token, user_id, expires',
 				[session.sessionToken, session.userId, session.expires]
 			);
-	
+
 			console.log('Session created in database:', rows[0]);
-	
+
 			if (!rows[0]) {
 				throw new Error('Failed to create session');
 			}
-	
+
 			// Return the session in the exact format expected by AdapterSession
 			const adaptedSession: AdapterSession = {
 				sessionToken: rows[0].session_token,
 				userId: rows[0].user_id.toString(), // Ensure userId is a string
 				expires: rows[0].expires
 			};
-	
+
 			return adaptedSession;
 		} catch (error) {
 			console.error('Error creating session:', error);
 			throw error;
 		}
 	},
-	async getSessionAndUser(sessionToken: string | undefined): Promise<{ user: AdapterUser; session: AdapterSession; } | null> {
+	async getSessionAndUser(
+		sessionToken: string | undefined
+	): Promise<{ user: AdapterUser; session: AdapterSession } | null> {
 		console.log('getSessionAndUser called with token:', sessionToken);
-		
+
 		if (!sessionToken || sessionToken === 'undefined') {
 			console.log('Invalid session token:', sessionToken);
 			return null;
 		}
-	
+
 		try {
 			const { rows } = await pool.query(
 				`SELECT 
@@ -107,31 +140,41 @@ export const NeonAdapter: Adapter = {
 					u.email,
 					u.username as name,
 					u.github_id,
-					u.created_at
+					u.created_at,
+					u.street_address,
+					u.city,
+					u.state,
+					u.postal_code,
+					u.country
 				 FROM sessions s
 				 JOIN users u ON s.user_id = u.id
 				 WHERE s.session_token = $1 AND s.expires > NOW()`,
 				[sessionToken]
 			);
-			
+
 			console.log('getSessionAndUser query result:', rows);
-	
+
 			if (rows.length === 0) return null;
-	
+
 			const userData = {
 				id: rows[0].user_id.toString(),
 				name: rows[0].name,
 				email: rows[0].email,
 				emailVerified: null,
 				github_id: rows[0].github_id,
+				street_address: rows[0].street_address,
+				city: rows[0].city,
+				state: rows[0].state,
+				postal_code: rows[0].postal_code,
+				country: rows[0].country
 			};
-	
+
 			const session = {
 				sessionToken: rows[0].session_token,
 				userId: rows[0].user_id.toString(),
 				expires: rows[0].expires
 			};
-	
+
 			return {
 				user: userData,
 				session: session
