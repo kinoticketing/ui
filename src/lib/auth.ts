@@ -2,6 +2,34 @@ import GitHub from '@auth/core/providers/github';
 import { SvelteKitAuth } from '@auth/sveltekit';
 import { AUTH_SECRET, GITHUB_ID, GITHUB_SECRET } from '$env/static/private';
 import { NeonAdapter } from './neonAdapter';
+import type { Session, User } from '@auth/core/types';
+
+// Define database user type
+interface DatabaseUser {
+	id: string;
+	password_hash?: string | null;
+	street_address?: string | null;
+	city?: string | null;
+	state?: string | null;
+	postal_code?: string | null;
+	country?: string | null;
+}
+
+// Define the extended types
+interface ExtendedUser extends User {
+	hasPassword?: boolean;
+	address?: {
+		street_address: string;
+		city: string;
+		state: string;
+		postal_code: string;
+		country: string;
+	};
+}
+
+interface ExtendedSession extends Session {
+	user: ExtendedUser;
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -32,10 +60,21 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		}
 	},
 	callbacks: {
-		async session({ session, user }) {
-			console.log('Session callback:', { session, user });
+		async session({ session, user }: { session: ExtendedSession; user: DatabaseUser }) {
 			if (session?.user) {
-				session.user.id = user.id?.toString();
+				session.user.id = user.id;
+				session.user.hasPassword = !!user.password_hash;
+
+				if (user.street_address) {
+					// Only create address object if we have a street address
+					session.user.address = {
+						street_address: user.street_address,
+						city: user.city ?? '',
+						state: user.state ?? '',
+						postal_code: user.postal_code ?? '',
+						country: user.country ?? ''
+					};
+				}
 			}
 			return session;
 		}

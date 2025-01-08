@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PageServerLoad } from './$types';
 import 'dotenv/config';
 import pkg from 'pg';
