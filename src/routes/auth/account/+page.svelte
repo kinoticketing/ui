@@ -277,20 +277,19 @@
 		margin: 0.25rem 0;
 	}
 
-	.address-search-group {
-		/* Target the specific input-group for address search */
+	/* .address-search-group {
 		display: flex;
 		align-items: center;
-	}
+
 
 	.address-search {
-		flex: 1; /* Allow the search input to grow and fill available space */
+		flex: 1; 
 		padding: 0.75rem;
 		border: 1px solid #ddd;
 		border-radius: 4px;
 		font-size: 1rem;
 		margin-bottom: 1rem;
-	}
+	} */
 
 	.address-fields {
 		display: grid;
