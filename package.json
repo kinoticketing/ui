@@ -46,6 +46,7 @@
 		"@auth/core": "^0.37.4",
 		"@auth/sveltekit": "^1.7.4",
 		"@googlemaps/js-api-loader": "^1.16.8",
+		"@types/google.maps": "3.58.1",
 		"@iconify/svelte": "^4.1.0",
 		"@neondatabase/serverless": "^0.10.4",
 		"@vercel/postgres": "^0.10.0",

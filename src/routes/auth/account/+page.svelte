@@ -2,8 +2,8 @@
 	import Icon from '@iconify/svelte';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
-	import { Loader } from '@googlemaps/js-api-loader';
 	import { onMount } from 'svelte';
+	import { Loader } from '@googlemaps/js-api-loader';
 
 	export let data: PageData;
 
@@ -26,16 +26,16 @@
 
 	onMount(async () => {
 		try {
-			// const response = await fetch('/api/maps');
-			// const apiKey = 'AIzaSyBV_ZaVSN28DS3PrimZaumzLxDpCfQyODo';
+			
+			const apiKey = 'AIzaSyBV_ZaVSN28DS3PrimZaumzLxDpCfQyODo';
 
-			// const loader = new Loader({
-			// 	apiKey,
-			// 	version: 'weekly',
-			// 	libraries: ['places']
-			// });
+			const loader = new Loader({
+				apiKey,
+				version: 'weekly',
+				libraries: ['places']
+			});
 
-			// await loader.load();
+			await loader.load();
 
 			// Create the autocomplete object
 			const options = {
