@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -13,38 +15,115 @@ const pool = new Pool({
     },
 });
 
-export async function load() {
+export const load: PageServerLoad = async () => {
     try {
-        const hallsResult = await pool.query('SELECT hall_id, name FROM cinema_halls ORDER BY name');
-        return { halls: hallsResult.rows };
+        // Nur Halls mit aktiven Sitzen
+        const activeHalls = await pool.query(`
+            SELECT id, name 
+            FROM halls 
+            WHERE id IN (
+                SELECT DISTINCT hall_id 
+                FROM seats 
+                WHERE status = 'active'
+            )
+            ORDER BY name
+        `);
+
+        return {
+            halls: activeHalls.rows.map((hall) => ({
+                id: hall.id,
+                name: hall.name
+            }))
+        };
     } catch (error) {
-        console.error('Fehler beim Laden der Säle:', error);
+        console.error('Error loading halls:', error);
         return { halls: [] };
     }
-}
+};
 
-export const actions = {
+export const actions: Actions = {
     default: async ({ request }) => {
         const formData = await request.formData();
-        const movie_id = formData.get('movie_id'); // IMDB-ID
-        const hall_id = formData.get('hall_id');
-        const showtime = formData.get('showtime');
+        const movie_id = formData.get('movie_id')?.toString(); // z. B. "tt1320253"
+        const hall_id = parseInt(formData.get('hall_id')?.toString() || '');
+        const start_time = formData.get('start_time')?.toString(); // datetime-local
 
-        if (!movie_id || !hall_id || !showtime) {
-            return fail(400, { message: 'Bitte füllen Sie alle Felder aus.' });
+        // Validierung
+        if (!movie_id || !hall_id || !start_time) {
+            return fail(400, { 
+                message: 'Please fill in all fields.',
+                values: { movie_id, hall_id, start_time }
+            });
         }
+
+        // Beispiel: feste Dauer (120 min)
+        const fixedDurationMinutes = 120;
 
         try {
-            // Vorstellung in die Tabelle `showtimes` einfügen
-            await pool.query(
-                `INSERT INTO showtimes (movie_id, hall_id, showtime) VALUES ($1, $2, $3)`,
-                [movie_id, hall_id, showtime]
-            );
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
 
-            return { success: true, message: 'Vorstellung erfolgreich erstellt!' };
+                // end_time = start_time + 120 min
+                const endQuery = await client.query(
+                    `SELECT ($1::timestamp + interval '1 minute' * $2) as end_time`,
+                    [start_time, fixedDurationMinutes]
+                );
+                const end_time = endQuery.rows[0].end_time; 
+
+                // Check Overlap
+                const overlap = await client.query(`
+                    SELECT id FROM screenings 
+                    WHERE hall_id = $1
+                      AND tstzrange(start_time, end_time) && tstzrange($2::timestamp, $3::timestamp)
+                `, [hall_id, start_time, end_time]);
+
+                if (overlap.rows.length > 0) {
+                    await client.query('ROLLBACK');
+                    return fail(400, {
+                        message: 'There is already a screening scheduled in this hall during this time.',
+                        values: { movie_id, hall_id, start_time }
+                    });
+                }
+
+                // Check if hall has active seats
+                const seatsCheck = await client.query(`
+                    SELECT COUNT(*) FROM seats 
+                    WHERE hall_id = $1 AND status = 'active'
+                `, [hall_id]);
+                if (parseInt(seatsCheck.rows[0].count) === 0) {
+                    await client.query('ROLLBACK');
+                    return fail(400, {
+                        message: 'Selected hall has no active seats configured.',
+                        values: { movie_id, hall_id, start_time }
+                    });
+                }
+
+                // Insert
+                await client.query(`
+                    INSERT INTO screenings (movie_id, hall_id, start_time, end_time)
+                    VALUES ($1, $2, $3, $4)
+                `, [movie_id, hall_id, start_time, end_time]);
+
+                await client.query('COMMIT');
+
+                return {
+                    success: true,
+                    message: 'Screening successfully created!'
+                };
+            } catch (error) {
+                await client.query('ROLLBACK');
+                console.error('Error saving screening:', error);
+                throw error;
+            } finally {
+                client.release();
+            }
         } catch (error) {
-            console.error('Fehler beim Speichern der Vorstellung:', error);
-            return fail(500, { message: 'Fehler beim Speichern der Vorstellung.' });
+            console.error('Database error:', error);
+            return fail(500, {
+                message: 'Error saving the screening. Please try again.',
+                values: { movie_id, hall_id, start_time }
+            });
         }
-    },
+    }
 };

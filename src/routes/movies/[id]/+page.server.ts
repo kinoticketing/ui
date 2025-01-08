@@ -1,59 +1,65 @@
+// src/routes/movies/[id]/+page.server.ts
 import type { PageServerLoad } from './$types';
 import pkg from 'pg';
-const { Client } = pkg;
+const { Pool } = pkg;
 import 'dotenv/config';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const apiKey = process.env.VITE_OMDB_API_KEY;
-	const { id } = params;
+	const { id } = params; // z.B. "tt1320253"
 
-	// Filmdetails abrufen
+	// 1) Filmdetails von OMDb abrufen
 	const response = await fetch(`https://www.omdbapi.com/?apikey=${apiKey}&i=${id}`);
-
 	if (!response.ok) {
 		throw new Error('Fehler beim Abrufen der Filmdetails.');
 	}
-
 	const data = await response.json();
-
 	if (data.Response === 'False') {
 		throw new Error(data.Error || 'Keine Filmdetails gefunden.');
 	}
 
-	// Datenbankverbindung erstellen
-	const client = new Client({
-		host: process.env.DB_HOST,
+	// 2) DB-Verbindung
+	const pool = new Pool({
 		user: process.env.DB_USER,
-		password: process.env.DB_PASSWORD,
+		host: process.env.DB_HOST,
 		database: process.env.DB_NAME,
-		port: 5432, // PostgreSQL Standard-Port
+		password: process.env.DB_PASSWORD,
+		port: 5432,
 		ssl: {
 			rejectUnauthorized: false
 		}
 	});
 
-	await client.connect();
-
-	// Vorstellungen abrufen
-	const res = await client.query(
-		'SELECT showtime_id, showtime AS time, hall_id AS hall FROM showtimes WHERE movie_id = $1',
+	// 3) Alle SCREENINGS zu diesem Film (movie_id = id) holen
+	const res = await pool.query(
+		`
+		SELECT 
+			id,        -- PK
+			hall_id,   -- FK zu halls
+			start_time
+		FROM screenings
+		WHERE movie_id = $1
+		ORDER BY start_time
+		`,
 		[id]
 	);
-	await client.end();
 
-	// showtime_id -> id mappen, damit "showtime.id" korrekt ist
+	// 4) Pool freigeben
+	await pool.end();
+
+	// 5) Wir wollen im Frontend ein Array "showtimes" haben:
 	const showtimes = res.rows.map((row) => {
 		return {
-			id: row.showtime_id,
-			time: row.time,
-			hall: row.hall
+			id: row.id,              // screening.id
+			time: row.start_time,    // => "time" fürs Frontend
+			hall: row.hall_id        // => "hall"
 		};
 	});
 
 	return {
 		movie: {
-			...data,
-			id 
+			...data, // sämtliche OMDb-Felder wie Title, Year, usw.
+			id       // wir geben die IMDb-ID als "movie.id" zurück
 		},
 		showtimes
 	};

@@ -2,17 +2,22 @@
 	export let data;
 	const { screening } = data;
 
+	// 2D-Array der Sitzplatzlabels
 	let seatPlan = screening?.seat_plan ?? [];
 
 	function handleSeatClick(rowIndex: number, colIndex: number) {
-		console.log(`Sitz geklickt:`, seatPlan[rowIndex][colIndex]);
+		console.log(
+			`Sitz geklickt: row=${rowIndex}, col=${colIndex}, Wert=`,
+			seatPlan[rowIndex][colIndex]
+		);
 	}
 
 	async function updateSeatPlan() {
 		const formData = new FormData();
 		formData.append('new_seat_plan', JSON.stringify(seatPlan));
 
-		const response = await fetch('?/updateSeatPlan', {
+		// Achtung: URL → kein "?" mehr, sondern "/updateSeatPlan"
+		const response = await fetch('./updateSeatPlan', {
 			method: 'POST',
 			body: formData
 		});
@@ -26,17 +31,19 @@
 </script>
 
 <svelte:head>
-	<title>Vorstellung: {screening?.showtime_id}</title>
+	<title>Vorstellung: {screening?.screening_id}</title>
 </svelte:head>
+
 <main>
 	{#if !screening}
 		<p>Keine Vorstellung gefunden.</p>
 	{:else}
-		<h1>Vorstellung {screening.showtime_id}</h1>
+		<h1>Vorstellung {screening.screening_id}</h1>
 		<p><b>Film-ID:</b> {screening.movie_id}</p>
 		<p><b>Saal:</b> {screening.hall_name} (ID: {screening.hall_id})</p>
 		<p><b>Kapazität:</b> {screening.capacity}</p>
-		<p><b>Zeit:</b> {screening.showtime}</p>
+		<p><b>Startzeit:</b> {screening.start_time}</p>
+		<p><b>Endzeit:</b> {screening.end_time}</p>
 
 		<h2>Sitzplan</h2>
 		{#if Array.isArray(seatPlan) && seatPlan.length > 0}
