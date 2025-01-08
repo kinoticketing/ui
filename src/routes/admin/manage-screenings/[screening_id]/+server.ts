@@ -1,3 +1,4 @@
+// src/routes/admin/manage-screenings/[screening_id]/+server.ts
 import pkg from 'pg';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -14,10 +15,16 @@ const pool = new Pool({
 
 // DELETE-Methode für das Löschen einer Vorstellung
 export const DELETE: RequestHandler = async ({ params }) => {
-	const { showtime_id } = params;
+	const { screening_id } = params;
+	const id = screening_id ? parseInt(screening_id, 10) : NaN;
 
 	try {
-		await pool.query('DELETE FROM showtimes WHERE showtime_id = $1', [showtime_id]);
+		// Evtl. erst seat_reservations löschen, wenn du das nicht per ON DELETE CASCADE geregelt hast
+		await pool.query('DELETE FROM seat_reservations WHERE screening_id = $1', [id]);
+
+		// Jetzt die eigentliche Vorstellung löschen
+		await pool.query('DELETE FROM screenings WHERE id = $1', [id]);
+
 		return new Response(null, { status: 204 }); // Erfolgreich gelöscht
 	} catch (error) {
 		console.error('Fehler beim Löschen der Vorstellung:', error);

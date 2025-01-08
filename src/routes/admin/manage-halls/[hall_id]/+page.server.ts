@@ -1,10 +1,9 @@
 // src/routes/admin/manage-halls/[hall_id]/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
-import type { RequestEvent } from '@sveltejs/kit';
 import pkg from 'pg';
 const { Pool } = pkg;
 
-// Deinen Pool erstellen oder importieren
+// Pool erstellen
 const pool = new Pool({
 	user: process.env.PGUSER,
 	host: process.env.PGHOST,
@@ -18,48 +17,79 @@ const pool = new Pool({
 
 export const load: PageServerLoad = async ({ params }) => {
 	try {
-		// hole die hall_id aus den URL-Parametern (z. B. /admin/manage-halls/7)
-		const hallId = parseInt(params.hall_id, 10);
+		const hallId = Number(params.hall_id);
 
-		// Saal aus der Datenbank laden
-		const result = await pool.query(
-			/* 
-			 * Wir holen hier alle Felder (hall_id, name, capacity, seat_plan).
-			 * 'seat_plan' enthält dein Sitzplan-Layout. 
-			 */
-			'SELECT hall_id, name, capacity, seat_plan FROM cinema_halls WHERE hall_id = $1',
+		// 1) Hallen-Daten aus `halls` laden
+		const hallResult = await pool.query(
+			`
+			SELECT 
+				id, 
+				name, 
+				total_rows, 
+				total_columns
+			FROM halls
+			WHERE id = $1
+			`,
 			[hallId]
 		);
 
-
-		if (result.rowCount === 0) {
-			// Falls kein Saal mit dieser ID existiert
+		if (hallResult.rowCount === 0) {
 			return {
 				hall: null,
 				error: `Saal mit ID ${hallId} nicht gefunden`
 			};
 		}
 
-        console.log('DB result:', result.rows[0]);
+		const hallRow = hallResult.rows[0];
+		// Zur Info: capacity können wir dynamisch berechnen
+		const capacity = hallRow.total_rows * hallRow.total_columns;
 
-		const hall = result.rows[0];
+		// 2) Seats zu diesem Saal laden und in ein 2D-Array packen
+		const seatsResult = await pool.query(
+			`
+			SELECT 
+				row_number, 
+				column_number,
+				seat_label,
+				status
+			FROM seats
+			WHERE hall_id = $1
+			ORDER BY row_number, column_number
+			`,
+			[hallId]
+		);
 
-		// Optional: Falls seat_plan als JSON gespeichert ist und du es direkt parsen möchtest
-		let seatPlan;
-		try {
-			seatPlan = JSON.parse(hall.seat_plan);
-		} catch (err) {
-			console.warn('seat_plan ist möglicherweise kein gültiges JSON', err);
-			seatPlan = hall.seat_plan; // oder null
+		/*
+		 * 3) seat_plan als 2D-Array erstellen
+		 *    row_number und column_number gehen jeweils von 0..(n-1).
+		 *    Du kannst in seat_plan z.B. die seat_label oder status hinterlegen.
+		 */
+		const seatPlan: string[][] = [];
+
+		for (let r = 0; r < hallRow.total_rows; r++) {
+			seatPlan[r] = [];
+			for (let c = 0; c < hallRow.total_columns; c++) {
+				seatPlan[r][c] = ''; // Erst mal leer
+			}
 		}
 
+		// Die Daten aus seatsResult eintragen
+		for (const seat of seatsResult.rows) {
+			// Hier entscheidest du, was im Frontend angezeigt werden soll:
+			// seat.seat_label (z.B. 'A1') oder seat.status (z.B. 'active', 'VIP', etc.)
+			// In diesem Beispiel nehmen wir seat_label.
+			seatPlan[seat.row_number][seat.column_number] = seat.seat_label;
+		}
+
+		const hallData = {
+			hall_id: hallRow.id,
+			name: hallRow.name,
+			capacity,
+			seat_plan: seatPlan
+		};
+
 		return {
-			hall: {
-				hall_id: hall.hall_id,
-				name: hall.name,
-				capacity: hall.capacity,
-				seat_plan: seatPlan
-			}
+			hall: hallData
 		};
 	} catch (error) {
 		console.error('Fehler beim Laden des Saals:', error);
@@ -70,39 +100,57 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 };
 
-// Beispiel-Aktionen: DELETE oder UPDATE (Sitzplan ändern etc.)
+// Aktionen (z.B. Saal aktualisieren) – optional
 export const actions: Actions = {
-	delete: async ({ params }: RequestEvent) => {
-		const { hall_id } = params as { hall_id: string };
-		try {
-			await pool.query('DELETE FROM cinema_halls WHERE hall_id = $1', [hall_id]);
-			return { success: true };
-		} catch (error) {
-			console.error('Fehler beim Löschen des Saals:', error);
-			return { success: false, error: 'Datenbankfehler beim Löschen des Saals.' };
-		}
-	},
+	// Beispiel: Sitzplan aktualisieren (komplett oder teilweise)
+	// Das Prinzip wäre:
+	// 1) parse seat_plan
+	// 2) seats löschen/aktualisieren oder upsert
+	// 3) done
+	// Der Einfachheit halber hier ein Pseudobeispiel:
 
-	updateSeatPlan: async ({ request, params }: RequestEvent) => {
-		const { hall_id } = params as { hall_id: string };
+	updateSeatPlan: async ({ request, params }) => {
+		const hallId = Number(params.hall_id);
 		const formData = await request.formData();
-		// z. B. das neue seat_plan (als JSON) aus einem Form-Feld "new_seat_plan" auslesen
 		const newSeatPlan = formData.get('new_seat_plan')?.toString();
 
 		if (!newSeatPlan) {
-			return { success: false, error: 'Kein Sitzplan angegeben' };
+			return { success: false, error: 'Kein neuer Sitzplan angegeben.' };
 		}
 
 		try {
-			// Schreib den neuen Sitzplan als JSON in die DB
-			await pool.query(
-				'UPDATE cinema_halls SET seat_plan = $1 WHERE hall_id = $2',
-				[newSeatPlan, hall_id]
-			);
+			// 1) Parse JSON
+			const seatPlanArray = JSON.parse(newSeatPlan) as string[][];
+
+			// 2) Lösche zuerst alle seats für diese hallId
+			await pool.query('DELETE FROM seats WHERE hall_id = $1', [hallId]);
+
+			// 3) Neu anlegen
+			for (let r = 0; r < seatPlanArray.length; r++) {
+				for (let c = 0; c < seatPlanArray[r].length; c++) {
+					const label = seatPlanArray[r][c] || '';
+					// 'active' oder was immer du willst
+					const status = 'active';
+
+					await pool.query(
+						`
+						INSERT INTO seats (
+							hall_id,
+							row_number,
+							column_number,
+							seat_label,
+							status
+						) VALUES ($1, $2, $3, $4, $5)
+						`,
+						[hallId, r, c, label, status]
+					);
+				}
+			}
+
 			return { success: true };
 		} catch (error) {
 			console.error('Fehler beim Aktualisieren des Sitzplans:', error);
-			return { success: false, error: 'Datenbankfehler beim Aktualisieren des Sitzplans.' };
+			return { success: false, error: 'Fehler beim Aktualisieren des Sitzplans.' };
 		}
 	}
 };

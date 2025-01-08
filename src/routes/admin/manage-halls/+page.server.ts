@@ -1,5 +1,5 @@
 import pkg from 'pg';
-const {Pool} = pkg;
+const { Pool } = pkg;
 import type { RequestEvent } from '@sveltejs/kit';
 
 const pool = new Pool({
@@ -8,28 +8,40 @@ const pool = new Pool({
 	database: process.env.PGDATABASE,
 	password: process.env.PGPASSWORD,
 	port: 5432,
-    ssl: {
-        rejectUnauthorized: false // SSL aktivieren und unsignierte Zertifikate zulassen
-    },
+	ssl: {
+		rejectUnauthorized: false // SSL aktivieren und unsignierte Zertifikate zulassen
+	}
 });
 
 export async function load() {
 	try {
-		// Daten aus der Tabelle `cinema_halls` laden
-		const result = await pool.query('SELECT hall_id, name, capacity FROM cinema_halls ORDER BY name');
+		// Daten aus der Tabelle `halls` laden und Aliase nutzen
+		// für hall_id und capacity, damit das Frontend unverändert bleiben kann.
+		const query = `
+			SELECT 
+				id AS hall_id,
+				name,
+				(total_rows * total_columns) AS capacity
+			FROM halls
+			ORDER BY name
+		`;
+
+		const result = await pool.query(query);
+
 		return { halls: result.rows };
 	} catch (error) {
 		console.error('Fehler beim Laden der Säle:', error);
-		return { halls: [] }; // Rückgabe eines leeren Arrays bei Fehler
+		return { halls: [] };
 	}
 }
 
 export const actions = {
 	delete: async ({ params }: RequestEvent) => {
-		// Sicherstellen, dass hall_id vorhanden ist
 		const { hall_id } = params as { hall_id: string };
 		try {
-			await pool.query('DELETE FROM cinema_halls WHERE hall_id = $1', [hall_id]);
+			// Löschen des Saals anhand des Primärschlüssels 'id' in der neuen Tabelle 'halls'
+			await pool.query('DELETE FROM halls WHERE id = $1', [hall_id]);
+
 			return { success: true };
 		} catch (error) {
 			console.error('Fehler beim Löschen des Saals:', error);
