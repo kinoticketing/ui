@@ -34,7 +34,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
                 COUNT(*) as screening_count,
                 MIN(start_time) as next_screening
             FROM screenings
-            WHERE start_time > CURRENT_TIMESTAMP
             GROUP BY movie_id
         `;
         
