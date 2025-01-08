@@ -7,11 +7,19 @@ const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
 });
 
-export const load: PageServerLoad = async ({ fetch, url }) => {
+// 1) Hier definieren wir unseren Rückgabetyp
+export interface MoviesReturnData {
+	movies: any[];
+	query: string;
+	error: string | null;
+}
+
+// 2) Hiermit sagst du: Die load-Funktion liefert dir ein Objekt im Format "MoviesReturnData"
+export const load: PageServerLoad<MoviesReturnData> = async ({ fetch, url }) => {
 	const apiKey = process.env.VITE_OMDB_API_KEY;
 	const query = url.searchParams.get('query') || '';
 	let movies: any[] = [];
-	let error = null;
+	let error: string | null = null;
 
 	try {
 		// Abruf der movie_ids aus der Tabelle `showtimes`
