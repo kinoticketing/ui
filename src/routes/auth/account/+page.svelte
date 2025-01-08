@@ -26,46 +26,72 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch('/api/maps');
-			const { apiKey } = await response.json();
+			// const response = await fetch('/api/maps');
+			// const apiKey = 'AIzaSyBV_ZaVSN28DS3PrimZaumzLxDpCfQyODo';
 
-			const loader = new Loader({
-				apiKey,
-				version: 'weekly',
-				libraries: ['places']
+			// const loader = new Loader({
+			// 	apiKey,
+			// 	version: 'weekly',
+			// 	libraries: ['places']
+			// });
+
+			// await loader.load();
+
+			// Create the autocomplete object
+			const options = {
+				componentRestrictions: { country: 'de' }, // Restrict to Germany
+				fields: ['formatted_address', 'address_components']
+			};
+
+			const autocomplete = new window.google.maps.places.Autocomplete(addressInput, options);
+
+			// Re-enable input fields
+			// Cast NodeList elements to HTMLInputElement
+			const addressFields = document.querySelectorAll(
+				'.address-fields input'
+			) as NodeListOf<HTMLInputElement>;
+			addressFields.forEach((field) => {
+				field.disabled = false;
 			});
-
-			await loader.load();
-			console.log('Google Maps loaded'); // Debug log
-
-			const autocomplete = new google.maps.places.Autocomplete(addressInput, {
-				fields: ['address_components', 'geometry', 'name'],
-				types: ['address']
-			});
-			console.log('Autocomplete initialized'); // Debug log
 
 			autocomplete.addListener('place_changed', () => {
 				const place = autocomplete.getPlace();
-				console.log('Selected place:', place); // Debug log
-				if (place.address_components) {
-					for (const component of place.address_components) {
-						const type = component.types[0];
-						if (type === 'street_number' || type === 'route') {
+				if (!place.address_components) return;
+
+				// Reset values
+				address = {
+					street_address: '',
+					city: '',
+					state: '',
+					postal_code: '',
+					country: ''
+				};
+
+				// Parse address components
+				place.address_components.forEach((component) => {
+					const type = component.types[0];
+					switch (type) {
+						case 'street_number':
+						case 'route':
 							address.street_address += component.long_name + ' ';
-						} else if (type === 'locality') {
+							break;
+						case 'locality':
 							address.city = component.long_name;
-						} else if (type === 'administrative_area_level_1') {
+							break;
+						case 'administrative_area_level_1':
 							address.state = component.long_name;
-						} else if (type === 'postal_code') {
+							break;
+						case 'postal_code':
 							address.postal_code = component.long_name;
-						} else if (type === 'country') {
+							break;
+						case 'country':
 							address.country = component.long_name;
-						}
+							break;
 					}
-				}
+				});
 			});
 		} catch (error) {
-			console.error('Error loading Google Maps:', error);
+			console.error('Error:', error);
 		}
 	});
 
@@ -103,12 +129,14 @@
 
 		<div class="section">
 			<h3>Address Information</h3>
-			<div class="input-group">
+			<div class="input-group address-search-group">
 				<input
 					bind:this={addressInput}
 					type="text"
 					placeholder="Search for your address"
 					class="address-search"
+					id="address-input"
+					autocomplete="off"
 				/>
 			</div>
 
@@ -118,20 +146,20 @@
 						type="text"
 						bind:value={address.street_address}
 						placeholder="Street Address"
-						readonly
+						disabled
 					/>
 				</div>
 				<div class="input-group">
-					<input type="text" bind:value={address.city} placeholder="City" readonly />
+					<input type="text" bind:value={address.city} placeholder="City" disabled />
 				</div>
 				<div class="input-group">
-					<input type="text" bind:value={address.state} placeholder="State" readonly />
+					<input type="text" bind:value={address.state} placeholder="State" disabled />
 				</div>
 				<div class="input-group">
-					<input type="text" bind:value={address.postal_code} placeholder="Postal Code" readonly />
+					<input type="text" bind:value={address.postal_code} placeholder="Postal Code" disabled />
 				</div>
 				<div class="input-group">
-					<input type="text" bind:value={address.country} placeholder="Country" readonly />
+					<input type="text" bind:value={address.country} placeholder="Country" disabled />
 				</div>
 			</div>
 		</div>
@@ -169,14 +197,18 @@
 			{#if paymentMethods.length > 0}
 				<ul class="payment-methods">
 					{#each paymentMethods as method}
-						<li>
-							<Icon
-								icon={method.type.toLowerCase() === 'visa' ? 'logos:visa' : 'logos:mastercard'}
-							/>
-							{method.type} ending in {method.last4}
-							<button class="btn danger" on:click={() => handleRemovePaymentMethod(method.id)}>
+						<li class="payment-method">
+							<div>
+								<Icon
+									icon={method.type.toLowerCase() === 'visa' ? 'logos:visa' : 'logos:mastercard'}
+								/>
+								{method.type} ending in {method.last4}
+							</div>
+							<button
+								class="btn danger remove-button"
+								on:click={() => handleRemovePaymentMethod(method.id)}
+							>
 								<Icon icon="mdi:delete" />
-								Remove
 							</button>
 						</li>
 					{/each}
@@ -212,8 +244,14 @@
 		margin-bottom: 1.5rem;
 	}
 
+	.address-search-group {
+		/* Target the specific input-group for address search */
+		display: flex;
+		align-items: center;
+	}
+
 	.address-search {
-		width: 100%;
+		flex: 1; /* Allow the search input to grow and fill available space */
 		padding: 0.75rem;
 		border: 1px solid #ddd;
 		border-radius: 4px;
@@ -226,8 +264,19 @@
 		gap: 1rem;
 	}
 
+	.address-fields .input-group {
+		/* Specifically target input-groups within address-fields */
+		display: flex; /* Make the input-group a flex container */
+		align-items: center; /* Vertically align the input field */
+	}
+
 	.address-fields input {
+		flex: 1; /* Allow the input to grow and fill available space */
 		background-color: #f8f9fa;
+		padding: 0.75rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: 1rem;
 	}
 
 	.user-info p {
@@ -248,20 +297,11 @@
 		position: relative;
 	}
 
-	input {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 1rem;
-	}
-
 	.btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		width: 100%;
 		padding: 0.75rem;
 		border: none;
 		border-radius: 4px;
@@ -270,17 +310,19 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.primary {
+	.btn.primary {
 		background-color: #007bff;
 		color: white;
+		width: 100%;
 	}
 
-	.secondary {
+	.btn.secondary {
 		background-color: #6c757d;
 		color: white;
+		width: 100%;
 	}
 
-	.danger {
+	.btn.danger {
 		background-color: #dc3545;
 		color: white;
 	}
@@ -290,10 +332,10 @@
 		padding: 0;
 	}
 
-	.payment-methods li {
+	.payment-method {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		justify-content: space-between;
 		margin-bottom: 0.5rem;
 		font-size: 0.9rem;
 	}
@@ -302,6 +344,16 @@
 		width: auto;
 		padding: 0.5rem;
 		font-size: 0.8rem;
+	}
+
+	.remove-button {
+		margin-left: auto; /* Push the button to the right */
+	}
+
+	.remove-button :global(svg) {
+		/* Target the icon inside the button */
+		width: 1.2em;
+		height: 1.2em;
 	}
 
 	.login-btn {
