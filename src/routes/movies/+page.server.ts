@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import 'dotenv/config';
 import pkg from 'pg';
-export const {Pool} = pkg;
+const { Pool } = pkg;
 
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
