@@ -1,20 +1,25 @@
 <!-- src/routes/movies/[id]/[showtime_id]/+page.svelte -->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-    import type { PageData } from './types'
+	import type { PriceResponse, SelectedSeat, PageData } from './types';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
-	const TICKET_PRICE = 12.99;
 
-	let selectedSeats: Array<{
-		key: string;
-		row: number;
-		col: number;
-		label: string;
-	}> = [];
+	let selectedSeats: SelectedSeat[] = [];
 
-	function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
+	async function getSeatPrice(seatId: number): Promise<PriceResponse> {
+		const response = await fetch(`/api/seats/${seatId}/price?screeningId=${screening.id}`);
+		const data = await response.json();
+
+		if (!response.ok) {
+			throw new Error(data.error || 'Failed to get seat price');
+		}
+
+		return data;
+	}
+
+	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
 		if (!seat || seat.isBooked) return;
 
 		const seatKey = `${rowIndex}-${colIndex}`;
@@ -23,17 +28,36 @@
 		if (existingSeatIndex !== -1) {
 			selectedSeats = selectedSeats.filter((s) => s.key !== seatKey);
 		} else {
-			selectedSeats = [
-				...selectedSeats,
-				{
-					key: seatKey,
-					row: rowIndex + 1,
-					col: colIndex + 1,
-					label: seat.label
-				}
-			];
+			try {
+				const priceData = await getSeatPrice(seat.id);
+				const numericPrice =
+					typeof priceData.price === 'string' ? parseFloat(priceData.price) : priceData.price;
+
+				selectedSeats = [
+					...selectedSeats,
+					{
+						key: seatKey,
+						row: rowIndex + 1,
+						col: colIndex + 1,
+						label: seat.seat_label,
+						seatId: seat.id,
+						price: numericPrice,
+						categoryName: seat.category.name
+					}
+				];
+			} catch (e) {
+				console.error('Error getting seat price:', e);
+			}
 		}
 	}
+
+	$: totalPrice = selectedSeats.reduce((sum, seat) => {
+		const seatPrice = typeof seat.price === 'string' ? parseFloat(seat.price) : seat.price;
+		return sum + (isNaN(seatPrice) ? 0 : seatPrice);
+	}, 0);
+
+	// Make sure selected seats are reactive
+	$: console.log('Selected seats changed:', selectedSeats); // Debug log
 
 	function removeSeat(seatKey: string) {
 		selectedSeats = selectedSeats.filter((seat) => seat.key !== seatKey);
@@ -48,14 +72,29 @@
 		return new Date(dateString).toLocaleString();
 	}
 
-	$: totalPrice = selectedSeats.length * TICKET_PRICE;
+	function formatPrice(price: string | number): string {
+		const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+		if (isNaN(numericPrice)) return '0.00';
+		return numericPrice.toFixed(2);
+	}
+
+	function getCategoryColor(categoryName: string): string {
+		switch (categoryName.toLowerCase()) {
+			case 'vip':
+				return '#fbbf24';
+			case 'premium':
+				return '#60a5fa';
+			default:
+				return '#e5e7eb';
+		}
+	}
 </script>
 
 <main>
 	{#if !error}
 		<div class="container">
 			<h1 class="movie-title">{movie.title}</h1>
-			<p class="showtime-info">Showtime: {screening.startTime}</p>
+			<p class="showtime-info">Showtime: {formatDateTime(screening.start_time)}</p>
 
 			<div class="booking-container">
 				<!-- Left side - Seating Plan -->
@@ -76,10 +115,17 @@
 										)}
 										class:seat-booked={seat?.isBooked}
 										class:seat-empty={!seat}
+										style={seat
+											? `background-color: ${
+													selectedSeats.some((s) => s.key === `${rowIndex}-${colIndex}`)
+														? '#3b82f6' // Selected color overrides category color
+														: getCategoryColor(seat.category.name)
+												}`
+											: ''}
 										disabled={!seat || seat.isBooked}
 										on:click={() => handleSeatClick(rowIndex, colIndex, seat)}
 									>
-										{seat?.label ?? ''}
+										{seat?.seat_label ?? ''}
 									</button>
 								{/each}
 							</div>
@@ -88,8 +134,16 @@
 
 					<div class="seat-legend">
 						<div class="legend-item">
-							<div class="legend-box available"></div>
-							<span>Available</span>
+							<div class="legend-box standard"></div>
+							<span>Standard</span>
+						</div>
+						<div class="legend-item">
+							<div class="legend-box premium"></div>
+							<span>Premium</span>
+						</div>
+						<div class="legend-item">
+							<div class="legend-box vip"></div>
+							<span>VIP</span>
 						</div>
 						<div class="legend-item">
 							<div class="legend-box selected"></div>
@@ -114,9 +168,9 @@
 								{#each selectedSeats as seat (seat.key)}
 									<div class="ticket-item">
 										<div class="ticket-info">
-											<p class="seat-label">Seat {seat.label}</p>
+											<p class="seat-label">Seat {seat.label} ({seat.categoryName})</p>
 											<p class="seat-details">Row {seat.row}, Column {seat.col}</p>
-											<p class="ticket-price">${TICKET_PRICE.toFixed(2)}</p>
+											<p class="ticket-price">${formatPrice(seat.price)}</p>
 										</div>
 										<button
 											class="remove-button"
@@ -133,7 +187,7 @@
 						<div class="cart-footer">
 							<div class="total-price">
 								<span>Total:</span>
-								<span>${totalPrice.toFixed(2)}</span>
+								<span>${formatPrice(totalPrice)}</span>
 							</div>
 
 							<button
@@ -161,6 +215,19 @@
 </main>
 
 <style>
+	/* Previous styles remain the same */
+	.legend-box.standard {
+		background-color: #e5e7eb;
+	}
+
+	.legend-box.premium {
+		background-color: #60a5fa;
+	}
+
+	.legend-box.vip {
+		background-color: #fbbf24;
+	}
+
 	main {
 		min-height: 100vh;
 		background-color: #f8f9fa;
@@ -198,11 +265,15 @@
 		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		height: 650px;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.screen-container {
-		margin-bottom: 3rem;
+		margin-bottom: 2rem;
 		text-align: center;
+		flex-shrink: 0;
 	}
 
 	.screen {
@@ -220,6 +291,29 @@
 
 	.seat-plan {
 		margin-bottom: 2rem;
+		flex-grow: 1;
+		overflow-y: auto;
+		padding-right: 0.5rem;
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e1 #f1f5f9;
+	}
+
+	.seat-plan::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.seat-plan::-webkit-scrollbar-track {
+		background: #f1f5f9;
+		border-radius: 3px;
+	}
+
+	.seat-plan::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 3px;
+	}
+
+	.seat-plan::-webkit-scrollbar-thumb:hover {
+		background: #94a3b8;
 	}
 
 	.seat-row {
@@ -266,6 +360,9 @@
 		justify-content: center;
 		gap: 2rem;
 		margin-top: 2rem;
+		flex-shrink: 0;
+		padding-top: 1rem;
+		border-top: 1px solid #e5e7eb;
 	}
 
 	.legend-item {
@@ -278,10 +375,6 @@
 		width: 1.5rem;
 		height: 1.5rem;
 		border-radius: 0.25rem;
-	}
-
-	.legend-box.available {
-		background-color: #e5e7eb;
 	}
 
 	.legend-box.selected {
@@ -303,19 +396,45 @@
 		padding: 1.5rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - 8rem); /* Adjust based on your needs */
+		max-height: 800px; /* Maximum height for very tall screens */
 	}
 
 	.cart-title {
 		font-size: 1.5rem;
 		font-weight: 600;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 		padding-bottom: 1rem;
 		border-bottom: 1px solid #e5e7eb;
 	}
 
 	.tickets-container {
-		min-height: 200px;
-		margin-bottom: 1.5rem;
+		flex-grow: 1;
+		overflow-y: auto;
+		margin-bottom: 1rem;
+		padding-right: 0.5rem; /* Space for scrollbar */
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e1 #f1f5f9;
+	}
+
+	.tickets-container::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.tickets-container::-webkit-scrollbar-track {
+		background: #f1f5f9;
+		border-radius: 3px;
+	}
+
+	.tickets-container::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 3px;
+	}
+
+	.tickets-container::-webkit-scrollbar-thumb:hover {
+		background: #94a3b8;
 	}
 
 	.no-tickets {
@@ -372,6 +491,7 @@
 	.cart-footer {
 		border-top: 1px solid #e5e7eb;
 		padding-top: 1.5rem;
+		margin-top: auto;
 	}
 
 	.total-price {
@@ -438,6 +558,11 @@
 		.cart-section {
 			position: static;
 			width: 100%;
+		}
+
+		.cart-container {
+			height: auto;
+			max-height: 500px; /* Smaller max-height for mobile */
 		}
 
 		.seating-section {

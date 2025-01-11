@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/routes/movies/[id]/[showtime_id]/+page.server.ts
-import type { PageServerLoad, Actions } from './$types';
-import type { PageData } from './$types';
-import type { Seat } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -17,132 +15,90 @@ const pool = new Pool({
     }
 });
 
-export const load: PageServerLoad = async ({ params }): Promise<PageData> => {
+export const load: PageServerLoad = async ({ params }) => {
     try {
-        const screeningId = params.showtime_id;
+        // Get movie data
+        const movieResult = await pool.query(
+            'SELECT * FROM movies WHERE imdb_id = $1',
+            [params.id]
+        );
 
-        console.log('Screening ID', screeningId)
-        if (!screeningId) {
-            console.log('INVALID SCREENING ID')
-            return {
-                movie: null,
-                screening: null,
-                error: 'Invalid screening ID'
-            };
+        if (movieResult.rows.length === 0) {
+            throw error(404, 'Movie not found');
         }
 
-        // Load movie and screening data
-        const result = await pool.query(
-            `
-            SELECT 
-                m.imdb_id AS movie_id,    -- PK of movies
-                m.title AS movie_title,
-                m.duration,
-                scr.id,             -- PK of screenings
-                scr.hall_id,        -- FK to halls
-                scr.start_time,
-                scr.end_time,
-                h.name AS hall_name,
-                h.total_rows,
-                h.total_columns
-            FROM screenings scr
-            JOIN movies m ON m.imdb_id = scr.movie_id
-            JOIN halls h ON h.id = scr.hall_id
-            WHERE scr.id = $1
-            `,
-            [screeningId]
+        // Get screening with hall and seats data
+        const screeningResult = await pool.query(
+            `SELECT 
+                s.*,
+                h.*,
+                array_agg(
+                    json_build_object(
+                        'id', seats.id,
+                        'row_number', seats.row_number,
+                        'column_number', seats.column_number,
+                        'seat_label', seats.seat_label,
+                        'status', seats.status,
+                        'category', (
+                            SELECT json_build_object(
+                                'id', sc.id,
+                                'name', sc.name,
+                                'description', sc.description,
+                                'price_modifier', sc.price_modifier
+                            )
+                            FROM seat_categories sc 
+                            WHERE sc.id = seats.category_id
+                        ),
+                        'isBooked', EXISTS (
+                            SELECT 1 FROM seat_reservations sr 
+                            WHERE sr.seat_id = seats.id 
+                            AND sr.screening_id = s.id
+                            AND sr.status = 'confirmed'
+                        )
+                    )
+                ) as seats
+            FROM screenings s
+            JOIN halls h ON s.hall_id = h.id
+            LEFT JOIN seats ON seats.hall_id = h.id
+            WHERE s.id = $1
+            GROUP BY s.id, h.id`,
+            [params.showtime_id]
         );
-        console.log('RESULT LOAD MOVIE AND SCREENING: ', result);
 
-        if (result.rowCount === 0) {
-            return {
-                movie: null,
-                screening: null,
-                error: `Screening not found`
-            };
+        if (screeningResult.rows.length === 0) {
+            throw error(404, 'Screening not found');
         }
 
-        const data = result.rows[0];
+        // Transform seats array into 2D seat plan
+        const screening = screeningResult.rows[0];
+        const seats = screening.seats;
+        const seatPlan: Array<Array<any>> = [];
 
-        // Load basic seat data
-        const seatsResult = await pool.query(
-            `
-            SELECT 
-                row_number,
-                column_number,
-                seat_label,
-                status
-            FROM seats
-            WHERE hall_id = $1
-            ORDER BY row_number, column_number
-            `,
-            [data.hall_id]
-        );
-
-        // Get reservations for this screening separately
-        const reservationsResult = await pool.query(
-            `
-            SELECT 
-                s.seat_label,
-                sr.status AS reservation_status
-            FROM seat_reservations sr
-            JOIN seats s ON s.id = sr.seat_id
-            WHERE sr.screening_id = $1
-                AND sr.status = 'active'
-                AND (sr.expiration_time IS NULL OR sr.expiration_time > NOW())
-            `,
-            [screeningId]
-        );
-
-        // Create map of reserved seats
-        const reservedSeats = new Map(
-            reservationsResult.rows.map(row => [row.seat_label, row.reservation_status])
-        );
-
-        // Create the 2D seat plan
-        const seatPlan: (Seat | null)[][] = [];
-        for (let r = 0; r < data.total_rows; r++) {
-            seatPlan[r] = [];
-            for (let c = 0; c < data.total_columns; c++) {
-                seatPlan[r][c] = null;
+        for (let row = 0; row < screening.total_rows; row++) {
+            seatPlan[row] = [];
+            for (let col = 0; col < screening.total_columns; col++) {
+                const seat = seats.find(
+                    (s: any) => s.row_number === row + 1 && s.column_number === col + 1
+                );
+                seatPlan[row][col] = seat || null;
             }
         }
 
-        // Fill in seat data
-        for (const seat of seatsResult.rows) {
-            seatPlan[seat.row_number][seat.column_number] = {
-                label: seat.seat_label,
-                status: seat.status,
-                isBooked: reservedSeats.has(seat.seat_label),
-                row: seat.row_number,
-                column: seat.column_number
-            };
-        }
-
         return {
-            movie: {
-                id: data.movie_id,
-                title: data.movie_title,
-                duration: data.duration
-            },
+            movie: movieResult.rows[0],
             screening: {
-                id: data.id,
-                startTime: data.start_time,
-                endTime: data.end_time,
+                ...screening,
                 hall: {
-                    id: data.hall_id,
-                    name: data.hall_name,
-                    seatPlan: seatPlan
+                    id: screening.id,
+                    name: screening.name,
+                    total_rows: screening.total_rows,
+                    total_columns: screening.total_columns,
+                    seatPlan
                 }
             }
         };
-    } catch (error) {
-        console.error('Error loading booking data:', error);
-        return {
-            movie: null,
-            screening: null,
-            error:
-                error instanceof Error ? error.message : 'Database error while loading booking information.'
-        };
+    } catch (e) {
+        console.error('Error loading movie and screening:', e);
+        throw error(500, 'Error loading movie and screening data');
     }
 };
