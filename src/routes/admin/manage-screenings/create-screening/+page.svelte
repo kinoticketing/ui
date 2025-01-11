@@ -56,29 +56,54 @@
             return;
         }
 
-        const formData = new FormData();
-        formData.append('movie_id', selectedMovie.movie_id); // => "tt1320253"
-        formData.append('hall_id', String(hall_id));
-        formData.append('start_time', start_time);
+        // First, save the movie to the movies table
+        try {
+            const movieResponse = await fetch('/admin/manage-screenings/create-screening/save-movie', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    movie_id: selectedMovie.movie_id,
+                    title: selectedMovie.title
+                })
+            });
 
-        const response = await fetch('/admin/manage-screenings/create-screening', {
-            method: 'POST',
-            body: formData
-        });
+            if (!movieResponse.ok) {
+                const error = await movieResponse.json();
+                saveMessage = error.message || 'Fehler beim Speichern des Films.';
+                return;
+            }
 
-        if (response.ok) {
-            const result = await response.json();
-            saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
-            // Reset
-            selectedMovie = null;
-            hall_id = null;
-            start_time = null;
-            movieQuery = '';
-        } else {
-            const error = await response.json();
-            saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
+            // Then proceed with creating the screening
+            const formData = new FormData();
+            formData.append('movie_id', selectedMovie.movie_id);
+            formData.append('hall_id', String(hall_id));
+            formData.append('start_time', start_time);
+
+            const response = await fetch('/admin/manage-screenings/create-screening', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
+                // Reset form
+                selectedMovie = null;
+                hall_id = null;
+                start_time = null;
+                movieQuery = '';
+            } else {
+                const error = await response.json();
+                saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
+            }
+        } catch (error) {
+            console.error('Fehler:', error);
+            saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
         }
     }
+    
 </script>
 
 <main>
