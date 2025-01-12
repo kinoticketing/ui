@@ -1,9 +1,7 @@
-// src/routes/admin/manage-halls/[hall_id]/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
 import pkg from 'pg';
 const { Pool } = pkg;
 
-// Pool erstellen
 const pool = new Pool({
 	user: process.env.PGUSER,
 	host: process.env.PGHOST,
@@ -19,138 +17,123 @@ export const load: PageServerLoad = async ({ params }) => {
 	try {
 		const hallId = Number(params.hall_id);
 
-		// 1) Hallen-Daten aus `halls` laden
+		// Load hall data
 		const hallResult = await pool.query(
 			`
-			SELECT 
-				id, 
-				name, 
-				total_rows, 
-				total_columns
-			FROM halls
-			WHERE id = $1
-			`,
+    SELECT
+    h.id,
+    h.name,
+    h.total_rows,
+    h.total_columns,
+    COUNT(s.id) as total_seats
+    FROM halls h
+    LEFT JOIN seats s ON h.id = s.hall_id
+    WHERE h.id = $1
+    GROUP BY h.id, h.name, h.total_rows, h.total_columns
+    `,
 			[hallId]
 		);
 
 		if (hallResult.rowCount === 0) {
 			return {
 				hall: null,
-				error: `Saal mit ID ${hallId} nicht gefunden`
+				error: `Hall with ID ${hallId} not found`
 			};
 		}
 
 		const hallRow = hallResult.rows[0];
-		// Zur Info: capacity können wir dynamisch berechnen
-		const capacity = hallRow.total_rows * hallRow.total_columns;
 
-		// 2) Seats zu diesem Saal laden und in ein 2D-Array packen
+		// Load seats with their categories
 		const seatsResult = await pool.query(
 			`
-			SELECT 
-				row_number, 
-				column_number,
-				seat_label,
-				status
-			FROM seats
-			WHERE hall_id = $1
-			ORDER BY row_number, column_number
-			`,
+    SELECT
+    s.row_number,
+    s.column_number,
+    s.seat_label,
+    s.status,
+    sc.name as category_name,
+    sc.price_modifier
+    FROM seats s
+    LEFT JOIN seat_categories sc ON s.category_id = sc.id
+    WHERE s.hall_id = $1
+    ORDER BY s.row_number, s.column_number
+    `,
 			[hallId]
 		);
 
-		/*
-		 * 3) seat_plan als 2D-Array erstellen
-		 *    row_number und column_number gehen jeweils von 0..(n-1).
-		 *    Du kannst in seat_plan z.B. die seat_label oder status hinterlegen.
-		 */
-		const seatPlan: string[][] = [];
+		// Initialize seat plan with the maximum dimensions found in the data
+		const maxRow = Math.max(hallRow.total_rows - 1, ...seatsResult.rows.map((s) => s.row_number));
+		const maxCol = Math.max(
+			hallRow.total_columns - 1,
+			...seatsResult.rows.map((s) => s.column_number)
+		);
 
-		for (let r = 0; r < hallRow.total_rows; r++) {
-			seatPlan[r] = [];
-			for (let c = 0; c < hallRow.total_columns; c++) {
-				seatPlan[r][c] = ''; // Erst mal leer
+		const seatPlan = Array.from({ length: maxRow + 1 }, () => Array(maxCol + 1).fill(null));
+
+		// Populate seat plan with detailed seat information
+		seatsResult.rows.forEach((seat) => {
+			if (seat.row_number <= maxRow && seat.column_number <= maxCol) {
+				seatPlan[seat.row_number][seat.column_number] = {
+					label: seat.seat_label,
+					status: seat.status,
+					category: seat.category_name?.toLowerCase() || 'regular',
+					priceModifier: seat.price_modifier || 1.0
+				};
+			} else {
+				console.warn(
+					`Seat at row ${seat.row_number}, column ${seat.column_number} is out of bounds and will be ignored.`
+				);
 			}
-		}
+		});
 
-		// Die Daten aus seatsResult eintragen
-		for (const seat of seatsResult.rows) {
-			// Hier entscheidest du, was im Frontend angezeigt werden soll:
-			// seat.seat_label (z.B. 'A1') oder seat.status (z.B. 'active', 'VIP', etc.)
-			// In diesem Beispiel nehmen wir seat_label.
-			seatPlan[seat.row_number][seat.column_number] = seat.seat_label;
-		}
+		// Load available seat categories for the admin interface
+		const categoriesResult = await pool.query(`
+    SELECT id, name, price_modifier
+    FROM seat_categories
+    ORDER BY name
+    `);
 
 		const hallData = {
-			hall_id: hallRow.id,
+			id: hallRow.id,
 			name: hallRow.name,
-			capacity,
-			seat_plan: seatPlan
+			total_rows: maxRow + 1,
+			total_columns: maxCol + 1,
+			total_seats: hallRow.total_seats,
+			seat_plan: seatPlan,
+			categories: categoriesResult.rows
 		};
 
-		return {
-			hall: hallData
-		};
+		return { hall: hallData };
 	} catch (error) {
-		console.error('Fehler beim Laden des Saals:', error);
+		console.error('Error loading hall:', error);
 		return {
 			hall: null,
-			error: 'Datenbankfehler beim Laden des Saals.'
+			error: 'Database error while loading hall data.'
 		};
 	}
 };
 
-// Aktionen (z.B. Saal aktualisieren) – optional
 export const actions: Actions = {
-	// Beispiel: Sitzplan aktualisieren (komplett oder teilweise)
-	// Das Prinzip wäre:
-	// 1) parse seat_plan
-	// 2) seats löschen/aktualisieren oder upsert
-	// 3) done
-	// Der Einfachheit halber hier ein Pseudobeispiel:
-
-	updateSeatPlan: async ({ request, params }) => {
+	updateSeat: async ({ request, params }) => {
 		const hallId = Number(params.hall_id);
-		const formData = await request.formData();
-		const newSeatPlan = formData.get('new_seat_plan')?.toString();
-
-		if (!newSeatPlan) {
-			return { success: false, error: 'Kein neuer Sitzplan angegeben.' };
-		}
+		const body = await request.json();
+		const { row_number, column_number, category_id } = body;
 
 		try {
-			// 1) Parse JSON
-			const seatPlanArray = JSON.parse(newSeatPlan) as string[][];
-
-			// 2) Lösche zuerst alle seats für diese hallId
-			await pool.query('DELETE FROM seats WHERE hall_id = $1', [hallId]);
-
-			// 3) Neu anlegen
-			for (let r = 0; r < seatPlanArray.length; r++) {
-				for (let c = 0; c < seatPlanArray[r].length; c++) {
-					const label = seatPlanArray[r][c] || '';
-					// 'active' oder was immer du willst
-					const status = 'active';
-
-					await pool.query(
-						`
-						INSERT INTO seats (
-							hall_id,
-							row_number,
-							column_number,
-							seat_label,
-							status
-						) VALUES ($1, $2, $3, $4, $5)
-						`,
-						[hallId, r, c, label, status]
-					);
-				}
-			}
+			// Update single seat
+			await pool.query(
+				`
+UPDATE seats
+SET category_id = $1
+WHERE hall_id = $2 AND row_number = $3 AND column_number = $4
+`,
+				[category_id, hallId, row_number, column_number]
+			);
 
 			return { success: true };
 		} catch (error) {
-			console.error('Fehler beim Aktualisieren des Sitzplans:', error);
-			return { success: false, error: 'Fehler beim Aktualisieren des Sitzplans.' };
+			console.error('Error updating seat:', error);
+			return { success: false, error: 'Error updating seat.' };
 		}
 	}
 };

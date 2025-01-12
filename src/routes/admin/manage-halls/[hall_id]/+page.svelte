@@ -1,117 +1,168 @@
 <script lang="ts">
-	// Die vom Server geladenen Daten
+	import { onMount } from 'svelte';
 	export let data;
-	
-	const { hall, error } = data;
 
-	// Falls kein Hall-Objekt vorhanden, gab es einen Fehler
-	if (!hall) {
-		console.error(error);
-	}
+	let { hall, error } = data;
 
-	// Der 2D-Sitzplan, den wir vom Server bekommen
-	let seatPlan = hall?.seat_plan ?? [];
+	let selectedCategoryId: number | null = null;
+	let editMode = false;
 
-	// Beispiel: Klick auf einzelnen Sitz
-	function handleSeatClick(rowIndex: number, colIndex: number) {
-		console.log(`Seat clicked: row=${rowIndex}, col=${colIndex}`, seatPlan[rowIndex][colIndex]);
-	}
+	const seatTypes = {
+		vip: { modifier: 5.0, class: 'vip' },
+		premium: { modifier: 3.0, class: 'premium' },
+		regular: { modifier: 1.0, class: 'regular' },
+		standard: { modifier: 1.0, class: 'standard' },
+		disabled: { modifier: 0.8, class: 'disabled' }
+	};
 
-	// Hilfsfunktion um den Sitztyp zu prüfen
-	function getSeatClass(seat: string) {
+	function getSeatClass(seat: any) {
 		if (!seat) return 'seat-empty';
-		// Vergleiche case-insensitive
-		const seatLower = seat.toLowerCase();
-		if (seatLower === 'regular') return 'regular';
-		if (seatLower === 'vip') return 'vip';
-		if (seatLower === 'behindert') return 'disabled';
-		return 'regular'; // Fallback
+		if (seat.status === 'inactive') return 'seat-inactive';
+
+		const categoryLower = seat.category?.toLowerCase() || 'regular';
+		for (const [type, data] of Object.entries(seatTypes)) {
+			if (categoryLower.includes(type)) {
+				return data.class;
+			}
+		}
+		return 'regular';
 	}
+
+	async function handleSeatClick(rowIndex: number, colIndex: number) {
+		if (!editMode || !selectedCategoryId || !hall) return;
+
+		const seat = hall.seat_plan[rowIndex][colIndex];
+		if (!seat) return;
+
+		const response = await fetch(`?/updateSeat`, {
+			method: 'POST',
+			body: JSON.stringify({
+				row_number: rowIndex,
+				column_number: colIndex,
+				category_id: selectedCategoryId
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		if (response.ok) {
+			const result = await response.json();
+			if (result.success) {
+				// Update the local state
+				hall.seat_plan[rowIndex][colIndex].category =
+					hall.categories.find((c) => c.id === selectedCategoryId)?.name.toLowerCase() || 'regular';
+			}
+		}
+	}
+
+	onMount(() => {
+		// Any initialization code if needed
+	});
 </script>
 
 <main>
 	{#if hall}
 		<div class="container">
-			<h1 class="movie-title">{hall.name}</h1>
-			<p class="hall-info">Kapazität: {hall.capacity} | ID: {hall.hall_id}</p>
+			<header class="header">
+				<h1 class="title">{hall.name}</h1>
+				<p class="info">
+					Capacity: {hall.total_seats} seats | Rows: {hall.total_rows} | Columns: {hall.total_columns}
+				</p>
+			</header>
 
-			<div class="booking-container">
-				<div class="seating-section">
-					<div class="screen-container">
-						<div class="screen"></div>
-						<p class="screen-label">Leinwand</p>
+			<div class="controls">
+				<label class="edit-mode">
+					<input type="checkbox" bind:checked={editMode} />
+					Edit Mode
+				</label>
+				{#if editMode}
+					<div class="category-selector">
+						<select bind:value={selectedCategoryId}>
+							<option value={null}>Select category...</option>
+							{#each hall.categories as category}
+								<option value={category.id}>{category.name}</option>
+							{/each}
+						</select>
 					</div>
+				{/if}
+			</div>
 
-					<div class="seat-plan">
-						{#each seatPlan as row, rowIndex}
-							<div class="seat-row">
-								{#each row as seat, colIndex}
-									<button
-										class="seat-button {getSeatClass(seat)}"
-										disabled={!seat}
-										on:click={() => handleSeatClick(rowIndex, colIndex)}
-									>
-										{seat ? seat[0] : ''}
-									</button>
-								{/each}
-							</div>
-						{/each}
-					</div>
+			<div class="seating-section">
+				<div class="screen-container">
+					<div class="screen"></div>
+					<p class="screen-label">Screen</p>
+				</div>
 
-					<div class="seat-legend">
-						<div class="legend-item">
-							<div class="legend-box regular"></div>
-							<span>Regular</span>
+				<div class="seat-plan">
+					{#each hall.seat_plan as row, rowIndex}
+						<div class="seat-row">
+							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
+							{#each row as seat, colIndex}
+								<button
+									class="seat {getSeatClass(seat)}"
+									disabled={!editMode || !selectedCategoryId}
+									on:click={() => handleSeatClick(rowIndex, colIndex)}
+									title={seat ? `${seat.label} (${seat.category})` : ''}
+								>
+									{seat?.label || ''}
+								</button>
+							{/each}
 						</div>
+					{/each}
+				</div>
+
+				<div class="seat-legend">
+					{#each Object.entries(seatTypes) as [type, data]}
 						<div class="legend-item">
-							<div class="legend-box vip"></div>
-							<span>VIP</span>
+							<div class="legend-box {data.class}"></div>
+							<span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+							<span class="modifier">({data.modifier}x)</span>
 						</div>
-						<div class="legend-item">
-							<div class="legend-box disabled"></div>
-							<span>Behindert</span>
-						</div>
-					</div>
+					{/each}
 				</div>
 			</div>
 		</div>
 	{:else}
-		<div class="error-container">
-			<h1 class="error-message">{error}</h1>
+		<div class="error">
+			<h1>{error}</h1>
 		</div>
 	{/if}
 </main>
 
 <style>
-	main {
-		min-height: 100vh;
-		background-color: #f8f9fa;
-		padding: 2rem 1rem;
-	}
-
 	.container {
 		max-width: 1200px;
 		margin: 0 auto;
+		padding: 2rem;
 	}
 
-	.movie-title {
-		font-size: 2rem;
-		font-weight: 600;
-		color: #1a1a1a;
-		margin-bottom: 0.5rem;
+	.header {
 		text-align: center;
-	}
-
-	.hall-info {
-		text-align: center;
-		color: #666;
 		margin-bottom: 2rem;
 	}
 
-	.booking-container {
+	.title {
+		font-size: 2rem;
+		margin: 0;
+	}
+
+	.info {
+		color: #666;
+		margin: 0.5rem 0;
+	}
+
+	.controls {
 		display: flex;
 		justify-content: center;
-		gap: 2rem;
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.edit-mode {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.seating-section {
@@ -119,8 +170,6 @@
 		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		width: 100%;
-		max-width: 800px;
 	}
 
 	.screen-container {
@@ -136,53 +185,69 @@
 		border-radius: 4px;
 	}
 
-	.screen-label {
-		font-size: 0.875rem;
-		color: #666;
-	}
-
 	.seat-plan {
-		margin-bottom: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		align-items: center;
 	}
 
 	.seat-row {
 		display: flex;
-		justify-content: center;
 		gap: 0.5rem;
-		margin-bottom: 0.5rem;
+		align-items: center;
 	}
 
-	.seat-button {
+	.row-label {
+		width: 2rem;
+		text-align: right;
+		font-weight: bold;
+	}
+
+	.seat {
 		width: 2.5rem;
 		height: 2.5rem;
 		border: none;
 		border-radius: 0.375rem;
-		background-color: #e5e7eb;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 0.875rem;
+		transition: all 0.2s;
+		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: #1a1a1a;
 	}
 
-	.seat-button:not(:disabled):hover {
+	.seat:not(:disabled):hover {
 		transform: scale(1.1);
 	}
 
-	.seat-button.regular {
-		background-color: #93c5fd;
-	}
-
-	.seat-button.vip {
+	/* Updated seat type colors */
+	.seat.vip {
 		background-color: #fcd34d;
+		color: #000;
 	}
-
-	.seat-button.disabled {
+	.seat.premium {
+		background-color: #f87171;
+		color: #fff;
+	}
+	.seat.regular {
+		background-color: #93c5fd;
+		color: #000;
+	}
+	.seat.standard {
+		background-color: #e5e7eb;
+		color: #000;
+	}
+	.seat.disabled {
 		background-color: #86efac;
+		color: #000;
 	}
-
-	.seat-button.seat-empty {
+	.seat.seat-inactive {
+		background-color: #9ca3af;
+		color: #fff;
+	}
+	.seat.seat-empty {
 		visibility: hidden;
 	}
 
@@ -191,6 +256,7 @@
 		justify-content: center;
 		gap: 2rem;
 		margin-top: 2rem;
+		flex-wrap: wrap;
 	}
 
 	.legend-item {
@@ -205,40 +271,44 @@
 		border-radius: 0.25rem;
 	}
 
-	.legend-box.regular {
-		background-color: #93c5fd;
-	}
-
+	/* Legend box colors matching seat colors */
 	.legend-box.vip {
 		background-color: #fcd34d;
 	}
-
+	.legend-box.premium {
+		background-color: #f87171;
+	}
+	.legend-box.regular {
+		background-color: #93c5fd;
+	}
+	.legend-box.standard {
+		background-color: #e5e7eb;
+	}
 	.legend-box.disabled {
 		background-color: #86efac;
 	}
 
-	.error-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		min-height: 50vh;
+	.modifier {
+		color: #666;
+		font-size: 0.875rem;
 	}
 
-	.error-message {
+	.error {
+		text-align: center;
 		color: #ef4444;
-		font-size: 1.5rem;
+		padding: 2rem;
 	}
 
-	@media (max-width: 640px) {
-		.seat-button {
+	@media (max-width: 768px) {
+		.seat {
 			width: 2rem;
 			height: 2rem;
-			font-size: 0.75rem;
+			font-size: 0.625rem;
 		}
 
 		.seat-legend {
 			flex-direction: column;
-			align-items: center;
+			align-items: flex-start;
 			gap: 1rem;
 		}
 	}
