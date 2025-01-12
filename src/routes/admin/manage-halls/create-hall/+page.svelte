@@ -70,7 +70,7 @@
 
         const result = await response.json();
         
-        if (result.success) {
+        if (result.type === 'success') {
             saveMessage = result.message;
             removeAll();
         } 
