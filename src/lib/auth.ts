@@ -83,9 +83,9 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		async signIn(message) {
 			console.log('Sign in event:', message);
 		},
-		async session(message) {
-			console.log('Session event:', message);
-		},
+		// async session(message) {
+		// 	console.log('Session event:', message);
+		// },
 		async createUser(message) {
 			console.log('Create user event:', message);
 		}

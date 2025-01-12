@@ -1,3 +1,4 @@
+//src/routes/api/checkout/+server.ts
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import pkg from 'pg';
