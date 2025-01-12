@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	export let data;
 
 	let { hall, error } = data;
-
-	let selectedCategoryId: number | null = null;
-	let editMode = false;
 
 	const seatTypes = {
 		vip: { modifier: 5.0, class: 'vip' },
@@ -42,38 +38,6 @@
 		}
 		return 'regular';
 	}
-
-	async function handleSeatClick(rowIndex: number, colIndex: number) {
-		if (!editMode || !selectedCategoryId || !hall) return;
-
-		const seat = hall.seat_plan[rowIndex][colIndex];
-		if (!seat) return;
-
-		const response = await fetch(`?/updateSeat`, {
-			method: 'POST',
-			body: JSON.stringify({
-				row_number: rowIndex,
-				column_number: colIndex,
-				category_id: selectedCategoryId
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-
-		if (response.ok) {
-			const result = await response.json();
-			if (result.success) {
-				// Update the local state
-				hall.seat_plan[rowIndex][colIndex].category =
-					hall.categories.find((c) => c.id === selectedCategoryId)?.name.toLowerCase() || 'regular';
-			}
-		}
-	}
-
-	onMount(() => {
-		// Any initialization code if needed
-	});
 </script>
 
 <main>
@@ -85,23 +49,6 @@
 					Capacity: {hall.total_seats} seats | Rows: {hall.total_rows} | Columns: {hall.total_columns}
 				</p>
 			</header>
-
-			<div class="controls">
-				<label class="edit-mode">
-					<input type="checkbox" bind:checked={editMode} />
-					Edit Mode
-				</label>
-				{#if editMode}
-					<div class="category-selector">
-						<select bind:value={selectedCategoryId}>
-							<option value={null}>Select category...</option>
-							{#each hall.categories as category}
-								<option value={category.id}>{category.name}</option>
-							{/each}
-						</select>
-					</div>
-				{/if}
-			</div>
 
 			<div class="seating-section">
 				<div class="screen-container">
@@ -117,8 +64,6 @@
 								{@const seat = getSeat(rowIndex, colIndex)}
 								<button
 									class="seat {getSeatClass(seat)}"
-									disabled={!editMode || !selectedCategoryId}
-									on:click={() => handleSeatClick(rowIndex, colIndex)}
 									title={`${seat.label} (${seat.category})`}
 								>
 									{seat.label}
