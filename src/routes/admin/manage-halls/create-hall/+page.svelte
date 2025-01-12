@@ -73,9 +73,7 @@
         if (result.success) {
             saveMessage = result.message;
             removeAll();
-        } else {
-            saveMessage = result.message || 'An error occurred while saving';
-        }
+        } 
     } catch (error) {
         console.error('Error saving:', error);
         saveMessage = 'An unexpected error occurred';
