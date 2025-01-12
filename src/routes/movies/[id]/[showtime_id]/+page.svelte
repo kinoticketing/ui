@@ -7,28 +7,59 @@
 	const { movie, screening, error } = data;
 
 	let selectedSeats: SelectedSeat[] = [];
+	let loading = false;
+	let timeoutId: ReturnType<typeof setTimeout>;
 
 	async function getSeatPrice(seatId: number): Promise<PriceResponse> {
-		const response = await fetch(`/api/seats/${seatId}/price?screeningId=${screening.id}`);
-		const data = await response.json();
+		if (timeoutId) clearTimeout(timeoutId);
+		
+		return new Promise((resolve, reject) => {
+			timeoutId = setTimeout(async () => {
+				try {
+					const response = await fetch(`/api/seats/${seatId}/price?screeningId=${screening.id}`);
+					const data = await response.json();
 
-		if (!response.ok) {
-			throw new Error(data.error || 'Failed to get seat price');
-		}
-
-		return data;
+					if (!response.ok) {
+						throw new Error(data.error || 'Failed to get seat price');
+					}
+					resolve(data);
+				} catch (error) {
+					reject(error);
+				}
+			}, 300);
+		});
 	}
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
-		if (!seat || seat.isBooked) return;
+		if (!seat || seat.isBooked || loading) return;
 
+		loading = true;
 		const seatKey = `${rowIndex}-${colIndex}`;
-		const existingSeatIndex = selectedSeats.findIndex((s) => s.key === seatKey);
 
-		if (existingSeatIndex !== -1) {
-			selectedSeats = selectedSeats.filter((s) => s.key !== seatKey);
-		} else {
-			try {
+		try {
+			if (selectedSeats.some((s) => s.key === seatKey)) {
+				await fetch(`/api/seats/${seat.id}/lock`, {
+					method: 'DELETE'
+				});
+				selectedSeats = selectedSeats.filter((s) => s.key !== seatKey);
+			} else {
+				if (selectedSeats.length >= 10) {
+					alert('Maximum 10 seats can be selected at once');
+					return;
+				}
+
+				const lockResponse = await fetch(`/api/seats/${seat.id}/lock`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ screeningId: screening.id })
+				});
+
+				if (!lockResponse.ok) {
+					const error = await lockResponse.json();
+					alert(error.error || 'Seat is no longer available');
+					return;
+				}
+
 				const priceData = await getSeatPrice(seat.id);
 				const numericPrice =
 					typeof priceData.price === 'string' ? parseFloat(priceData.price) : priceData.price;
@@ -45,9 +76,12 @@
 						categoryName: seat.category.name
 					}
 				];
-			} catch (e) {
-				console.error('Error getting seat price:', e);
 			}
+		} catch (e) {
+			console.error('Error handling seat selection:', e);
+			alert('Failed to process seat selection. Please try again.');
+		} finally {
+			loading = false;
 		}
 	}
 
@@ -56,16 +90,48 @@
 		return sum + (isNaN(seatPrice) ? 0 : seatPrice);
 	}, 0);
 
-	// Make sure selected seats are reactive
-	$: console.log('Selected seats changed:', selectedSeats); // Debug log
-
 	function removeSeat(seatKey: string) {
+		const seat = selectedSeats.find(s => s.key === seatKey);
+		if (seat) {
+			fetch(`/api/seats/${seat.seatId}/lock`, {
+				method: 'DELETE'
+			}).catch(error => {
+				console.error('Error unlocking seat:', error);
+			});
+		}
 		selectedSeats = selectedSeats.filter((seat) => seat.key !== seatKey);
 	}
 
 	async function handleCheckout() {
-		// Implement your checkout logic here
-		console.log('Processing checkout for:', selectedSeats);
+		if (loading) return;
+		
+		loading = true;
+		try {
+			const response = await fetch('/api/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					screeningId: screening.id,
+					seats: selectedSeats.map(seat => ({
+						seatId: seat.seatId,
+						price: seat.price
+					}))
+				})
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || 'Checkout failed');
+			}
+
+			const { checkoutUrl } = await response.json();
+			window.location.href = checkoutUrl;
+		} catch (error) {
+			console.error('Checkout error:', error);
+			alert('Failed to process checkout. Please try again.');
+		} finally {
+			loading = false;
+		}
 	}
 
 	function formatDateTime(dateString: string) {
@@ -118,7 +184,7 @@
 										style={seat
 											? `background-color: ${
 													selectedSeats.some((s) => s.key === `${rowIndex}-${colIndex}`)
-														? '#3b82f6' // Selected color overrides category color
+														? '#3b82f6'
 														: getCategoryColor(seat.category.name)
 												}`
 											: ''}
@@ -398,8 +464,8 @@
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 8rem); /* Adjust based on your needs */
-		max-height: 800px; /* Maximum height for very tall screens */
+		height: calc(100vh - 8rem);
+		max-height: 800px;
 	}
 
 	.cart-title {
@@ -414,7 +480,7 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		margin-bottom: 1rem;
-		padding-right: 0.5rem; /* Space for scrollbar */
+		padding-right: 0.5rem;
 		scrollbar-width: thin;
 		scrollbar-color: #cbd5e1 #f1f5f9;
 	}
@@ -562,7 +628,7 @@
 
 		.cart-container {
 			height: auto;
-			max-height: 500px; /* Smaller max-height for mobile */
+			max-height: 500px;
 		}
 
 		.seating-section {
