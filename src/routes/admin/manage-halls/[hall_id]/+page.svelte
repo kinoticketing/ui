@@ -15,6 +15,21 @@
 		disabled: { modifier: 0.8, class: 'disabled' }
 	};
 
+	function getSeat(rowIndex: number, colIndex: number) {
+		const existingSeat = hall?.seat_plan?.[rowIndex]?.[colIndex];
+		if (existingSeat) {
+			return {
+				...existingSeat,
+				label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`
+			};
+		}
+		return {
+			label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`,
+			category: 'regular',
+			status: 'active'
+		};
+	}
+
 	function getSeatClass(seat: any) {
 		if (!seat) return 'seat-empty';
 		if (seat.status === 'inactive') return 'seat-inactive';
@@ -95,17 +110,18 @@
 				</div>
 
 				<div class="seat-plan">
-					{#each hall.seat_plan as row, rowIndex}
+					{#each Array(hall.total_rows) as _, rowIndex}
 						<div class="seat-row">
 							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
-							{#each row as seat, colIndex}
+							{#each Array(hall.total_columns) as _, colIndex}
+								{@const seat = getSeat(rowIndex, colIndex)}
 								<button
 									class="seat {getSeatClass(seat)}"
 									disabled={!editMode || !selectedCategoryId}
 									on:click={() => handleSeatClick(rowIndex, colIndex)}
-									title={seat ? `${seat.label} (${seat.category})` : ''}
+									title={`${seat.label} (${seat.category})`}
 								>
-									{seat?.label || ''}
+									{seat.label}
 								</button>
 							{/each}
 						</div>
