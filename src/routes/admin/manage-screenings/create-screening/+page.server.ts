@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import pkg from 'pg';
