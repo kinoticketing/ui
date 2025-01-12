@@ -1,8 +1,30 @@
 <script lang="ts">
-	export let data: { 
-		movie: any; 
-		showtimes: { id: number; time: string; hall: number }[] 
-	};
+	interface Showtime {
+		id: number;
+		time: string;
+		endTime: string;
+		hall: number;
+		hallName: string;
+	}
+
+	interface MovieData {
+		movie: {
+			Title: string;
+			Year: string;
+			Genre: string;
+			Director: string;
+			Actors: string;
+			Plot: string;
+			Poster: string;
+			imdbRating: string;
+			imdbID: string;
+			Runtime: string;
+			id: string;
+		};
+		showtimes: Showtime[];
+	}
+
+	export let data: MovieData;
 </script>
 
 <main>
@@ -56,9 +78,10 @@
 									hour: '2-digit',
 									minute: '2-digit'
 								})}
-								Uhr 
-								| <strong>Saal:</strong> {showtime.hall}
-								| <strong>Dauer:</strong> {data.movie.Runtime}
+								Uhr | <strong>Saal:</strong>
+								{showtime.hallName}
+								| <strong>Dauer:</strong>
+								{data.movie.Runtime}
 							</a>
 						</li>
 					{/each}
@@ -125,7 +148,9 @@
 		border-radius: 8px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		margin-bottom: 1rem;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
 	}
 	.showtime-link {
 		display: block;
