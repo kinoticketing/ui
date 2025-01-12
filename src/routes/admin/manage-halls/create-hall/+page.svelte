@@ -126,6 +126,8 @@
 				<div class="seat-row">
 					<span class="row-label">{String.fromCharCode(65 + rowIndex)}</span>
 					{#each row as seat, colIndex}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<div
 							class="seat {seat.toLowerCase()}"
 							on:click={() => toggleDropdown(rowIndex, colIndex)}
