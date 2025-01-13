@@ -2,17 +2,48 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
+	import { onMount } from 'svelte';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
+
+	function goBackToMovie() {
+		window.location.href = `/movies/${movie.imdb_id}`;
+	}
 
 	let selectedSeats: SelectedSeat[] = [];
 	let loading = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
 
+	onMount(async () => {
+		// Check for stored seats
+		const storedSeats = localStorage.getItem('selectedSeats');
+		if (storedSeats) {
+			const seats = JSON.parse(storedSeats);
+			// Re-lock each seat
+			for (const seat of seats) {
+				try {
+					const lockResponse = await fetch(`/api/seats/${seat.seatId}/lock`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ screeningId: screening.id })
+					});
+
+					if (lockResponse.ok) {
+						selectedSeats = [...selectedSeats, seat];
+					}
+				} catch (error) {
+					console.error('Error relocking seat:', error);
+				}
+			}
+			// Clear stored seats after retrieving them
+			localStorage.removeItem('selectedSeats');
+		}
+	});
+
 	async function getSeatPrice(seatId: number): Promise<PriceResponse> {
 		if (timeoutId) clearTimeout(timeoutId);
-		
+
 		return new Promise((resolve, reject) => {
 			timeoutId = setTimeout(async () => {
 				try {
@@ -91,11 +122,11 @@
 	}, 0);
 
 	function removeSeat(seatKey: string) {
-		const seat = selectedSeats.find(s => s.key === seatKey);
+		const seat = selectedSeats.find((s) => s.key === seatKey);
 		if (seat) {
 			fetch(`/api/seats/${seat.seatId}/lock`, {
 				method: 'DELETE'
-			}).catch(error => {
+			}).catch((error) => {
 				console.error('Error unlocking seat:', error);
 			});
 		}
@@ -104,15 +135,17 @@
 
 	async function handleCheckout() {
 		if (loading) return;
-		
+
 		loading = true;
 		try {
+			// Store selected seats in localStorage
+			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
 			const response = await fetch('/api/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					screeningId: screening.id,
-					seats: selectedSeats.map(seat => ({
+					seats: selectedSeats.map((seat) => ({
 						seatId: seat.seatId,
 						price: seat.price
 					}))
@@ -159,6 +192,10 @@
 <main>
 	{#if !error}
 		<div class="container">
+			<button class="back-button" on:click={goBackToMovie}>
+				<Icon icon="mdi:arrow-left" width="20" height="20" />
+				Back to Movie
+			</button>
 			<h1 class="movie-title">{movie.title}</h1>
 			<p class="showtime-info">Showtime: {formatDateTime(screening.start_time)}</p>
 
@@ -263,11 +300,6 @@
 							>
 								Proceed to Checkout
 							</button>
-
-							<button class="paypal-button" disabled={selectedSeats.length === 0}>
-								<Icon icon="mdi:paypal" />
-								Pay with PayPal
-							</button>
 						</div>
 					</div>
 				</div>
@@ -282,6 +314,34 @@
 
 <style>
 	/* Previous styles remain the same */
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		position: relative; /* Change from your original */
+	}
+
+	.back-button {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-button:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
 	.legend-box.standard {
 		background-color: #e5e7eb;
 	}
