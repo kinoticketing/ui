@@ -2,8 +2,11 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	interface Movie {
+		id: string;
 		Title: string;
 		Year: string;
 		Genre: string;
@@ -11,27 +14,48 @@
 		Poster: string;
 		Plot: string;
 		imdbRating: string;
-		id: string;
+		nextScreening?: string;
 	}
 
-	export let data: { movies: Movie[] };
-	let searchQuery = '';
-	let filteredMovies: Movie[] = [];
+	export let data: { movies: Movie[]; query: string };
+	let searchQuery = data.query || '';
+	let filteredMovies = data.movies;
 
 	function goBackHome() {
-		window.location.href = 'http://localhost:5173/';
+		window.location.href = '/';
 	}
 
-	$: {
+	function handleSearch() {
 		if (searchQuery) {
-			filteredMovies = data.movies.filter(
-				(movie) =>
-					movie.Title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					movie.Genre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					movie.Director.toLowerCase().includes(searchQuery.toLowerCase())
-			);
+			goto(`?query=${encodeURIComponent(searchQuery)}`);
 		} else {
-			filteredMovies = data.movies;
+			goto('?query=');
+		}
+	}
+
+	function clearSearch() {
+		searchQuery = '';
+		goto('?query=');
+	}
+
+	function formatDate(dateString: string | undefined) {
+		if (!dateString) return '';
+		const date = new Date(dateString);
+		return date.toLocaleString('de-DE', {
+			weekday: 'short',
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+
+	// Initialize search query from URL
+	$: {
+		const urlQuery = $page.url.searchParams.get('query');
+		if (urlQuery !== null && urlQuery !== searchQuery) {
+			searchQuery = urlQuery;
 		}
 	}
 </script>
@@ -51,11 +75,15 @@
 				<input
 					type="text"
 					bind:value={searchQuery}
-					placeholder="Search by title, genre or director..."
+					placeholder="Nach Titel, Genre oder Regisseur suchen..."
 					class="search-input"
+					on:keydown={(e) => e.key === 'Enter' && handleSearch()}
 				/>
+				<button class="search-button" on:click={handleSearch}>
+					<Icon icon="mdi:magnify" width="20" height="20" />
+				</button>
 				{#if searchQuery}
-					<button class="clear-search" on:click={() => (searchQuery = '')}>
+					<button class="clear-search" on:click={clearSearch}>
 						<Icon icon="mdi:close" width="20" height="20" />
 					</button>
 				{/if}
@@ -64,14 +92,10 @@
 
 		<!-- Movies Grid -->
 		<div class="movies-grid">
-			{#each filteredMovies as movie (movie.id)}
+			{#each data.movies as movie (movie.id)}
 				<a href={`/movies/${movie.id}`} class="movie-card" transition:fade>
 					<div class="poster-container">
-						<img
-							src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg'}
-							alt={movie.Title}
-							class="movie-poster"
-						/>
+						<img src={movie.Poster} alt={movie.Title} class="movie-poster" />
 						<div class="movie-rating">⭐ {movie.imdbRating}</div>
 					</div>
 					<div class="movie-info">
@@ -79,6 +103,11 @@
 						<p class="movie-year">{movie.Year}</p>
 						<p class="movie-genre">{movie.Genre}</p>
 						<p class="movie-plot">{movie.Plot}</p>
+						{#if movie.nextScreening}
+							<p class="next-screening">
+								Nächste Vorführung: {formatDate(movie.nextScreening)}
+							</p>
+						{/if}
 					</div>
 				</a>
 			{:else}
@@ -92,6 +121,7 @@
 </main>
 
 <style>
+	/* All the styles remain exactly the same */
 	main {
 		min-height: 100vh;
 		background-color: #f8f9fa;
@@ -158,8 +188,28 @@
 
 	.search-input:focus {
 		outline: none;
-		border-color: #2563eb;
-		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+		border-color: #1a1a1a;
+		box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+	}
+
+	.search-button {
+		position: absolute;
+		right: 2.5rem;
+		background: none;
+		border: none;
+		color: #6b7280;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+	.search-button:hover {
+		color: #1a1a1a;
+		background-color: #f3f4f6;
 	}
 
 	.clear-search {
@@ -256,7 +306,7 @@
 	}
 
 	.movie-genre {
-		color: #2563eb;
+		color: #1a1a1a;
 		font-size: 0.875rem;
 		font-weight: 500;
 	}
@@ -270,6 +320,13 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		margin-top: auto;
+	}
+
+	.next-screening {
+		font-size: 0.875rem;
+		color: #1a1a1a;
+		font-weight: 500;
+		margin-top: 0.5rem;
 	}
 
 	.no-results {

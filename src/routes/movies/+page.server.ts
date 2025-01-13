@@ -1,114 +1,101 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PageServerLoad } from './$types';
 import 'dotenv/config';
 import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+	connectionString: process.env.DATABASE_URL
 });
 
-// Type definitions for better type safety
 interface Movie {
-    id: string;
-    Title: string;
-    Year: string;
-    Poster: string;
-    nextScreening?: string;
-    totalScreenings?: number;
+	id: string;
+	Title: string;
+	Year: string;
+	Genre: string;
+	Director: string;
+	Poster: string;
+	Plot: string;
+	imdbRating: string;
+	nextScreening?: string;
 }
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
-    const apiKey = process.env.VITE_OMDB_API_KEY;
-    const query = url.searchParams.get('query') || '';
-    let movies: Movie[] = [];
-    let error = null;
+	const apiKey = process.env.VITE_OMDB_API_KEY;
+	const query = url.searchParams.get('query') || '';
+	let movies: Movie[] = [];
+	let error = null;
 
-    try {
-        const client = await pool.connect();
-        
-        // Get movie IDs from screenings table with additional information
-        const screeningsQuery = `
+	try {
+		const client = await pool.connect();
+
+		// Base query to get upcoming screenings
+		let screeningsQuery = `
             SELECT 
                 movie_id,
-                COUNT(*) as screening_count,
                 MIN(start_time) as next_screening
             FROM screenings
-            GROUP BY movie_id
+            WHERE start_time > NOW()
         `;
-        
-        const res = await client.query(screeningsQuery);
-        const availableMovies = res.rows;
-        const availableMovieIds = availableMovies.map(row => row.movie_id);
-        client.release();
 
-        if (!query) {
-            // Fetch details for all movies with scheduled screenings
-            const omdbResponses = await Promise.all(
-                availableMovieIds.map(id =>
-                    fetch(`https://www.omdbapi.com/?apikey=${apiKey}&i=${id}&type=movie`)
-                        .then(res => res.json())
+		// Add search conditions if query exists
+		if (query) {
+			screeningsQuery = `
+                SELECT DISTINCT ON (s.movie_id)
+                    s.movie_id,
+                    MIN(s.start_time) as next_screening
+                FROM screenings s
+                JOIN movies m ON s.movie_id = m.id
+                WHERE s.start_time > NOW()
+                AND (
+                    LOWER(m.title) LIKE $1 OR
+                    LOWER(m.genre) LIKE $1 OR
+                    LOWER(m.director) LIKE $1
                 )
-            );
+                GROUP BY s.movie_id
+            `;
+		}
 
-            movies = omdbResponses
-                .filter(movie => movie.Response !== 'False')
-                .map(movie => {
-                    const screeningInfo = availableMovies.find(
-                        m => m.movie_id === movie.imdbID
-                    );
-                    
-                    return {
-                        id: movie.imdbID,
-                        Title: movie.Title,
-                        Year: movie.Year,
-                        Poster: movie.Poster !== 'N/A' ? movie.Poster : 'default-fallback-image.png',
-                        nextScreening: screeningInfo?.next_screening,
-                        totalScreenings: screeningInfo?.screening_count
-                    };
-                });
-        } else {
-            // Search OMDB API
-            const response = await fetch(
-                `https://www.omdbapi.com/?apikey=${apiKey}&s=${query}&type=movie`
-            );
+		screeningsQuery += ' GROUP BY movie_id ORDER BY MIN(start_time)';
 
-            if (!response.ok) {
-                throw new Error('Error fetching data from OMDB API.');
-            }
+		const res = await client.query(screeningsQuery, query ? [`%${query.toLowerCase()}%`] : []);
+		const upcomingMovies = res.rows;
+		client.release();
 
-            const data = await response.json();
+		// Fetch movie details from OMDB
+		const omdbResponses = await Promise.all(
+			upcomingMovies.map((movie) =>
+				fetch(
+					`https://www.omdbapi.com/?apikey=${apiKey}&i=${movie.movie_id}&type=movie&plot=short`
+				).then((res) => res.json())
+			)
+		);
 
-            if (data.Response === 'False') {
-                error = data.Error || 'No movies found.';
-            } else {
-                // Filter movies that have screenings and add screening information
-                movies = data.Search
-                    .filter((movie: { imdbID: string }) =>
-                        availableMovieIds.includes(movie.imdbID)
-                    )
-                    .map((movie: any) => {
-                        const screeningInfo = availableMovies.find(
-                            m => m.movie_id === movie.imdbID
-                        );
-                        
-                        return {
-                            ...movie,
-                            id: movie.imdbID,
-                            nextScreening: screeningInfo?.next_screening,
-                            totalScreenings: screeningInfo?.screening_count
-                        };
-                    });
-            }
-        }
-    } catch (err) {
-        console.error('Error:', err);
-        error = 'An error occurred. Please try again later.';
-    }
+		movies = omdbResponses
+			.filter((movie) => movie.Response !== 'False')
+			.map((movie, index) => ({
+				id: movie.imdbID,
+				Title: movie.Title,
+				Year: movie.Year,
+				Genre: movie.Genre,
+				Director: movie.Director,
+				Poster: movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg',
+				Plot: movie.Plot,
+				imdbRating: movie.imdbRating,
+				nextScreening: upcomingMovies[index].next_screening
+			}))
+			.sort((a, b) => {
+				const dateA = new Date(a.nextScreening || '');
+				const dateB = new Date(b.nextScreening || '');
+				return dateA.getTime() - dateB.getTime();
+			});
+	} catch (err) {
+		console.error('Error:', err);
+		error = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+	}
 
-    return {
-        movies,
-        query,
-        error
-    };
+	return {
+		movies,
+		query,
+		error
+	};
 };
