@@ -28,6 +28,12 @@ declare global {
 				user: ExtendedUser;
 			} | null;
 		}
+
+		interface Platform {
+			env: {
+				TMDB_API_KEY: string;
+			}
+		}
 	}
 }
 

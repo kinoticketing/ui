@@ -32,6 +32,24 @@
 	function goBackToMovies() {
 		window.location.href = '/movies';
 	}
+
+	import { onMount } from 'svelte';
+	let trailerId: string | null = null;
+	let trailerError: string | null = null;
+
+	onMount(async () => {
+		try {
+			const response = await fetch(`/api/movies/${data.movie.imdbID}/trailer`);
+			if (!response.ok) {
+				throw new Error('Failed to fetch trailer');
+			}
+			const trailerData = await response.json();
+			trailerId = trailerData.trailerId;
+		} catch (e) {
+			console.error('Error loading trailer:', e);
+			trailerError = 'Trailer konnte nicht geladen werden';
+		}
+	});
 </script>
 
 <main>
@@ -77,23 +95,13 @@
 							<span class="info-label">IMDb-Bewertung:</span>
 							<span class="info-value">⭐ {data.movie.imdbRating}</span>
 						</div>
-						<div class="info-item">
-							<span class="info-label">IMDb-Eintrag:</span>
-							<a
-								href={`https://www.imdb.com/title/${data.movie.imdbID}/`}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="imdb-link"
-							>
-								Schau den Trailer auf IMDb
-							</a>
-						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Right side - Showtimes -->
-			<div class="showtimes-section">
+			<!-- Right side - Showtimes and Trailer -->
+			<div class="right-section">
+				<!-- Showtimes -->
 				<div class="showtimes-container">
 					<h2 class="showtimes-title">Vorstellungen</h2>
 
@@ -121,6 +129,28 @@
 									</div>
 								</a>
 							{/each}
+						{/if}
+					</div>
+				</div>
+
+				<!-- Trailer Section -->
+				<div class="trailer-container">
+					<h2 class="trailer-title">Filmtrailer</h2>
+					<div class="trailer-wrapper">
+						{#if trailerError}
+							<div class="trailer-error">
+								{trailerError}
+							</div>
+						{:else if trailerId}
+							<iframe
+								src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1`}
+								title="Filmtrailer"
+								class="trailer-iframe"
+								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+								allowfullscreen
+							></iframe>
+						{:else}
+							<div class="trailer-loading">Trailer wird geladen...</div>
 						{/if}
 					</div>
 				</div>
@@ -227,31 +257,25 @@
 		border-top: 1px solid #e5e7eb;
 	}
 
-	.imdb-link {
-		color: #2563eb;
-		text-decoration: none;
-		transition: color 0.2s;
-	}
-
-	.imdb-link:hover {
-		color: #1d4ed8;
-		text-decoration: underline;
-	}
-
-	.showtimes-section {
+	.right-section {
 		flex: 2;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
 		position: sticky;
 		top: 2rem;
 	}
 
-	.showtimes-container {
+	.showtimes-container,
+	.trailer-container {
 		background: white;
 		padding: 1.5rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	}
 
-	.showtimes-title {
+	.showtimes-title,
+	.trailer-title {
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin-bottom: 1.5rem;
@@ -304,12 +328,49 @@
 		font-size: 0.875rem;
 	}
 
+	.trailer-wrapper {
+		position: relative;
+		width: 100%;
+		padding-top: 56.25%; /* 16:9 Aspect Ratio */
+	}
+
+	.trailer-iframe {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border: none;
+		border-radius: 0.5rem;
+	}
+
+	.trailer-error,
+	.trailer-loading {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #f8f9fa;
+		border-radius: 0.5rem;
+		color: #6b7280;
+		text-align: center;
+		padding: 1rem;
+	}
+
+	.trailer-error {
+		color: #ef4444;
+	}
+
 	@media (max-width: 1024px) {
 		.content-container {
 			flex-direction: column;
 		}
 
-		.showtimes-section {
+		.right-section {
 			position: static;
 			width: 100%;
 		}
