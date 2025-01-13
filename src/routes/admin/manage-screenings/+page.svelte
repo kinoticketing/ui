@@ -42,10 +42,18 @@
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString();
 	}
+
+	// Zurück navigieren
+	function goBack() {
+		history.back();
+	}
 </script>
 
 <main>
-	<h1>All Screenings</h1>
+	<h1 class="page-title">
+		<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+		<span>All screenings</span>
+	</h1>
 
 	{#if data.showtimes.length > 0}
 		<ul class="showtime-list">
@@ -79,6 +87,34 @@
 </main>
 
 <style>
+	.page-title {
+		position: relative;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
 	h1 {
 		text-align: center;
 		margin-bottom: 20px;
