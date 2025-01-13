@@ -45,40 +45,32 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const row = screeningResult.rows[0];
 
-		// Kapazität berechnen (statt Feld "capacity")
-		const capacity = row.total_rows * row.total_columns;
+		 // Initialize seat plan with correct dimensions
+        const seatPlan: string[][] = Array(row.total_rows)
+            .fill(null)
+            .map(() => Array(row.total_columns).fill(''));
 
-		// 2) Alle Seats für diesen Saal laden
-		const seatsResult = await pool.query(
-			`
-			SELECT
-				row_number,
-				column_number,
-				seat_label,
-				status
-			FROM seats
-			WHERE hall_id = $1
-			ORDER BY row_number, column_number
-			`,
-			[row.hall_id]
-		);
+        // Load seats with 1-based indexing
+        const seatsResult = await pool.query(`
+            SELECT
+                row_number - 1 as row_index,
+                column_number - 1 as col_index,
+                seat_label,
+                status
+            FROM seats
+            WHERE hall_id = $1
+            ORDER BY row_number, column_number
+        `, [row.hall_id]);
 
-		/*
-		 * 3) Ein 2D-Array seat_plan bauen, 
-		 *    row_number & column_number gehen von 0..(n-1)
-		 */
-		const seatPlan: string[][] = [];
-		for (let r = 0; r < row.total_rows; r++) {
-			seatPlan[r] = [];
-			for (let c = 0; c < row.total_columns; c++) {
-				seatPlan[r][c] = ''; // Platzhalter
-			}
-		}
-
-		// Eintragen der seat_label (oder status) in das Array
-		for (const seat of seatsResult.rows) {
-			seatPlan[seat.row_number][seat.column_number] = seat.seat_label;
-		}
+        // Safely populate seat plan
+        seatsResult.rows.forEach(seat => {
+            if (seat.row_index >= 0 && 
+                seat.row_index < row.total_rows && 
+                seat.col_index >= 0 && 
+                seat.col_index < row.total_columns) {
+                seatPlan[seat.row_index][seat.col_index] = seat.seat_label;
+            }
+        });
 
 		// 4) Dem Frontend ein Objekt zurückgeben, das "wie früher" aufgebaut ist
 		return {
@@ -89,7 +81,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				hall_name: row.hall_name,
 				start_time: row.start_time,
 				end_time: row.end_time,
-				capacity,
+				capacity: row.total_rows * row.total_columns,
 				seat_plan: seatPlan
 			}
 		};
