@@ -88,6 +88,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		});
 
 		// 4) Dem Frontend ein Objekt zurückgeben, das "wie früher" aufgebaut ist
+		const capacity = seatPlan.flat().filter(seat => seat !== null).length;
 		return {
 			screening: {
 				screening_id: row.screening_id,
@@ -96,7 +97,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				hall_name: row.hall_name,
 				start_time: row.start_time,
 				end_time: row.end_time,
-				capacity: row.total_rows * row.total_columns,
+				capacity,
 				seat_plan: seatPlan
 			}
 		};
