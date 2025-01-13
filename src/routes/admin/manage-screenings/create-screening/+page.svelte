@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+
     export let data: { halls: { id: number; name: string }[] };
 
     let movieQuery: string = '';
@@ -100,11 +102,18 @@
         }
     }
     
+    // Zurück navigieren
+	function goBack() {
+        goto('/admin/manage-screenings');
+	}
 </script>
 
 <main>
     <div class="container">
-        <h1>Neue Vorstellung erstellen</h1>
+        <h1 class="page-title">
+            <button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+            <span>Neue Vorstellung erstellen</span>
+        </h1>
 
         {#if saveMessage}
             <p class="feedback">{saveMessage}</p>
@@ -162,6 +171,34 @@
 </main>
 
 <style>
+    .page-title {
+		position: relative;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+    
     .container {
         max-width: 800px;
         margin: 30px auto;

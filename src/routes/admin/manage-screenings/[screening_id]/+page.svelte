@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	export let data;
 	const { screening } = data;
 	let seatPlan = screening?.seat_plan ?? [];
@@ -62,11 +64,12 @@
 			alert('Fehler: ' + result.error);
 		}
 	}
-</script>
 
-<svelte:head>
-	<title>Vorstellung: {screening?.screening_id}</title>
-</svelte:head>
+	// Zurück navigieren
+	function goBack() {
+		goto('/admin/manage-screenings');
+	}
+</script>
 
 <main>
 	{#if !screening}
@@ -74,7 +77,10 @@
 	{:else}
 		<!-- Screening-Header und Info-Card bleiben erhalten -->
 		<div class="screening-header">
-			<h1>Vorstellung {screening.screening_id}</h1>
+			<h1 class="page-title">
+				<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+				<span>Vorstellung {screening.screening_id}</span>
+			</h1>
 		</div>
 
 		<div class="info-card">
@@ -120,7 +126,7 @@
 					{#each seatPlan as row, rowIndex}
 						<div class="seat-row">
 							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
-							{#each row.filter(seat => seat !== null) as seat, colIndex}
+							{#each row.filter((seat) => seat !== null) as seat, colIndex}
 								<button
 									class="seat {getSeatClass(seat)}"
 									title={`${seat.label} (${seat.category})`}
@@ -154,6 +160,34 @@
 
 <style>
 	/* Container & allgemeine Layouts */
+	.page-title {
+		position: relative;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
 	main {
 		max-width: 1200px;
 		margin: 0 auto;
@@ -372,7 +406,7 @@
 		color: #e74c3c;
 		text-align: center;
 	}
-	
+
 	/* Responsive Anpassungen */
 	@media (max-width: 768px) {
 		.seat {
