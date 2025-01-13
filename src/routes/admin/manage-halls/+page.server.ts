@@ -21,7 +21,7 @@ export async function load() {
 			SELECT 
 				id AS hall_id,
 				name,
-				(total_rows * total_columns) AS capacity
+				(SELECT COUNT(*) FROM seats WHERE hall_id = halls.id) AS capacity
 			FROM halls
 			ORDER BY name
 		`;
