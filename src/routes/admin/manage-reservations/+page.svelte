@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	export let data;
 
 	let searchTerm = '';
@@ -9,6 +10,10 @@
 			reservation.movie_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			reservation.ticket_id.toString().includes(searchTerm)
 	);
+
+	function navigateToDetails(id: string) {
+		goto(`/admin/manage-reservations/${id}`);
+	}
 </script>
 
 <svelte:head>
@@ -35,7 +40,7 @@
 						<th>Vorstellung</th>
 						<th>Saal</th>
 						<th>Sitz</th>
-						<th>Preis</th>
+						<th class="price-column">Preis</th>
 						<th>Status</th>
 						<th>Erstellt am</th>
 						<th>Aktionen</th>
@@ -43,19 +48,21 @@
 				</thead>
 				<tbody>
 					{#each filteredReservations as reservation}
-						<tr>
+						<tr class="clickable-row" on:click={() => navigateToDetails(reservation.ticket_id)}>
 							<td>{reservation.ticket_id}</td>
 							<td>{reservation.username}</td>
 							<td>{reservation.movie_title}</td>
 							<td>{new Date(reservation.start_time).toLocaleString()}</td>
 							<td>{reservation.hall_name}</td>
 							<td>{reservation.seat_label}</td>
-							<td>{reservation.price} €</td>
+							<td class="price-column">{reservation.price} €</td>
 							<td><span class="status {reservation.status}">{reservation.status}</span></td>
 							<td>{new Date(reservation.created_at).toLocaleString()}</td>
 							<td>
 								{#if reservation.status !== 'cancelled'}
-									<form method="POST" action="?/cancel" use:enhance>
+									<!-- svelte-ignore a11y-click-events-have-key-events -->
+									<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+									<form method="POST" action="?/cancel" use:enhance on:click|stopPropagation>
 										<input type="hidden" name="ticketId" value={reservation.ticket_id} />
 										<button type="submit" class="cancel-btn"> Stornieren </button>
 									</form>
@@ -70,6 +77,18 @@
 </main>
 
 <style>
+	.clickable-row {
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.clickable-row:hover {
+		background-color: #f3f4f6;
+	}
+	.price-column {
+		min-width: 10px;
+		white-space: nowrap;
+	}
 	main {
 		min-height: 100vh;
 		background-color: #f8f9fa;
