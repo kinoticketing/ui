@@ -1,14 +1,17 @@
 <script lang="ts">
-    export let data: { halls: { hall_id: number; name: string }[] };
+    export let data: { halls: { id: number; name: string }[] };
 
-    let movieQuery: string = ''; // Eingabe für die Filmsuche
-    let searchResults: { movie_id: string; title: string }[] = []; // Ergebnisse der Filmsuche
-    let selectedMovie: { movie_id: string; title: string } | null = null; // Ausgewählter Film
+    let movieQuery: string = '';
+    let searchResults: { movie_id: string; title: string }[] = [];
+    let selectedMovie: { movie_id: string; title: string } | null = null;
 
     let hall_id: number | null = null;
-    let showtime: string | null = null;
+
+    // "start_time" aus dem datetime-local
+    let start_time: string | null = null;
+
     let saveMessage: string | null = null;
-    let searchError: string | null = null; // Fehlernachricht für die Suche
+    let searchError: string | null = null;
 
     // Filme suchen
     async function fetchMovies() {
@@ -34,51 +37,73 @@
         }
     }
 
-    // Film auswählen
     function selectMovie(movie: { movie_id: string; title: string }) {
         selectedMovie = movie;
         searchResults = [];
         movieQuery = '';
     }
 
-    // Vorstellung erstellen
     async function submitForm(event: Event) {
-        event.preventDefault(); // Standard-Formularaktion verhindern
+        event.preventDefault();
         saveMessage = null;
 
-        if (!selectedMovie || !hall_id || !showtime) {
+        console.log('[DEBUG] movie_id:', selectedMovie?.movie_id);
+        console.log('[DEBUG] hall_id:', hall_id);
+        console.log('[DEBUG] start_time:', start_time);
+
+        if (!selectedMovie || !hall_id || !start_time) {
             saveMessage = 'Bitte füllen Sie alle Felder aus.';
             return;
         }
 
-        const formData = new FormData();
-        formData.append('movie_id', selectedMovie.movie_id); // IMDB-ID direkt speichern
-        formData.append('hall_id', String(hall_id));
-        formData.append('showtime', showtime);
-
+        // First, save the movie to the movies table
         try {
+            const movieResponse = await fetch('/admin/manage-screenings/create-screening/save-movie', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    movie_id: selectedMovie.movie_id,
+                    title: selectedMovie.title
+                })
+            });
+
+            if (!movieResponse.ok) {
+                const error = await movieResponse.json();
+                saveMessage = error.message || 'Fehler beim Speichern des Films.';
+                return;
+            }
+
+            // Then proceed with creating the screening
+            const formData = new FormData();
+            formData.append('movie_id', selectedMovie.movie_id);
+            formData.append('hall_id', String(hall_id));
+            formData.append('start_time', start_time);
+
             const response = await fetch('/admin/manage-screenings/create-screening', {
                 method: 'POST',
-                body: formData,
+                body: formData
             });
 
             if (response.ok) {
                 const result = await response.json();
                 saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
-                // Felder zurücksetzen
+                // Reset form
                 selectedMovie = null;
                 hall_id = null;
-                showtime = null;
+                start_time = null;
                 movieQuery = '';
             } else {
                 const error = await response.json();
                 saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
             }
         } catch (error) {
-            console.error('Netzwerkfehler:', error);
-            saveMessage = 'Ein Netzwerkfehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+            console.error('Fehler:', error);
+            saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
         }
     }
+    
 </script>
 
 <main>
@@ -109,14 +134,15 @@
                     {#each searchResults as movie}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
                         <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-                        <li on:click={() => selectMovie(movie)}>{movie.title}</li>
+                        <li on:click={() => selectMovie(movie)}>
+                            {movie.title}
+                        </li>
                     {/each}
                 </ul>
             {/if}
 
             {#if selectedMovie}
                 <p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
-                <input type="hidden" name="movie_id" value={selectedMovie.movie_id} />
             {/if}
 
             <label>
@@ -124,14 +150,14 @@
                 <select name="hall_id" bind:value={hall_id}>
                     <option value="" disabled selected>Saal auswählen</option>
                     {#each data.halls as hall}
-                        <option value={hall.hall_id}>{hall.name}</option>
+                        <option value={hall.id}>{hall.name}</option>
                     {/each}
                 </select>
             </label>
 
             <label>
                 Datum und Uhrzeit:
-                <input type="datetime-local" name="showtime" bind:value={showtime} />
+                <input type="datetime-local" name="start_time" bind:value={start_time} />
             </label>
 
             <button type="submit" class="submit-btn">Vorstellung erstellen</button>
