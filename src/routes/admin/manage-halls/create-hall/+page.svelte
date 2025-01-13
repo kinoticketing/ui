@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { writable } from 'svelte/store';
 	import { get } from 'svelte/store';
 
@@ -14,7 +15,7 @@
 
 	// Zurück navigieren
 	function goBack() {
-		history.back();
+		goto('/admin/manage-halls');
 	}
 
 	function addColumn(rowIndex: number) {

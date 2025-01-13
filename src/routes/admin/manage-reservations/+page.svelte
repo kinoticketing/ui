@@ -17,7 +17,7 @@
 
 	// Zurück navigieren
 	function goBack() {
-		history.back();
+		goto('/admin');
 	}
 </script>
 

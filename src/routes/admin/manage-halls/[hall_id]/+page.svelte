@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	export let data;
 
 	let { hall, error } = data;
@@ -38,7 +40,7 @@
 	
 	// Zurück navigieren
 	function goBack() {
-		history.back();
+		goto('/admin/manage-halls');
 	}
 </script>
 

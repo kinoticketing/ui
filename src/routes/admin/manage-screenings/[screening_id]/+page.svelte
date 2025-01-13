@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	export let data;
 	const { screening } = data;
 	let seatPlan = screening?.seat_plan ?? [];
@@ -65,7 +67,7 @@
 
 	// Zurück navigieren
 	function goBack() {
-		history.back();
+		goto('/admin/manage-screenings');
 	}
 </script>
 

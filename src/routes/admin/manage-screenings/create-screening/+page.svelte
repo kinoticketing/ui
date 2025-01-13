@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+
     export let data: { halls: { id: number; name: string }[] };
 
     let movieQuery: string = '';
@@ -106,7 +108,7 @@
     
     // Zurück navigieren
 	function goBack() {
-		history.back();
+        goto('/admin/manage-screenings');
 	}
 </script>
 

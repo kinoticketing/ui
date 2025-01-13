@@ -5,7 +5,7 @@
 
 	// Zurück navigieren
 	function goBack() {
-		history.back();
+		goto('/admin');
 	}
 
 	// Zur Detailseite navigieren
