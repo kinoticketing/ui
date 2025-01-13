@@ -35,6 +35,7 @@
 				<thead>
 					<tr>
 						<th>Ticket ID</th>
+						<th>Ticket Code</th>
 						<th>Benutzer</th>
 						<th>Film</th>
 						<th>Vorstellung</th>
@@ -50,6 +51,7 @@
 					{#each filteredReservations as reservation}
 						<tr class="clickable-row" on:click={() => navigateToDetails(reservation.ticket_id)}>
 							<td>{reservation.ticket_id}</td>
+							<td>{reservation.ticket_code}</td>
 							<td>{reservation.username}</td>
 							<td>{reservation.movie_title}</td>
 							<td>{new Date(reservation.start_time).toLocaleString()}</td>

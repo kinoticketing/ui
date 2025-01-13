@@ -18,6 +18,7 @@ export async function load() {
 		const query = `
     SELECT
     t.id AS ticket_id,
+    t.ticket_code,
     u.username,
     m.title AS movie_title,
     s.start_time,
