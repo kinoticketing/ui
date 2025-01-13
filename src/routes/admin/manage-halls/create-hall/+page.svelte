@@ -12,6 +12,11 @@
 	let rows = writable<string[][]>([[]]);
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
 
+	// Zurück navigieren
+	function goBack() {
+		history.back();
+	}
+
 	function addColumn(rowIndex: number) {
 		col_count++;
 		rows.update((r) => {
@@ -109,7 +114,10 @@
 <svelte:window on:click={handleClickOutside} />
 
 <main>
-	<h1>Create Hall</h1>
+	<h1 class="page-title">
+		<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+		<span>Create hall</span>
+	</h1>
 	<div class="container">
 		<div class="inputs">
 			<input type="text" placeholder="Hall Name" bind:value={hall_name} required />
@@ -181,6 +189,34 @@
 </main>
 
 <style>
+	.page-title {
+		position: relative;
+		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
 	.container {
 		padding: 20px;
 		max-width: 1200px;

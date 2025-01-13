@@ -3,6 +3,11 @@
 
 	export let data: { halls: { hall_id: number; name: string; capacity: number }[] };
 
+	// Zurück navigieren
+	function goBack() {
+		history.back();
+	}
+
 	// Zur Detailseite navigieren
 	function goToDetail(hall_id: number) {
 		goto(`/admin/manage-halls/${hall_id}`);
@@ -32,7 +37,10 @@
 </script>
 
 <main>
-	<h1>Alle Säle</h1>
+	<h1 class="page-title">
+		<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+		<span>Alle Säle</span>
+	</h1>
 
 	{#if data.halls.length > 0}
 		<ul class="hall-list">
@@ -56,9 +64,32 @@
 </main>
 
 <style>
-	h1 {
+	.page-title {
+		position: relative;
 		text-align: center;
 		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.hall-list {
