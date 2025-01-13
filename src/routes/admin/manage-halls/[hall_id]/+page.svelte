@@ -14,10 +14,7 @@
 	function getSeat(rowIndex: number, colIndex: number) {
 		const existingSeat = hall?.seat_plan?.[rowIndex]?.[colIndex];
 		if (existingSeat) {
-			return {
-				...existingSeat,
-				label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`
-			};
+			return existingSeat; // Use the existing seat label from database
 		}
 		return {
 			label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`,
@@ -46,7 +43,7 @@
 			<header class="header">
 				<h1 class="title">{hall.name}</h1>
 				<p class="info">
-					Capacity: {hall.total_seats} seats | Rows: {hall.total_rows} | Columns: {hall.total_columns}
+					Capacity: {hall.total_seats} seats
 				</p>
 			</header>
 
@@ -57,11 +54,10 @@
 				</div>
 
 				<div class="seat-plan">
-					{#each Array(hall.total_rows) as _, rowIndex}
+					{#each hall.seat_plan as row, rowIndex}
 						<div class="seat-row">
 							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
-							{#each Array(hall.total_columns) as _, colIndex}
-								{@const seat = getSeat(rowIndex, colIndex)}
+							{#each row.filter((seat) => seat !== null) as seat}
 								<button
 									class="seat {getSeatClass(seat)}"
 									title={`${seat.label} (${seat.category})`}
