@@ -38,7 +38,6 @@
 	});
 	*/
 	onMount(async () => {
-		console.log('Session data ACCOUNTPAGE:', $page.data.session);
 		if ($page.data.session?.user) {
 			try {
 				const response = await fetch('/api/user/address');
@@ -114,9 +113,6 @@
 		}
 	}
 
-	function handleAddPaymentMethod() {
-		console.log('Add payment method attempted');
-	}
 
 	function handleRemovePaymentMethod(id: number) {
 		paymentMethods = paymentMethods.filter((method) => method.id !== id);
@@ -276,36 +272,6 @@
 				</form>
 			{/if}
 		</div>
-
-		<div class="section">
-			<h3>Payment Methods</h3>
-			{#if paymentMethods.length > 0}
-				<ul class="payment-methods">
-					{#each paymentMethods as method}
-						<li class="payment-method">
-							<div>
-								<Icon
-									icon={method.type.toLowerCase() === 'visa' ? 'logos:visa' : 'logos:mastercard'}
-								/>
-								{method.type} ending in {method.last4}
-							</div>
-							<button
-								class="btn danger remove-button"
-								on:click={() => handleRemovePaymentMethod(method.id)}
-							>
-								<Icon icon="mdi:delete" />
-							</button>
-						</li>
-					{/each}
-				</ul>
-			{:else}
-				<p>No payment methods added yet.</p>
-			{/if}
-			<button class="btn primary" on:click={handleAddPaymentMethod}>
-				<Icon icon="mdi:credit-card-plus" />
-				Add Payment Method
-			</button>
-		</div>
 	{:else}
 		<p>Please log in to view your account information.</p>
 		<button type="button" class="login-btn" on:click={() => goto('/login')}>Login</button>
@@ -397,11 +363,6 @@
 		width: 100%;
 	}
 
-	.btn.danger {
-		background-color: #dc3545;
-		color: white;
-	}
-
 	.btn:disabled {
 		opacity: 0.7;
 		cursor: not-allowed;
@@ -444,38 +405,6 @@
 		border-radius: 4px;
 		font-size: 1rem;
 		background-color: #f8f9fa;
-	}
-
-	.payment-methods {
-		list-style-type: none;
-		padding: 0;
-		margin-bottom: 1rem;
-	}
-
-	.payment-method {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 0.5rem;
-		padding: 0.5rem;
-		background-color: #f8f9fa;
-		border-radius: 4px;
-	}
-
-	.payment-method div {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.remove-button {
-		margin-left: auto;
-		padding: 0.5rem;
-	}
-
-	.remove-button :global(svg) {
-		width: 1.2em;
-		height: 1.2em;
 	}
 
 	.login-btn {
