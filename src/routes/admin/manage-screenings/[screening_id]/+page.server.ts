@@ -45,42 +45,50 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const row = screeningResult.rows[0];
 
-		// Kapazität berechnen (statt Feld "capacity")
-		const capacity = row.total_rows * row.total_columns;
+		// Initialize seat plan as a 2D-array of nulls (als Platzhalter)
+		const seatPlan: any[][] = Array(row.total_rows)
+			.fill(null)
+			.map(() => Array(row.total_columns).fill(null));
 
-		// 2) Alle Seats für diesen Saal laden
+		// 2) Seats laden – hier holen wir zusätzlich category_id und Kategorie-Name (als category)
 		const seatsResult = await pool.query(
 			`
-			SELECT
-				row_number,
-				column_number,
-				seat_label,
-				status
-			FROM seats
-			WHERE hall_id = $1
-			ORDER BY row_number, column_number
-			`,
+            SELECT
+                row_number - 1 AS row_index,
+                column_number - 1 AS col_index,
+                seat_label,
+                status,
+                category_id,
+                COALESCE(sc.name, 'regular') AS category,
+                COALESCE(sc.price_modifier, 1) AS price_modifier
+            FROM seats
+            LEFT JOIN seat_categories sc ON seats.category_id = sc.id
+            WHERE hall_id = $1
+            ORDER BY row_number, column_number
+            `,
 			[row.hall_id]
 		);
 
-		/*
-		 * 3) Ein 2D-Array seat_plan bauen, 
-		 *    row_number & column_number gehen von 0..(n-1)
-		 */
-		const seatPlan: string[][] = [];
-		for (let r = 0; r < row.total_rows; r++) {
-			seatPlan[r] = [];
-			for (let c = 0; c < row.total_columns; c++) {
-				seatPlan[r][c] = ''; // Platzhalter
+		// 3) Sitzplan-Array füllen – an der korrekten Stelle wird statt eines simplen Strings ein Objekt abgelegt
+		seatsResult.rows.forEach((seat) => {
+			if (
+				seat.row_index >= 0 &&
+				seat.row_index < row.total_rows &&
+				seat.col_index >= 0 &&
+				seat.col_index < row.total_columns
+			) {
+				seatPlan[seat.row_index][seat.col_index] = {
+					label: seat.seat_label,
+					status: seat.status,
+					category: seat.category,
+					category_id: seat.category_id,
+					priceModifier: seat.price_modifier
+				};
 			}
-		}
-
-		// Eintragen der seat_label (oder status) in das Array
-		for (const seat of seatsResult.rows) {
-			seatPlan[seat.row_number][seat.column_number] = seat.seat_label;
-		}
+		});
 
 		// 4) Dem Frontend ein Objekt zurückgeben, das "wie früher" aufgebaut ist
+		const capacity = seatPlan.flat().filter(seat => seat !== null).length;
 		return {
 			screening: {
 				screening_id: row.screening_id,
@@ -117,12 +125,8 @@ export const actions: Actions = {
 
 	updateSeatPlan: async ({ params, request }) => {
 		/*
-			Da dein neues DB-Schema kein seat_plan-Feld in `screenings` oder `halls` hat,
-			müsstest du - analog zur "Update seats"-Logik - 
-			entweder seats neu anlegen, löschen oder ändern.
-
-			Hier nur ein rudimentäres Beispiel: 
-			Aktuell würden wir alle seats löschen & dann neu erstellen.
+			Da dein aktuelles DB-Schema keinen direkten Sitzplan als Feld bereitstellt,
+			müssen wir – analog zur "Update seats"-Logik – alle Seats löschen und neu erstellen.
 		*/
 		const screeningId = parseInt(params.screening_id, 10);
 		const formData = await request.formData();
@@ -133,34 +137,44 @@ export const actions: Actions = {
 		}
 
 		try {
-			// 1) Screening laden, um hall_id zu bekommen
+			// 1) Screening laden, um die hall_id zu ermitteln
 			const screeningResult = await pool.query(
-				'SELECT hall_id FROM screenings WHERE id = $1',
+				'SELECT hall_id, total_rows, total_columns FROM screenings WHERE id = $1',
 				[screeningId]
 			);
 			if (screeningResult.rowCount === 0) {
 				return { success: false, error: 'Screening nicht gefunden.' };
 			}
-			const hallId = screeningResult.rows[0].hall_id;
+			const { hall_id, total_rows, total_columns } = screeningResult.rows[0];
 
-			// 2) Seats für diesen hall löschen
-			await pool.query('DELETE FROM seats WHERE hall_id = $1', [hallId]);
+			// 2) Alle existing seats für diesen Hall löschen
+			await pool.query('DELETE FROM seats WHERE hall_id = $1', [hall_id]);
 
-			// 3) Neue seats anlegen
-			const seatPlanArray = JSON.parse(newSeatPlanStr.toString()) as string[][];
+			// 3) Neuen Sitzplan einlesen und alle seats neu anlegen
+			//    Erwartet wird ein 2D-Array, in dem jede Zelle ein Objekt mit mindestens { label, status, category_id } ist.
+			const seatPlanArray = JSON.parse(newSeatPlanStr.toString()) as any[][];
 
+			// Optional: Hier kannst du noch Validierungen (z.B. Dimensionen) vornehmen
 			for (let r = 0; r < seatPlanArray.length; r++) {
 				for (let c = 0; c < seatPlanArray[r].length; c++) {
-					const label = seatPlanArray[r][c] || '';
-					// In status könntest du z.B. 'active' speichern
-					const status = 'active';
+					const seatObj = seatPlanArray[r][c];
+					// Falls in einer Zelle kein Objekt vorhanden ist, erzeugen wir einen Default-Wert (z. B. "regular")
+					const label =
+						seatObj && seatObj.label
+							? seatObj.label
+							: `${String.fromCharCode(65 + r)}${c + 1}`;
+					const status = seatObj && seatObj.status ? seatObj.status : 'active';
+					// category_id kann entweder explizit übergeben werden oder auf null/default gesetzt werden
+					const category_id =
+						seatObj && seatObj.category_id ? seatObj.category_id : null;
 
+					// Da in der DB Zeilen und Spalten in der Regel 1-basiert sind, speichern wir r+1 und c+1
 					await pool.query(
 						`
-						INSERT INTO seats (hall_id, row_number, column_number, seat_label, status)
-						VALUES ($1, $2, $3, $4, $5)
+						INSERT INTO seats (hall_id, row_number, column_number, seat_label, status, category_id)
+						VALUES ($1, $2, $3, $4, $5, $6)
 						`,
-						[hallId, r, c, label, status]
+						[hall_id, r + 1, c + 1, label, status, category_id]
 					);
 				}
 			}

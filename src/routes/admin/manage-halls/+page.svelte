@@ -10,6 +10,10 @@
 
 	// Saal löschen
 	async function deleteHall(hall_id: number) {
+		if (!confirm('Sind Sie sicher, dass Sie diesen Saal löschen möchten?')) {
+			return;
+		}
+
 		const response = await fetch(`/admin/manage-halls/${hall_id}`, {
 			method: 'DELETE'
 		});
