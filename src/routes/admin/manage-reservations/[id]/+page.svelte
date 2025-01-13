@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
 
 	export let data;
@@ -13,6 +14,21 @@
 		const hours = Math.floor(minutes / 60);
 		const remainingMinutes = minutes % 60;
 		return `${hours}h ${remainingMinutes}min`;
+	}
+
+	function handleCancel() {
+		return async ({
+			result
+		}: {
+			formData: FormData;
+			formElement: HTMLFormElement;
+			action: URL;
+			result: any;
+		}) => {
+			if (result.type === 'success') {
+				goto('/admin/manage-reservations');
+			}
+		};
 	}
 </script>
 
@@ -78,7 +94,7 @@
 		</div>
 
 		{#if reservation.status !== 'cancelled'}
-			<form method="POST" action="?/cancel" use:enhance class="cancel-form">
+			<form method="POST" action="?/cancel" use:enhance={handleCancel} class="cancel-form">
 				<button type="submit" class="cancel-btn">Reservierung stornieren</button>
 			</form>
 		{/if}

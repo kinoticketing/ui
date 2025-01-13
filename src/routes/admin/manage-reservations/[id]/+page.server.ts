@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 };
 
-export const actions = {
+export const actions: Actions = {
 	cancel: async ({ params }) => {
 		const ticketId = params.id;
 		try {
@@ -67,7 +67,7 @@ export const actions = {
 			return { success: true };
 		} catch (err) {
 			console.error('Fehler beim Stornieren des Tickets:', err);
-			return { success: false };
+			return { success: false, error: 'Fehler beim Stornieren des Tickets' };
 		}
 	}
 };
