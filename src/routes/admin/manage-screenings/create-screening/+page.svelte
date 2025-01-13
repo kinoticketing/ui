@@ -47,10 +47,6 @@
         event.preventDefault();
         saveMessage = null;
 
-        console.log('[DEBUG] movie_id:', selectedMovie?.movie_id);
-        console.log('[DEBUG] hall_id:', hall_id);
-        console.log('[DEBUG] start_time:', start_time);
-
         if (!selectedMovie || !hall_id || !start_time) {
             saveMessage = 'Bitte füllen Sie alle Felder aus.';
             return;

@@ -9,7 +9,6 @@
 
 	function handleResetPassword() {
 		// Implement password reset logic here
-		console.log('Password reset attempted', { email, newPassword, confirmNewPassword });
 	}
 
 	function togglePasswordVisibility(field: 'newPassword' | 'confirmNewPassword') {
