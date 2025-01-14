@@ -6,6 +6,8 @@
 		showtimes: {
 			showtime_id: number;
 			movie_id: string;
+			movie_title: string; // Neue Eigenschaft für den Filmtitel
+			movie_poster_url: string; // Neue Eigenschaft für die Poster-URL
 			hall_name: string;
 			showtime: string;
 			end_time: string;
@@ -80,14 +82,21 @@
 							</button>
 						</div>
 						<div class="tile-content">
-							<p><strong>Film ID:</strong> {showtime.movie_id}</p>
-							<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
-							<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
-							<p>
-								<strong>Auslastung:</strong>
-								{showtime.reserved_seats}/{showtime.total_seats}
-								({showtime.occupancy_percentage}%)
-							</p>
+							<div class="movie-info">
+								<div>
+									<p><strong>Film:</strong> {showtime.movie_title}</p>
+									<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
+									<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
+									<p>
+										<strong>Auslastung:</strong>
+										{showtime.reserved_seats}/{showtime.total_seats}
+										({showtime.occupancy_percentage}%)
+									</p>
+								</div>
+								{#if showtime.movie_poster_url}
+									<img src={showtime.movie_poster_url} alt="Movie Poster" class="movie-poster" />
+								{/if}
+							</div>
 						</div>
 					</div>
 				{/each}
@@ -197,6 +206,18 @@
 
 	.tile-content {
 		padding: 1rem;
+	}
+
+	.movie-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.movie-poster {
+		max-width: 100px;
+		height: auto;
+		border-radius: 0.25rem;
 	}
 
 	.create-showtime-btn {
