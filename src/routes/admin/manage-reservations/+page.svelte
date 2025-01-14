@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import Icon from '@iconify/svelte';
 	export let data;
 
 	let searchTerm = '';
@@ -28,7 +29,10 @@
 <main>
 	<div class="container">
 		<h1 class="page-title">
-			<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+			<button class="back-btn" on:click={goBack}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+				Zurück
+			</button>
 			<span>Reservierungen verwalten</span>
 		</h1>
 

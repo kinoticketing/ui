@@ -226,18 +226,19 @@
 		gap: 0.5rem;
 		margin: 2rem auto 0;
 		padding: 0.75rem 1.25rem;
-		background-color: #28a745;
-		color: white;
-		border: none;
+		background-color: transparent;
+		color: #28a745;
+		border: 2px solid #28a745;
 		border-radius: 0.5rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: all 0.2s;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
 
 	.create-showtime-btn:hover {
 		background-color: #218838;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		color: white;
 	}
 </style>
