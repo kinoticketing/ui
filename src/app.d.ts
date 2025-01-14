@@ -11,6 +11,12 @@ declare global {
 			postal_code: string;
 			country: string;
 		}
+		interface User {
+			id?: string
+			name?: string | null
+			email?: string | null
+			image?: string | null
+		  }
 
 		interface ExtendedUser extends User {
 			hasPassword?: boolean;
