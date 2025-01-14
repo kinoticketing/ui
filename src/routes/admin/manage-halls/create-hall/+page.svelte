@@ -222,9 +222,7 @@
 	}
 
 	.page-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		position: relative;
 		margin-bottom: 2rem;
 	}
 
@@ -234,10 +232,13 @@
 		color: #1a1a1a;
 		margin: 0;
 		text-align: center;
-		width: 100%;
 	}
 
 	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;

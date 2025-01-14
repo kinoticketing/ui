@@ -54,8 +54,8 @@
 		{#if data.halls.length > 0}
 			<div class="hall-grid">
 				{#each data.halls as hall}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div class="hall-tile" on:click={() => goToDetail(hall.hall_id)}>
 						<h3>{hall.name}</h3>
 						<p><strong>Kapazität:</strong> {hall.capacity} Sitzplätze</p>
@@ -89,9 +89,7 @@
 	}
 
 	.page-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		position: relative;
 		margin-bottom: 2rem;
 	}
 
@@ -101,10 +99,13 @@
 		color: #1a1a1a;
 		margin: 0;
 		text-align: center;
-		width: 100%;
 	}
 
 	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
