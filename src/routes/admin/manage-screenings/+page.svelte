@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Icon from '@iconify/svelte';
 
 	export let data: {
 		showtimes: {
@@ -21,7 +22,7 @@
 
 	// Delete screening
 	async function deleteShowtime(showtime_id: number) {
-		if (confirm('Are you sure you want to delete this screening?')) {
+		if (confirm('Sind Sie sicher, dass Sie diese Vorstellung löschen möchten?')) {
 			const response = await fetch(`/admin/manage-screenings/${showtime_id}`, {
 				method: 'DELETE'
 			});
@@ -29,7 +30,7 @@
 			if (response.ok) {
 				location.reload();
 			} else {
-				alert('Error deleting the screening.');
+				alert('Fehler beim Löschen der Vorstellung.');
 			}
 		}
 	}
@@ -49,54 +50,85 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Vorstellungen verwalten</title>
+</svelte:head>
+
 <main>
-	<h1 class="page-title">
-		<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
-		<span>All screenings</span>
-	</h1>
+	<div class="container">
+		<div class="page-header">
+			<button class="back-btn" on:click={goBack}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+				Zurück
+			</button>
+			<h1 class="page-title">Alle Vorstellungen</h1>
+		</div>
 
-	{#if data.showtimes.length > 0}
-		<ul class="showtime-list">
-			{#each data.showtimes as showtime}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-				<li class="showtime-item" on:click={() => goToDetail(showtime.showtime_id)}>
-					<p><strong>Movie ID:</strong> {showtime.movie_id}</p>
-					<p><strong>Hall:</strong> {showtime.hall_name}</p>
-					<p><strong>Start Time:</strong> {formatDateTime(showtime.showtime)}</p>
-					<p><strong>End Time:</strong> {formatDateTime(showtime.end_time)}</p>
-					<p>
-						<strong>Occupancy:</strong>
-						{showtime.reserved_seats}/{showtime.total_seats}
-						({showtime.occupancy_percentage}%)
-					</p>
-					<button
-						class="delete-btn"
-						on:click|stopPropagation={() => deleteShowtime(showtime.showtime_id)}
-					>
-						Delete Screening
-					</button>
-				</li>
-			{/each}
-		</ul>
-	{:else}
-		<p>No screenings available.</p>
-	{/if}
+		{#if data.showtimes.length > 0}
+			<ul class="showtime-list">
+				{#each data.showtimes as showtime}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+					<li class="showtime-item" on:click={() => goToDetail(showtime.showtime_id)}>
+						<p><strong>Film ID:</strong> {showtime.movie_id}</p>
+						<p><strong>Saal:</strong> {showtime.hall_name}</p>
+						<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
+						<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
+						<p>
+							<strong>Auslastung:</strong>
+							{showtime.reserved_seats}/{showtime.total_seats}
+							({showtime.occupancy_percentage}%)
+						</p>
+						<button
+							class="delete-btn"
+							on:click|stopPropagation={() => deleteShowtime(showtime.showtime_id)}
+						>
+							<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-delete" />
+							Vorstellung löschen
+						</button>
+					</li>
+				{/each}
+			</ul>
+		{:else}
+			<p>Keine Vorstellungen vorhanden.</p>
+		{/if}
 
-	<button class="create-showtime-btn" on:click={goToCreateScreening}> Create New Screening </button>
+		<button class="create-showtime-btn" on:click={goToCreateScreening}>
+			<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-add" />
+			Neue Vorstellung erstellen
+		</button>
+	</div>
 </main>
 
 <style>
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
+
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 2rem;
+	}
+
 	.page-title {
-		position: relative;
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin: 0;
 		text-align: center;
-		margin-bottom: 20px;
+		width: 100%;
 	}
 
 	.back-btn {
-		position: absolute;
-		left: 0;
-		top: 0;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -115,41 +147,39 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	h1 {
-		text-align: center;
-		margin-bottom: 20px;
-	}
-
 	.showtime-list {
 		list-style-type: none;
 		padding: 0;
-		max-width: 800px;
-		margin: 0 auto 20px;
+		margin: 0;
 	}
 
 	.showtime-item {
-		background-color: #f9f9f9;
-		padding: 15px;
-		margin-bottom: 10px;
-		border: 1px solid #ddd;
-		border-radius: 5px;
+		background-color: white;
+		padding: 1.25rem;
+		border-radius: 0.5rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		margin-bottom: 1rem;
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: box-shadow 0.2s;
 	}
 
 	.showtime-item:hover {
-		background-color: #e9ecef;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.delete-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		background-color: #dc3545;
 		color: white;
 		border: none;
-		padding: 5px 10px;
-		border-radius: 3px;
+		padding: 0.5rem 1rem;
+		border-radius: 0.25rem;
 		cursor: pointer;
-		font-size: 14px;
-		margin-top: 10px;
+		font-weight: 500;
+		transition: background-color 0.2s;
+		margin-top: 1rem;
 	}
 
 	.delete-btn:hover {
@@ -157,18 +187,23 @@
 	}
 
 	.create-showtime-btn {
-		display: block;
-		margin: 20px auto;
-		padding: 10px 20px;
-		font-size: 16px;
-		background-color: #007bff;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 2rem auto 0;
+		padding: 0.75rem 1.25rem;
+		background-color: #28a745;
 		color: white;
 		border: none;
-		border-radius: 5px;
+		border-radius: 0.5rem;
+		font-weight: 500;
 		cursor: pointer;
+		transition: background-color 0.2s;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
 
 	.create-showtime-btn:hover {
-		background-color: #0056b3;
+		background-color: #218838;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 </style>
