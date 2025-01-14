@@ -1,6 +1,5 @@
 <script>
 	import Icon from '@iconify/svelte';
-	let adminName = 'Admin';
 </script>
 
 <svelte:head>
