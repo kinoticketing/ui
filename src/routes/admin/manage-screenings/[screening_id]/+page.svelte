@@ -85,8 +85,8 @@
 
 			<div class="info-card">
 				<div class="info-item">
-					<span class="label">Film-ID:</span>
-					<span class="value">{screening.movie_id}</span>
+					<span class="label">Film:</span>
+					<span class="value">{screening.movie_title}</span>
 				</div>
 				<div class="info-item">
 					<span class="label">Saal:</span>
