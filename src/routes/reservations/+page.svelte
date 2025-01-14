@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { generateTicketQRCode } from '$lib/util/qrCode';
 
 	interface Ticket {
 		id: string;
@@ -22,6 +23,46 @@
 	}
 
 	export let data: PageData;
+
+	// Add these to your script section
+	let showQRModal = false;
+	let currentQRCode = '';
+	let loadingQR = false;
+	let selectedTicket: Ticket | null = null;
+
+	// Sort tickets by status priority
+	$: sortedTickets = data.tickets?.sort((a, b) => {
+		const statusPriority = {
+			confirmed: 0,
+			pending: 1,
+			cancelled: 2
+		};
+		return (
+			statusPriority[a.status as keyof typeof statusPriority] -
+			statusPriority[b.status as keyof typeof statusPriority]
+		);
+	});
+
+	async function showQRCode(ticket: Ticket) {
+		// Only show QR code for confirmed tickets
+		if (ticket.status !== 'confirmed') return;
+
+		loadingQR = true;
+		try {
+			const qrCode = await generateTicketQRCode({
+				showtime: ticket.screening_time,
+				seats: [ticket.seat_label],
+				uniqueIdentifier: ticket.ticket_code
+			});
+			currentQRCode = qrCode;
+			selectedTicket = ticket;
+			showQRModal = true;
+		} catch (err) {
+			console.error('Error generating QR code:', err);
+		} finally {
+			loadingQR = false;
+		}
+	}
 
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString('de-DE', {
@@ -65,13 +106,27 @@
 
 			<h1 class="page-title">My Reservations</h1>
 
-			{#if data.tickets && data.tickets.length > 0}
+			{#if sortedTickets && sortedTickets.length > 0}
 				<div class="tickets-grid">
-					{#each data.tickets as ticket}
+					{#each sortedTickets as ticket}
 						<div class="ticket-card">
 							<div class="ticket-header">
-								<h2 class="movie-title">{ticket.movie_title}</h2>
-								<p class="booking-date">Reserved on: {formatDateTime(ticket.booking_date)}</p>
+								<div class="header-content">
+									<div class="title-section">
+										<h2 class="movie-title">{ticket.movie_title}</h2>
+										<p class="booking-date">Reserved on: {formatDateTime(ticket.booking_date)}</p>
+									</div>
+									{#if ticket.status === 'confirmed'}
+										<button
+											class="qr-button"
+											on:click={() => showQRCode(ticket)}
+											disabled={loadingQR}
+											aria-label="Show QR Code"
+										>
+											<Icon icon="mdi:qrcode" width="24" height="24" />
+										</button>
+									{/if}
+								</div>
 							</div>
 
 							<div class="ticket-details">
@@ -141,6 +196,25 @@
 					</div>
 				</div>
 			{/if}
+
+			{#if showQRModal && selectedTicket && selectedTicket.status === 'confirmed'}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div class="modal-overlay" on:click|self={() => (showQRModal = false)}>
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3>Ticket QR Code</h3>
+							<button class="close-button" on:click={() => (showQRModal = false)}>
+								<Icon icon="mdi:close" width="24" height="24" />
+							</button>
+						</div>
+						<div class="modal-body">
+							<img src={currentQRCode} alt="Ticket QR Code" />
+							<p class="ticket-code">Ticket Code: {selectedTicket.ticket_code}</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 		{:else}
 			<div class="empty-state">
 				<div class="empty-content">
@@ -167,6 +241,140 @@
 		position: relative;
 	}
 
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.title-section {
+		flex: 1;
+	}
+
+	.qr-button {
+		padding: 0.5rem;
+		background-color: #f3f4f6;
+		border: none;
+		border-radius: 0.5rem;
+		color: #374151;
+		transition: all 0.2s ease;
+	}
+
+	.qr-button:hover {
+		background-color: #e5e7eb;
+	}
+
+	.qr-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+	}
+
+	.modal-content {
+		background: white;
+		border-radius: 1rem;
+		padding: 1.5rem;
+		max-width: 400px;
+		width: 90%;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.modal-header h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #1a1a1a;
+	}
+
+	.close-button {
+		background: none;
+		border: none;
+		color: #6b7280;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		transition: all 0.2s ease;
+	}
+
+	.close-button:hover {
+		background-color: #f3f4f6;
+		color: #374151;
+	}
+
+	.modal-body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.modal-body img {
+		width: 100%;
+		max-width: 300px;
+		height: auto;
+	}
+
+	.ticket-code {
+		font-family: monospace;
+		background-color: #f3f4f6;
+		padding: 0.5rem 1rem;
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+	}
+
+	.title-section {
+		flex: 1;
+	}
+
+	.qr-button {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #f3f4f6;
+		border: none;
+		border-radius: 50%;
+		color: #4b5563;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.qr-button:hover {
+		background-color: #e5e7eb;
+	}
+
+	.qr-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 	.back-button {
 		position: absolute;
 		left: 0;
