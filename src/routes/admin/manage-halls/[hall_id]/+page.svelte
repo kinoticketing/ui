@@ -50,7 +50,7 @@
 			<header class="header">
 				<h1 class="page-title">
 					<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
-					<span>Alle Säle</span>
+					<span>{hall.name}</span>
 				</h1>
 				<p class="info">
 					Capacity: {hall.total_seats} seats
