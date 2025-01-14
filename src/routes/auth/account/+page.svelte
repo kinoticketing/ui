@@ -153,6 +153,12 @@
 										</div>
 									{/if}
 								</div>
+								<div class="actions-grid">
+									<button class="view-reservations-button" on:click={() => goto('/reservations')}>
+										<Icon icon="mdi:ticket-account" width="20" height="20" />
+										View My Reservations
+									</button>
+								</div>
 							{/if}
 						</div>
 
@@ -370,6 +376,35 @@
 		flex: 2;
 		position: sticky;
 		top: 2rem;
+	}
+	.actions-grid {
+		margin-top: 1.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid #e5e7eb;
+	}
+
+	.view-reservations-button {
+		width: 100%;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: #2563eb;
+		border: none;
+		border-radius: 0.75rem;
+		color: white;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.view-reservations-button:hover {
+		background-color: #1d4ed8;
+		transform: translateY(-1px);
+	}
+
+	.view-reservations-button:active {
+		transform: translateY(1px);
 	}
 
 	.section-title {
