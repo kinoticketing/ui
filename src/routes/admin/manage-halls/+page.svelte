@@ -52,20 +52,19 @@
 		</div>
 
 		{#if data.halls.length > 0}
-			<ul class="hall-list">
+			<div class="hall-grid">
 				{#each data.halls as hall}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-					<li class="hall-item" on:click={() => goToDetail(hall.hall_id)}>
-						<p><strong>Name:</strong> {hall.name}</p>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div class="hall-tile" on:click={() => goToDetail(hall.hall_id)}>
+						<h3>{hall.name}</h3>
 						<p><strong>Kapazität:</strong> {hall.capacity} Sitzplätze</p>
 						<button class="delete-btn" on:click|stopPropagation={() => deleteHall(hall.hall_id)}>
-							<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-delete" />
-							Saal löschen
+							<Icon style="font-size: 1.25rem;" icon="ic:outline-delete" />
 						</button>
-					</li>
+					</div>
 				{/each}
-			</ul>
+			</div>
 		{:else}
 			<p>Es sind keine Säle vorhanden.</p>
 		{/if}
@@ -85,7 +84,7 @@
 	}
 
 	.container {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
 	}
 
@@ -124,43 +123,44 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.hall-list {
-		list-style-type: none;
-		padding: 0;
-		margin: 0;
+	.hall-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1rem;
+		margin-bottom: 2rem;
 	}
 
-	.hall-item {
+	.hall-tile {
 		background-color: white;
 		padding: 1.25rem;
 		border-radius: 0.5rem;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		margin-bottom: 1rem;
 		cursor: pointer;
 		transition: box-shadow 0.2s;
+		position: relative;
 	}
 
-	.hall-item:hover {
+	.hall-tile:hover {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
+	.hall-tile h3 {
+		margin-top: 0;
+	}
+
 	.delete-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		background-color: #dc3545;
-		color: white;
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background-color: transparent;
 		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 0.25rem;
 		cursor: pointer;
-		font-weight: 500;
-		transition: background-color 0.2s;
-		margin-top: 1rem;
+		color: #dc3545;
+		transition: color 0.2s;
 	}
 
 	.delete-btn:hover {
-		background-color: #c82333;
+		color: #c82333;
 	}
 
 	.create-hall-btn {

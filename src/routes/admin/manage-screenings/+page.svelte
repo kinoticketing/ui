@@ -5,7 +5,7 @@
 	export let data: {
 		showtimes: {
 			showtime_id: number;
-			movie_id: string; // Changed from movie_title to match our schema
+			movie_id: string;
 			hall_name: string;
 			showtime: string;
 			end_time: string;
@@ -65,30 +65,33 @@
 		</div>
 
 		{#if data.showtimes.length > 0}
-			<ul class="showtime-list">
+			<div class="showtime-grid">
 				{#each data.showtimes as showtime}
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-					<li class="showtime-item" on:click={() => goToDetail(showtime.showtime_id)}>
-						<p><strong>Film ID:</strong> {showtime.movie_id}</p>
-						<p><strong>Saal:</strong> {showtime.hall_name}</p>
-						<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
-						<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
-						<p>
-							<strong>Auslastung:</strong>
-							{showtime.reserved_seats}/{showtime.total_seats}
-							({showtime.occupancy_percentage}%)
-						</p>
-						<button
-							class="delete-btn"
-							on:click|stopPropagation={() => deleteShowtime(showtime.showtime_id)}
-						>
-							<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-delete" />
-							Vorstellung löschen
-						</button>
-					</li>
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div class="showtime-tile" on:click={() => goToDetail(showtime.showtime_id)}>
+						<div class="tile-header">
+							<h3>{showtime.hall_name}</h3>
+							<button
+								class="delete-btn"
+								on:click|stopPropagation={() => deleteShowtime(showtime.showtime_id)}
+							>
+								<Icon style="font-size: 1rem;" icon="ic:outline-delete" />
+							</button>
+						</div>
+						<div class="tile-content">
+							<p><strong>Film ID:</strong> {showtime.movie_id}</p>
+							<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
+							<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
+							<p>
+								<strong>Auslastung:</strong>
+								{showtime.reserved_seats}/{showtime.total_seats}
+								({showtime.occupancy_percentage}%)
+							</p>
+						</div>
+					</div>
 				{/each}
-			</ul>
+			</div>
 		{:else}
 			<p>Keine Vorstellungen vorhanden.</p>
 		{/if}
@@ -108,7 +111,7 @@
 	}
 
 	.container {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
 	}
 
@@ -147,43 +150,52 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.showtime-list {
-		list-style-type: none;
-		padding: 0;
-		margin: 0;
+	.showtime-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1rem;
+		margin-bottom: 2rem;
 	}
 
-	.showtime-item {
+	.showtime-tile {
 		background-color: white;
-		padding: 1.25rem;
 		border-radius: 0.5rem;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		margin-bottom: 1rem;
 		cursor: pointer;
 		transition: box-shadow 0.2s;
 	}
 
-	.showtime-item:hover {
+	.showtime-tile:hover {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.delete-btn {
+	.tile-header {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		background-color: #dc3545;
-		color: white;
+		justify-content: space-between;
+		padding: 1rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.tile-header h3 {
+		margin: 0;
+		font-size: 1.25rem;
+	}
+
+	.delete-btn {
+		background-color: transparent;
 		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 0.25rem;
 		cursor: pointer;
-		font-weight: 500;
-		transition: background-color 0.2s;
-		margin-top: 1rem;
+		color: #dc3545;
+		transition: color 0.2s;
 	}
 
 	.delete-btn:hover {
-		background-color: #c82333;
+		color: #c82333;
+	}
+
+	.tile-content {
+		padding: 1rem;
 	}
 
 	.create-showtime-btn {
