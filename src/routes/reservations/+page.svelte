@@ -1,8 +1,8 @@
-<!-- src/routes/reservations/+page.svelte -->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 
 	interface Ticket {
 		id: string;
@@ -14,6 +14,7 @@
 		hall_name: string;
 		price: number;
 		booking_date: string;
+		end_time: string;
 	}
 
 	interface PageData {
@@ -44,6 +45,14 @@
 	function goToLogin() {
 		goto('/auth/login');
 	}
+
+	function canBeCancelled(screeningTime: string): boolean {
+		const screeningDate = new Date(screeningTime);
+		const now = new Date();
+		return now < screeningDate;
+	}
+
+	let cancelling = false;
 </script>
 
 <main>
@@ -66,6 +75,13 @@
 							</div>
 
 							<div class="ticket-details">
+								<div class="detail-item">
+									<span class="detail-label">Status:</span>
+									<span class="detail-value status-badge {ticket.status}">
+										{ticket.status}
+									</span>
+								</div>
+
 								<div class="detail-item">
 									<span class="detail-label">Screening:</span>
 									<span class="detail-value">{formatDateTime(ticket.screening_time)}</span>
@@ -90,6 +106,27 @@
 									<span class="detail-label">Ticket Code:</span>
 									<span class="detail-value code">{ticket.ticket_code}</span>
 								</div>
+
+								{#if ticket.status !== 'cancelled' && canBeCancelled(ticket.screening_time)}
+									<form
+										method="POST"
+										action="?/cancel"
+										use:enhance={() => {
+											cancelling = true;
+											return async ({ result }) => {
+												cancelling = false;
+												if (result.type === 'success') {
+													window.location.reload();
+												}
+											};
+										}}
+									>
+										<input type="hidden" name="ticketId" value={ticket.id} />
+										<button type="submit" class="cancel-button" disabled={cancelling}>
+											{cancelling ? 'Cancelling...' : 'Cancel Reservation'}
+										</button>
+									</form>
+								{/if}
 							</div>
 						</div>
 					{/each}
@@ -186,6 +223,45 @@
 		border-bottom: 1px solid #e5e7eb;
 		padding-bottom: 1rem;
 		margin-bottom: 1rem;
+	}
+	.status-badge {
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+	}
+
+	.status-badge.confirmed {
+		background-color: #d1fae5;
+		color: #047857;
+	}
+
+	.status-badge.cancelled {
+		background-color: #fee2e2;
+		color: #dc2626;
+	}
+
+	.cancel-button {
+		width: 100%;
+		padding: 0.75rem;
+		margin-top: 1rem;
+		background-color: #ef4444;
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.cancel-button:hover:not(:disabled) {
+		background-color: #dc2626;
+	}
+
+	.cancel-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	.movie-title {
