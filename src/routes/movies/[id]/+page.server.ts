@@ -34,12 +34,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await pool.query(
 		`
 		SELECT 
-			id,        -- PK
-			hall_id,   -- FK zu halls
-			start_time
-		FROM screenings
-		WHERE movie_id = $1
-		ORDER BY start_time
+			s.id,        -- PK
+			s.hall_id,   -- FK zu halls
+			s.start_time,
+			h.name as hall_name
+		FROM screenings s
+		JOIN halls h ON s.hall_id = h.id
+		WHERE s.movie_id = $1
+		ORDER BY s.start_time
 		`,
 		[id]
 	);
@@ -50,16 +52,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	// 5) Wir wollen im Frontend ein Array "showtimes" haben:
 	const showtimes = res.rows.map((row) => {
 		return {
-			id: row.id,              // screening.id
-			time: row.start_time,    // => "time" fürs Frontend
-			hall: row.hall_id        // => "hall"
+			id: row.id, // screening.id
+			time: row.start_time, // => "time" fürs Frontend
+			hall: row.hall_id, // => "hall"
+			hall_name: row.hall_name 
 		};
 	});
 
 	return {
 		movie: {
 			...data, // sämtliche OMDb-Felder wie Title, Year, usw.
-			id       // wir geben die IMDb-ID als "movie.id" zurück
+			id // wir geben die IMDb-ID als "movie.id" zurück
 		},
 		showtimes
 	};

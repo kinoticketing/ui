@@ -31,9 +31,11 @@ export const load: PageServerLoad = async ({ params }) => {
 				s.end_time,
 				h.name AS hall_name,
 				h.total_rows,
-				h.total_columns
+				h.total_columns,
+				m.title AS movie_title
 			FROM screenings s
 			JOIN halls h ON h.id = s.hall_id
+			JOIN movies m ON m.imdb_id = s.movie_id
 			WHERE s.id = $1
 			`,
 			[screeningId]
@@ -93,6 +95,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			screening: {
 				screening_id: row.screening_id,
 				movie_id: row.movie_id,
+				movie_title: row.movie_title, // Add movie title
 				hall_id: row.hall_id,
 				hall_name: row.hall_name,
 				start_time: row.start_time,
