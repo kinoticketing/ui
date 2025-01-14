@@ -6,7 +6,7 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	const session = await event.locals.auth();
 	const path = event.url.pathname;
 
-	const protectedRoutes = ['/auth/account', '/reservations'];
+	const protectedRoutes = ['/auth/account'];
 
 	if (protectedRoutes.some((route) => path.startsWith(route)) && !session) {
 		throw redirect(303, '/auth/login');
