@@ -9,7 +9,10 @@
 
 <main>
 	<div class="container">
-		<h1 class="page-title">Willkommen, {adminName}!</h1>
+		<h1 class="page-title">Willkommen, Herrscher!</h1>
+		<p>
+			Als allmächtiger Herrscher über Säle, Vorstellungen und Reservierungen liegt das Schicksal des Kinos in Deinen Händen. Mögest Du weise über Dein digitales Reich regieren!
+		</p>
 		<div class="btn-group">
 			<button class="btn" on:click={() => (window.location.href = '/admin/manage-halls')}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-meeting-room" />
@@ -31,6 +34,18 @@
 </main>
 
 <style>
+	p {
+		font-size: 1.1rem;
+		color: #555;
+		line-height: 1.6;
+		margin-bottom: 2.5rem;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		font-family: system-ui, -apple-system, sans-serif;
+	}
+
 	main {
 		min-height: 100vh;
 		background-color: #f8f9fa;
