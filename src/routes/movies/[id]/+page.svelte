@@ -7,7 +7,7 @@
 		time: string;
 		endTime: string;
 		hall: number;
-		hallName: string;
+		hall_name: string;
 	}
 
 	interface MovieData {
@@ -123,7 +123,7 @@
 											})} Uhr
 										</div>
 										<div class="showtime-details">
-											<span class="hall-info">Saal: {showtime.hallName}</span>
+											<span class="hall-info">Saal: {showtime.hall_name}</span>
 											<span class="duration-info">Dauer: {data.movie.Runtime}</span>
 										</div>
 									</div>
