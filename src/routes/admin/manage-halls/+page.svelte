@@ -2,19 +2,50 @@
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
 
-	export let data: { halls: { hall_id: number; name: string; capacity: number }[] };
+	export let data: {
+		halls: {
+			hall_id: number;
+			name: string;
+			capacity: number;
+			total_rows: number;
+			total_columns: number;
+			seat_plan: Array<{
+				seat_label: string;
+				category: string;
+				status: string;
+			}>;
+		}[];
+	};
 
-	// Zurück navigieren
+	const seatTypes = {
+		vip: { class: 'vip' },
+		premium: { class: 'premium' },
+		regular: { class: 'regular' },
+		standard: { class: 'standard' },
+		disabled: { class: 'disabled' }
+	};
+
+	function getSeatClass(seat: any) {
+		if (!seat) return 'seat-empty';
+		if (seat.status === 'inactive') return 'seat-inactive';
+
+		const categoryLower = seat.category?.toLowerCase() || 'regular';
+		for (const [type, data] of Object.entries(seatTypes)) {
+			if (categoryLower.includes(type)) {
+				return data.class;
+			}
+		}
+		return 'regular';
+	}
+
 	function goBack() {
 		goto('/admin');
 	}
 
-	// Zur Detailseite navigieren
 	function goToDetail(hall_id: number) {
 		goto(`/admin/manage-halls/${hall_id}`);
 	}
 
-	// Saal löschen
 	async function deleteHall(hall_id: number) {
 		if (!confirm('Sind Sie sicher, dass Sie diesen Saal löschen möchten?')) {
 			return;
@@ -25,7 +56,6 @@
 		});
 
 		if (response.ok) {
-			// Seite neu laden, um die Liste zu aktualisieren
 			location.reload();
 		} else {
 			alert('Fehler beim Löschen des Saals.');
@@ -34,6 +64,32 @@
 
 	function goToCreateHall() {
 		goto('/admin/manage-halls/create-hall');
+	}
+
+	function createSeatPlanMatrix(hall: any) {
+		if (!hall.seat_plan) return [];
+
+		// Group seats by row_number
+		const seatsByRow = hall.seat_plan.reduce((acc: any, seat: any) => {
+			const rowMatch = seat.seat_label.match(/^[A-Z]+/);
+			const row = rowMatch ? rowMatch[0] : '';
+			
+			if (!acc[row]) {
+				acc[row] = [];
+			}
+			acc[row].push(seat);
+			return acc;
+		}, {});
+
+		// Convert to matrix
+		return Object.values(seatsByRow).map((row: any) => {
+			// Sort seats within each row by column number (extracted from seat label)
+			return row.sort((a: any, b: any) => {
+				const aNum = parseInt(a.seat_label.match(/\d+/)[0]);
+				const bNum = parseInt(b.seat_label.match(/\d+/)[0]);
+				return aNum - bNum;
+			});
+		});
 	}
 </script>
 
@@ -59,6 +115,20 @@
 					<div class="hall-tile" on:click={() => goToDetail(hall.hall_id)}>
 						<h3>{hall.name}</h3>
 						<p><strong>Kapazität:</strong> {hall.capacity} Sitzplätze</p>
+
+						<div class="seat-plan-preview">
+							<div class="screen-preview"></div>
+							<div class="seats-preview">
+								{#each createSeatPlanMatrix(hall) as row, rowIndex}
+									<div class="seat-row-preview">
+										{#each row as seat}
+											<div class="seat-preview {getSeatClass(seat)}"></div>
+										{/each}
+									</div>
+								{/each}
+							</div>
+						</div>
+
 						<button class="delete-btn" on:click|stopPropagation={() => deleteHall(hall.hall_id)}>
 							<Icon style="font-size: 1.25rem;" icon="ic:outline-delete" />
 						</button>
@@ -183,5 +253,61 @@
 	.create-hall-btn:hover {
 		background-color: #218838;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.seat-plan-preview {
+		margin-top: 1rem;
+		background: #f8f9fa;
+		padding: 1rem;
+		border-radius: 0.5rem;
+	}
+
+	.screen-preview {
+		height: 4px;
+		background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
+		margin: 0 auto 0.5rem;
+		width: 80%;
+		border-radius: 2px;
+	}
+
+	.seats-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		align-items: center;
+	}
+
+	.seat-row-preview {
+		display: flex;
+		gap: 2px;
+	}
+
+	.seat-preview {
+		width: 8px;
+		height: 8px;
+		border-radius: 2px;
+		background-color: #e5e7eb;
+	}
+
+	.seat-preview.vip {
+		background-color: #fcd34d;
+	}
+	.seat-preview.premium {
+		background-color: #f87171;
+	}
+	.seat-preview.regular {
+		background-color: #93c5fd;
+	}
+	.seat-preview.standard {
+		background-color: #e5e7eb;
+	}
+	.seat-preview.disabled {
+		background-color: #86efac;
+	}
+	.seat-preview.seat-inactive {
+		background-color: #9ca3af;
+	}
+	.seat-preview.seat-empty {
+		visibility: hidden;
 	}
 </style>
