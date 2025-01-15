@@ -1,0 +1,14 @@
+{
+    "register": {
+        "title": "Erstelle dein Kino-Konto",
+        "signUpWithGoogle": "Mit Google registrieren",
+        "signUpWithGithub": "Mit GitHub registrieren",
+        "or": "oder",
+        "usernamePlaceholder": "Benutzername",
+        "emailPlaceholder": "E-Mail",
+        "passwordPlaceholder": "Passwort",
+        "confirmPasswordPlaceholder": "Passwort bestätigen",
+        "createAccountButton": "Konto erstellen",
+        "alreadyHaveAccount": "Hast du schon ein Konto? Anmelden"
+    }
+}

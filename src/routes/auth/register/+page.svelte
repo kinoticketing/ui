@@ -3,6 +3,16 @@
 	import Icon from '@iconify/svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
+	import { onMount } from 'svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	export let form: ActionData;
 
@@ -22,76 +32,92 @@
 	}
 </script>
 
-<div class="create-account-container">
-	<h2>Create Your Cinema Account</h2>
+{#if loaded}
+	<div class="create-account-container">
+		<h2>{$t('register.title')}</h2>
 
-	<div class="auth-providers">
-		<button on:click={() => signIn('google')} class="provider-btn google">
-			<Icon icon="logos:google-icon" />
-			Sign up with Google
-		</button>
+		<div class="auth-providers">
+			<button on:click={() => signIn('google')} class="provider-btn google">
+				<Icon icon="logos:google-icon" />
+				{$t('register.signUpWithGoogle')}
+			</button>
 
-		<button on:click={() => signIn('github')} class="provider-btn github">
-			<Icon icon="mdi:github" />
-			Sign up with GitHub
-		</button>
-	</div>
-
-	<div class="spacer">
-		<span>or</span>
-	</div>
-
-	<form method="POST" use:enhance>
-		<div class="input-group">
-			<input name="username" type="text" bind:value={username} placeholder="Username" required />
-		</div>
-
-		<div class="input-group">
-			<input name="email" type="email" bind:value={email} placeholder="Email" required />
-		</div>
-
-		<div class="input-group password-group">
-			<input
-				name="password"
-				type={showPassword ? 'text' : 'password'}
-				placeholder="Password"
-				required
-			/>
-			<button
-				type="button"
-				class="toggle-password"
-				on:click={() => togglePasswordVisibility('password')}
-			>
-				<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+			<button on:click={() => signIn('github')} class="provider-btn github">
+				<Icon icon="mdi:github" />
+				{$t('register.signUpWithGithub')}
 			</button>
 		</div>
 
-		<div class="input-group password-group">
-			<input
-				type={showConfirmPassword ? 'text' : 'password'}
-				placeholder="Confirm Password"
-				required
-			/>
-			<button
-				type="button"
-				class="toggle-password"
-				on:click={() => togglePasswordVisibility('confirmPassword')}
-			>
-				<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
-			</button>
+		<div class="spacer">
+			<span>{$t('register.or')}</span>
 		</div>
 
-		{#if form?.message}
-			<p class="error">{form.message}</p>
-		{/if}
+		<form method="POST" use:enhance>
+			<div class="input-group">
+				<input
+					name="username"
+					type="text"
+					bind:value={username}
+					placeholder={$t('register.usernamePlaceholder')}
+					required
+				/>
+			</div>
 
-		<button type="submit" class="create-btn">Create Account</button>
-	</form>
+			<div class="input-group">
+				<input
+					name="email"
+					type="email"
+					bind:value={email}
+					placeholder={$t('register.emailPlaceholder')}
+					required
+				/>
+			</div>
 
-	<p class="login-link">
-		<a href="/auth/login">Already have an account? Log In</a>
-	</p>
-</div>
+			<div class="input-group password-group">
+				<input
+					name="password"
+					type={showPassword ? 'text' : 'password'}
+					placeholder={$t('register.passwordPlaceholder')}
+					required
+				/>
+				<button
+					type="button"
+					class="toggle-password"
+					on:click={() => togglePasswordVisibility('password')}
+				>
+					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+				</button>
+			</div>
+
+			<div class="input-group password-group">
+				<input
+					type={showConfirmPassword ? 'text' : 'password'}
+					placeholder={$t('register.confirmPasswordPlaceholder')}
+					required
+				/>
+				<button
+					type="button"
+					class="toggle-password"
+					on:click={() => togglePasswordVisibility('confirmPassword')}
+				>
+					<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+				</button>
+			</div>
+
+			{#if form?.message}
+				<p class="error">{form.message}</p>
+			{/if}
+
+			<button type="submit" class="create-btn">
+				{$t('register.createAccountButton')}
+			</button>
+		</form>
+
+		<p class="login-link">
+			<a href="/auth/login">{$t('register.alreadyHaveAccount')}</a>
+		</p>
+	</div>
+{/if}
 
 <style>
 	.create-account-container {
