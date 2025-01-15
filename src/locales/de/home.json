@@ -1,0 +1,42 @@
+{
+    "home": {
+        "hero": {
+            "heading": "Willkommen in Ihrem Lieblingskino",
+            "description": "Erleben Sie die neuesten Blockbuster in unseren modernen Kinosäälen",
+            "buttonText": "Alle Filme ansehen"
+        },
+        "nowPlaying": {
+            "heading": "Aktuelle Vorstellungen",
+            "viewAll": "Alle anzeigen"
+        },
+        "features": {
+            "heading": "Unser Kino-Erlebnis",
+            "modernTech": {
+                "title": "Modernste Technik",
+                "description": "Dolby Atmos Sound und 4K Laser-Projektion für ein einzigartiges Filmerlebnis"
+            },
+            "premiumComfort": {
+                "title": "Premium Komfort",
+                "description": "Bequeme Sessel mit extra viel Beinfreiheit für maximalen Komfort"
+            },
+            "snackBar": {
+                "title": "Snack-Bar",
+                "description": "Frisches Popcorn, Nachos und eine große Getränkeauswahl"
+            },
+            "attractiveOffers": {
+                "title": "Attraktive Angebote",
+                "description": "Regelmäßige Sondervorstellungen und Rabattaktionen"
+            }
+        },
+        "comingSoon": {
+            "heading": "Demnächst bei uns",
+            "viewAll": "Alle anzeigen"
+        },
+        "newsletter": {
+            "heading": "Bleiben Sie informiert",
+            "description": "Abonnieren Sie unseren Newsletter für die neuesten Filmstarts und Sonderangebote",
+            "emailPlaceholder": "Ihre E-Mail-Adresse",
+            "subscribeButton": "Abonnieren"
+        }
+    }
+}

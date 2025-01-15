@@ -3,7 +3,11 @@
 	import Icon from '@iconify/svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../i18n.js';
 
 	interface Movie {
 		id: string;
@@ -16,6 +20,12 @@
 		imdbRating: string;
 		nextScreening?: string;
 	}
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	export let data: { movies: Movie[]; query: string };
 	let searchQuery = data.query || '';
@@ -60,65 +70,74 @@
 	}
 </script>
 
-<main>
-	<div class="container">
-		<button class="back-button" on:click={goBackHome}>
-			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Back to Home
-		</button>
+{#if loaded}
+	<main>
+		<div class="container">
+			<button class="back-button" on:click={goBackHome}>
+				<Icon icon="mdi:arrow-left" width="20" height="20" />
+				<!-- Use the moviesPage.backToHome string -->
+				{$t('movies.backToHome')}
+			</button>
 
-		<h1 class="page-title">Filme</h1>
+			<h1 class="page-title">
+				<!-- Use the moviesPage.pageTitle string -->
+				{$t('movies.pageTitle')}
+			</h1>
 
-		<!-- Search Section -->
-		<div class="search-section">
-			<div class="search-container">
-				<input
-					type="text"
-					bind:value={searchQuery}
-					placeholder="Nach Titel, Genre oder Regisseur suchen..."
-					class="search-input"
-					on:keydown={(e) => e.key === 'Enter' && handleSearch()}
-				/>
-				<button class="search-button" on:click={handleSearch}>
-					<Icon icon="mdi:magnify" width="20" height="20" />
-				</button>
-				{#if searchQuery}
-					<button class="clear-search" on:click={clearSearch}>
-						<Icon icon="mdi:close" width="20" height="20" />
+			<!-- Search Section -->
+			<div class="search-section">
+				<div class="search-container">
+					<input
+						type="text"
+						bind:value={searchQuery}
+						placeholder={$t('movies.searchPlaceholder')}
+						class="search-input"
+						on:keydown={(e) => e.key === 'Enter' && handleSearch()}
+					/>
+					<button class="search-button" on:click={handleSearch}>
+						<Icon icon="mdi:magnify" width="20" height="20" />
 					</button>
-				{/if}
+					{#if searchQuery}
+						<button class="clear-search" on:click={clearSearch}>
+							<Icon icon="mdi:close" width="20" height="20" />
+						</button>
+					{/if}
+				</div>
+			</div>
+
+			<!-- Movies Grid -->
+			<div class="movies-grid">
+				{#each data.movies as movie (movie.id)}
+					<a href={`/movies/${movie.id}`} class="movie-card" transition:fade>
+						<div class="poster-container">
+							<img src={movie.Poster} alt={movie.Title} class="movie-poster" />
+							<div class="movie-rating">⭐ {movie.imdbRating}</div>
+						</div>
+						<div class="movie-info">
+							<h2 class="movie-title">{movie.Title}</h2>
+							<p class="movie-year">{movie.Year}</p>
+							<p class="movie-genre">{movie.Genre}</p>
+							<p class="movie-plot">{movie.Plot}</p>
+							{#if movie.nextScreening}
+								<p class="next-screening">
+									<!-- Use the moviesPage.nextScreeningLabel string -->
+									{$t('movies.nextScreeningLabel')}
+									{formatDate(movie.nextScreening)}
+								</p>
+							{/if}
+						</div>
+					</a>
+				{:else}
+					<div class="no-results">
+						<Icon icon="mdi:movie-off" width="48" height="48" />
+						<!-- Use the moviesPage.noResults string -->
+						<p>{$t('movies.noResults')}</p>
+					</div>
+				{/each}
 			</div>
 		</div>
-
-		<!-- Movies Grid -->
-		<div class="movies-grid">
-			{#each data.movies as movie (movie.id)}
-				<a href={`/movies/${movie.id}`} class="movie-card" transition:fade>
-					<div class="poster-container">
-						<img src={movie.Poster} alt={movie.Title} class="movie-poster" />
-						<div class="movie-rating">⭐ {movie.imdbRating}</div>
-					</div>
-					<div class="movie-info">
-						<h2 class="movie-title">{movie.Title}</h2>
-						<p class="movie-year">{movie.Year}</p>
-						<p class="movie-genre">{movie.Genre}</p>
-						<p class="movie-plot">{movie.Plot}</p>
-						{#if movie.nextScreening}
-							<p class="next-screening">
-								Nächste Vorführung: {formatDate(movie.nextScreening)}
-							</p>
-						{/if}
-					</div>
-				</a>
-			{:else}
-				<div class="no-results">
-					<Icon icon="mdi:movie-off" width="48" height="48" />
-					<p>Keine Filme gefunden</p>
-				</div>
-			{/each}
-		</div>
-	</div>
-</main>
+	</main>
+{/if}
 
 <style>
 	/* All the styles remain exactly the same */

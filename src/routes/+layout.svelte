@@ -7,6 +7,15 @@
 	import { quintOut } from 'svelte/easing';
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { goto } from '$app/navigation';
+	import '../i18n.js';
+	import { t, locale } from 'svelte-i18n';
+	import { i18nReady } from '../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
@@ -40,125 +49,157 @@
 </script>
 
 <svelte:window on:click={handleClickOutside} />
+{#if loaded}
+	<header class:scrolled={isScrolled}>
+		<nav>
+			<div class="nav-content">
+				<a href="/" class="logo">
+					<img src="/logo.png" alt={$t('layout.logo.alt')} />
+					<span>{$t('layout.logo.text')}</span>
+				</a>
 
-<header class:scrolled={isScrolled}>
-	<nav>
-		<div class="nav-content">
-			<a href="/" class="logo">
-				<img src="/logo.png" alt="Cinema Logo" />
-				<span>Cinema</span>
-			</a>
+				<div class="nav-links">
+					<a href="/" class="nav-link" class:active={$page.url.pathname === '/'}>
+						<Icon icon="mdi:home" width="24" height="24" />
+						<span>{$t('layout.nav.home')}</span>
+					</a>
+					<a href="/movies" class="nav-link" class:active={$page.url.pathname.includes('/movies')}>
+						<Icon icon="mdi:movie" width="24" height="24" />
+						<span>{$t('layout.nav.movies')}</span>
+					</a>
+					<a
+						href="/reservations"
+						class="nav-link"
+						class:active={$page.url.pathname.includes('/reservations')}
+					>
+						<Icon icon="mdi:ticket" width="24" height="24" />
+						<span>{$t('layout.nav.reservations')}</span>
+					</a>
+					<a href="/about" class="nav-link" class:active={$page.url.pathname === '/about'}>
+						<Icon icon="mdi:information" width="24" height="24" />
+						<span>{$t('layout.nav.about')}</span>
+					</a>
+				</div>
 
-			<div class="nav-links">
-				<a href="/" class="nav-link" class:active={$page.url.pathname === '/'}>
-					<Icon icon="mdi:home" width="24" height="24" />
-					<span>Home</span>
-				</a>
-				<a href="/movies" class="nav-link" class:active={$page.url.pathname.includes('/movies')}>
-					<Icon icon="mdi:movie" width="24" height="24" />
-					<span>Movies</span>
-				</a>
-				<a
-					href="/reservations"
-					class="nav-link"
-					class:active={$page.url.pathname.includes('/reservations')}
-				>
-					<Icon icon="mdi:ticket" width="24" height="24" />
-					<span>Reservations</span>
-				</a>
-				<a href="/about" class="nav-link" class:active={$page.url.pathname === '/about'}>
-					<Icon icon="mdi:information" width="24" height="24" />
-					<span>About</span>
-				</a>
+				<div class="language-selector">
+					<button class="lang-btn" class:active={$locale === 'en'} on:click={() => locale.set('en')}
+						>EN</button
+					>
+					<button class="lang-btn" class:active={$locale === 'de'} on:click={() => locale.set('de')}
+						>DE</button
+					>
+				</div>
+
+				<div class="account-dropdown">
+					<button class="account-button" on:click={toggleMenu}>
+						<Icon icon="mdi:account-circle" width="32" height="32" />
+					</button>
+
+					{#if showMenu}
+						<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
+							{#if !$page.data.session?.user}
+								<a href="/auth/login" class="dropdown-item">
+									<Icon icon="mdi:login" width="20" height="20" />
+									<span>{$t('layout.account.signIn')}</span>
+								</a>
+							{:else}
+								<a href="/auth/account" class="dropdown-item">
+									<Icon icon="mdi:account-circle-outline" width="20" height="20" />
+									<span>{$t('layout.account.myAccount')}</span>
+								</a>
+								<a href="/settings" class="dropdown-item">
+									<Icon icon="mdi:cog" width="20" height="20" />
+									<span>{$t('layout.account.settings')}</span>
+								</a>
+								<button class="dropdown-item logout" on:click={handleLogout}>
+									<Icon icon="mdi:logout" width="20" height="20" />
+									<span>{$t('layout.account.signOut')}</span>
+								</button>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<main>
+		<slot />
+	</main>
+
+	<footer>
+		<div class="footer-content">
+			<div class="footer-section">
+				<h2>{$t('layout.footer.aboutUs.title')}</h2>
+				<p>{$t('layout.footer.aboutUs.description')}</p>
 			</div>
 
-			<div class="account-dropdown">
-				<button class="account-button" on:click={toggleMenu}>
-					<Icon icon="mdi:account-circle" width="32" height="32" />
-				</button>
-
-				{#if showMenu}
-					<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
-						{#if !$page.data.session?.user}
-							<a href="/auth/login" class="dropdown-item">
-								<Icon icon="mdi:login" width="20" height="20" />
-								<span>Sign In</span>
-							</a>
-						{:else}
-							<a href="/auth/account" class="dropdown-item">
-								<Icon icon="mdi:account-circle-outline" width="20" height="20" />
-								<span>My Account</span>
-							</a>
-							<a href="/settings" class="dropdown-item">
-								<Icon icon="mdi:cog" width="20" height="20" />
-								<span>Settings</span>
-							</a>
-							<button class="dropdown-item logout" on:click={handleLogout}>
-								<Icon icon="mdi:logout" width="20" height="20" />
-								<span>Sign Out</span>
-							</button>
-						{/if}
-					</div>
-				{/if}
+			<div class="footer-section">
+				<h2>{$t('layout.footer.quickLinks.title')}</h2>
+				<div class="footer-links">
+					<a href="/terms">{$t('layout.footer.quickLinks.terms')}</a>
+					<a href="/privacy">{$t('layout.footer.quickLinks.privacy')}</a>
+					<a href="/contact">{$t('layout.footer.quickLinks.contact')}</a>
+					<a href="/faq">{$t('layout.footer.quickLinks.faq')}</a>
+				</div>
 			</div>
-		</div>
-	</nav>
-</header>
 
-<main>
-	<slot />
-</main>
+			<div class="footer-section">
+				<h2>{$t('layout.footer.connect.title')}</h2>
+				<div class="social-links">
+					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.facebook')}>
+						<Icon icon="mdi:facebook" width="24" height="24" />
+					</a>
+					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.twitter')}>
+						<Icon icon="mdi:twitter" width="24" height="24" />
+					</a>
+					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.instagram')}>
+						<Icon icon="mdi:instagram" width="24" height="24" />
+					</a>
+				</div>
+			</div>
 
-<footer>
-	<div class="footer-content">
-		<div class="footer-section">
-			<h2>About Us</h2>
-			<p>
-				Your premier destination for an exceptional movie experience. Book your tickets easily and
-				enjoy the latest blockbusters in comfort.
-			</p>
-		</div>
-
-		<div class="footer-section">
-			<h2>Quick Links</h2>
-			<div class="footer-links">
-				<a href="/terms">Terms of Service</a>
-				<a href="/privacy">Privacy Policy</a>
-				<a href="/contact">Contact</a>
-				<a href="/faq">FAQ</a>
+			<div class="footer-section">
+				<h2>{$t('layout.footer.newsletter.title')}</h2>
+				<form class="newsletter-form" on:submit|preventDefault>
+					<input type="email" placeholder={$t('layout.footer.newsletter.placeholder')} required />
+					<button type="submit">{$t('layout.footer.newsletter.subscribe')}</button>
+				</form>
 			</div>
 		</div>
 
-		<div class="footer-section">
-			<h2>Connect With Us</h2>
-			<div class="social-links">
-				<a href="#" class="social-link" aria-label="Facebook">
-					<Icon icon="mdi:facebook" width="24" height="24" />
-				</a>
-				<a href="#" class="social-link" aria-label="Twitter">
-					<Icon icon="mdi:twitter" width="24" height="24" />
-				</a>
-				<a href="#" class="social-link" aria-label="Instagram">
-					<Icon icon="mdi:instagram" width="24" height="24" />
-				</a>
-			</div>
+		<div class="footer-bottom">
+			<p>&copy; {currentYear} Kinoreservierung. {$t('layout.footer.copyright')}</p>
 		</div>
-
-		<div class="footer-section">
-			<h2>Newsletter</h2>
-			<form class="newsletter-form" on:submit|preventDefault>
-				<input type="email" placeholder="Enter your email" required />
-				<button type="submit">Subscribe</button>
-			</form>
-		</div>
-	</div>
-
-	<div class="footer-bottom">
-		<p>&copy; {currentYear} Kinoreservierung. All rights reserved.</p>
-	</div>
-</footer>
+	</footer>
+{/if}
 
 <style>
+	.language-selector {
+		display: flex;
+		gap: 0.5rem;
+		margin-left: 1rem;
+	}
+
+	.lang-btn {
+		padding: 0.25rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		background: none;
+		color: #4b5563;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.lang-btn:hover {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	.lang-btn.active {
+		background-color: #2563eb;
+		color: white;
+		border-color: #2563eb;
+	}
 	/* Header Styles */
 	header {
 		position: fixed;

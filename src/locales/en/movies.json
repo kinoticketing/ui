@@ -1,0 +1,9 @@
+{
+    "movies": {
+        "backToHome": "Back to Home",
+        "pageTitle": "Movies",
+        "searchPlaceholder": "Search by title, genre, or director...",
+        "noResults": "No movies found",
+        "nextScreeningLabel": "Next Show:"
+    }
+}

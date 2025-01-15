@@ -1,0 +1,45 @@
+{
+    "layout": {
+        "logo": {
+            "alt": "Cinema Logo",
+            "text": "Cinema"
+        },
+        "nav": {
+            "home": "Startseite",
+            "movies": "Filme",
+            "reservations": "Reservierungen",
+            "about": "Über uns"
+        },
+        "account": {
+            "signIn": "Anmelden",
+            "myAccount": "Mein Konto",
+            "settings": "Einstellungen",
+            "signOut": "Abmelden"
+        },
+        "footer": {
+            "aboutUs": {
+                "title": "Über uns",
+                "description": "Ihr erstklassiges Kino für ein herausragendes Filmerlebnis."
+            },
+            "quickLinks": {
+                "title": "Schnellzugriff",
+                "terms": "Nutzungsbedingungen",
+                "privacy": "Datenschutzerklärung",
+                "contact": "Kontakt",
+                "faq": "FAQ"
+            },
+            "connect": {
+                "title": "Vernetzen Sie sich mit uns",
+                "facebook": "Facebook",
+                "twitter": "Twitter",
+                "instagram": "Instagram"
+            },
+            "newsletter": {
+                "title": "Newsletter",
+                "placeholder": "E-Mail eingeben",
+                "subscribe": "Abonnieren"
+            },
+            "copyright": "Alle Rechte vorbehalten."
+        }
+    }
+}

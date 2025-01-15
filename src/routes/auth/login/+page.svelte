@@ -12,7 +12,7 @@
 
 	// Handle Github login with callbackUrl
 	function handleGithubLogin() {
-		signIn('github', { 
+		signIn('github', {
 			callbackUrl: '/auth/account'
 		});
 	}
@@ -27,14 +27,14 @@
 
 	// Show toast on successful login
 	onMount(() => {
-    if (browser && $page.data.session?.user) {
-        toast.success('Successfully logged in!', {
-            icon: '✅',  // Using an emoji instead of Icon component
-            duration: 3000,
-            style: 'border-radius: 10px; background: #333; color: #fff;'
-        });
-    }
-});
+		if (browser && $page.data.session?.user) {
+			toast.success('Successfully logged in!', {
+				icon: '✅', // Using an emoji instead of Icon component
+				duration: 3000,
+				style: 'border-radius: 10px; background: #333; color: #fff;'
+			});
+		}
+	});
 </script>
 
 <div class="login-container">

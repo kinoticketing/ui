@@ -1,0 +1,9 @@
+{
+    "movies": {
+        "backToHome": "Zurück zur Startseite",
+        "pageTitle": "Filme",
+        "searchPlaceholder": "Nach Titel, Genre oder Regisseur suchen...",
+        "noResults": "Keine Filme gefunden",
+        "nextScreeningLabel": "Nächste Vorführung:"
+    }
+}

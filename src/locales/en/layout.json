@@ -1,0 +1,45 @@
+{
+    "layout": {
+        "logo": {
+            "alt": "Cinema Logo",
+            "text": "Cinema"
+        },
+        "nav": {
+            "home": "Home",
+            "movies": "Movies",
+            "reservations": "Reservations",
+            "about": "About"
+        },
+        "account": {
+            "signIn": "Sign In",
+            "myAccount": "My Account",
+            "settings": "Settings",
+            "signOut": "Sign Out"
+        },
+        "footer": {
+            "aboutUs": {
+                "title": "About Us",
+                "description": "Your premier destination for an exceptional movie experience."
+            },
+            "quickLinks": {
+                "title": "Quick Links",
+                "terms": "Terms of Service",
+                "privacy": "Privacy Policy",
+                "contact": "Contact",
+                "faq": "FAQ"
+            },
+            "connect": {
+                "title": "Connect With Us",
+                "facebook": "Facebook",
+                "twitter": "Twitter",
+                "instagram": "Instagram"
+            },
+            "newsletter": {
+                "title": "Newsletter",
+                "placeholder": "Enter your email",
+                "subscribe": "Subscribe"
+            },
+            "copyright": "All rights reserved."
+        }
+    }
+}

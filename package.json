@@ -55,6 +55,7 @@
 		"neon": "^2.0.0",
 		"pg": "^8.13.1",
 		"svelte-french-toast": "^1.2.0",
+		"svelte-i18n": "^4.0.1",
 		"vercel": "^39.1.3"
 	}
 }

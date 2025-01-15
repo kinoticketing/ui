@@ -1,0 +1,77 @@
+{
+    "about": {
+        "headerTitle": "About Us",
+        "ourStoryTitle": "Our Story",
+        "ourStoryParagraph": "This project is a collaborative effort among students who are developing this website as part of their studies. We wanted to create a platform that simplifies booking movie tickets while also encouraging innovation and creativity. The plan is for the website to grow into a fully functional platform designed for cinema enthusiasts like you!",
+        "ourMissionTitle": "Our Mission",
+        "missionStatement": "Creating a seamless and innovative way to book your movie tickets. Your next cinematic experience is just a click away.",
+        "attentionTitle": "Attention",
+        "attentionParagraph": "This is a student project. We do not sell real tickets. A movie theater where you can watch films with our tickets does not exist.",
+        "coreValuesTitle": "Our Core Values",
+        "teamTitle": "Meet Our Team",
+        "coreValues": [
+            {
+                "title": "Innovation",
+                "icon": "🚀",
+                "description": "We embrace the latest technology to simplify ticket booking. Our team constantly explores new ways to enhance the user experience, from AI-powered recommendations to virtual reality previews of cinema seats."
+            },
+            {
+                "title": "Accessibility",
+                "icon": "🌍",
+                "description": "We ensure booking tickets is easy and available anytime, anywhere. Our platform is designed with a user-first approach, making it intuitive for everyone, regardless of their tech-savviness."
+            },
+            {
+                "title": "Community",
+                "icon": "🤝",
+                "description": "We aim to bring people together through unforgettable movie experiences. Our platform not only facilitates ticket booking but also fosters a sense of community among film enthusiasts."
+            },
+            {
+                "title": "Excellence",
+                "icon": "🏆",
+                "description": "We prioritize comfort, satisfaction, and top-notch service in every aspect of our platform. From the moment users land on our site to the time they’re seated in the cinema, we strive for excellence."
+            },
+            {
+                "title": "Sustainability",
+                "icon": "🌱",
+                "description": "We are committed to promoting environmental responsibility in the movie industry. Our digital ticketing system significantly reduces paper waste, and we partner with eco-friendly cinemas."
+            }
+        ],
+        "teamMembers": [
+            {
+                "key": "0",
+                "name": "Max Mustermann",
+                "role": "Co-Founder & CEO",
+                "bio": "Lisa leads our team with passion and determination to create a unique booking platform.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "1",
+                "name": "Max Mustermann",
+                "role": "CTO",
+                "bio": "Max focuses on delivering cutting-edge technology and ensuring smooth user experiences.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "2",
+                "name": "Max Mustermann",
+                "role": "Head of Design",
+                "bio": "Anna ensures that every element looks great and is user-friendly.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "3",
+                "name": "Max Mustermann",
+                "role": "Marketing Director",
+                "bio": "Thomas develops strategies to reach movie enthusiasts and grow our user base.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "4",
+                "name": "Max Mustermann",
+                "role": "Customer Relations Manager",
+                "bio": "Sophia ensures our users have the best possible experience with our platform.",
+                "image": "/PlaceholderBlue.png"
+            }
+        ]
+    }
+}
