@@ -1,1 +1,28 @@
-{}
+{
+    "reservations": {
+        "backToHome": "Zurück zur Startseite",
+        "pageTitle": "Meine Reservierungen",
+        "reservedOn": "Reserviert am:",
+        "showQRCode": "QR-Code anzeigen",
+        "status": "Status:",
+        "screening": "Vorführung:",
+        "hall": "Saal:",
+        "seat": "Sitz:",
+        "price": "Preis:",
+        "ticketCode": "Ticket-\n code:",
+        "cancelReservation": "Reservierung stornieren",
+        "cancelling": "Wird storniert...",
+        "noReservationsFound": "Keine Reservierungen gefunden",
+        "noBookingsYet": "Sie haben noch keine Kinotickets gebucht.",
+        "browseMovies": "Filme durchsuchen",
+        "authenticationRequired": "Authentifizierung erforderlich",
+        "loginPrompt": "Bitte melden Sie sich an, um Ihre Reservierungen anzusehen.",
+        "goToLogin": "Zum Login",
+        "ticketCodeLabel": "Ticketcode:",
+        "ticket_status": {
+            "pending": "Ausstehend",
+            "cancelled": "Storniert",
+            "confirmed": "Bestätigt"
+        }
+    }
+}

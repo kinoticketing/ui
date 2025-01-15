@@ -3,7 +3,11 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
 	import { generateTicketQRCode } from '$lib/util/qrCode';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../i18n.js';
 
 	interface Ticket {
 		id: string;
@@ -21,6 +25,12 @@
 	interface PageData {
 		tickets?: Ticket[];
 	}
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	export let data: PageData;
 
@@ -96,137 +106,146 @@
 	let cancelling = false;
 </script>
 
-<main>
-	<div class="container">
-		{#if $page.data.session}
-			<button class="back-button" on:click={() => goto('/')}>
-				<Icon icon="mdi:arrow-left" width="20" height="20" />
-				Back to Home
-			</button>
+{#if loaded}
+	<main>
+		<div class="container">
+			{#if $page.data.session}
+				<button class="back-button" on:click={() => goto('/')}>
+					<Icon icon="mdi:arrow-left" width="20" height="20" />
+					{$t('reservations.backToHome')}
+				</button>
 
-			<h1 class="page-title">My Reservations</h1>
+				<h1 class="page-title">{$t('reservations.pageTitle')}</h1>
 
-			{#if sortedTickets && sortedTickets.length > 0}
-				<div class="tickets-grid">
-					{#each sortedTickets as ticket}
-						<div class="ticket-card">
-							<div class="ticket-header">
-								<div class="header-content">
-									<div class="title-section">
-										<h2 class="movie-title">{ticket.movie_title}</h2>
-										<p class="booking-date">Reserved on: {formatDateTime(ticket.booking_date)}</p>
+				{#if sortedTickets && sortedTickets.length > 0}
+					<div class="tickets-grid">
+						{#each sortedTickets as ticket}
+							<div class="ticket-card">
+								<div class="ticket-header">
+									<div class="header-content">
+										<div class="title-section">
+											<h2 class="movie-title">{ticket.movie_title}</h2>
+											<p class="booking-date">
+												{$t('reservations.reservedOn')}
+												{formatDateTime(ticket.booking_date)}
+											</p>
+										</div>
+										{#if ticket.status === 'confirmed'}
+											<button
+												class="qr-button"
+												on:click={() => showQRCode(ticket)}
+												disabled={loadingQR}
+												aria-label={$t('reservations.showQRCode')}
+											>
+												<Icon icon="mdi:qrcode" width="24" height="24" />
+											</button>
+										{/if}
 									</div>
-									{#if ticket.status === 'confirmed'}
-										<button
-											class="qr-button"
-											on:click={() => showQRCode(ticket)}
-											disabled={loadingQR}
-											aria-label="Show QR Code"
+								</div>
+
+								<div class="ticket-details">
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.status')}</span>
+										<span class="detail-value status-badge {ticket.status}">
+											{$t(`reservations.ticket_status.${ticket.status}`)}
+										</span>
+									</div>
+
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.screening')}</span>
+										<span class="detail-value">{formatDateTime(ticket.screening_time)}</span>
+									</div>
+
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.hall')}</span>
+										<span class="detail-value">{ticket.hall_name}</span>
+									</div>
+
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.seat')}</span>
+										<span class="detail-value">{ticket.seat_label}</span>
+									</div>
+
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.price')}</span>
+										<span class="detail-value">€{formatPrice(ticket.price)}</span>
+									</div>
+
+									<div class="detail-item">
+										<span class="detail-label">{$t('reservations.ticketCode')}</span>
+										<span class="detail-value code">{ticket.ticket_code}</span>
+									</div>
+
+									{#if ticket.status !== 'cancelled' && canBeCancelled(ticket.screening_time)}
+										<form
+											method="POST"
+											action="?/cancel"
+											use:enhance={() => {
+												cancelling = true;
+												return async ({ result }) => {
+													cancelling = false;
+													if (result.type === 'success') {
+														window.location.reload();
+													}
+												};
+											}}
 										>
-											<Icon icon="mdi:qrcode" width="24" height="24" />
-										</button>
+											<input type="hidden" name="ticketId" value={ticket.id} />
+											<button type="submit" class="cancel-button" disabled={cancelling}>
+												{cancelling
+													? $t('reservations.cancelling')
+													: $t('reservations.cancelReservation')}
+											</button>
+										</form>
 									{/if}
 								</div>
 							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="empty-state">
+						<div class="empty-content">
+							<Icon icon="mdi:ticket-outline" width="64" height="64" />
+							<h2>{$t('reservations.noReservationsFound')}</h2>
+							<p>{$t('reservations.noBookingsYet')}</p>
+							<button class="auth-button" on:click={goToMovies}
+								>{$t('reservations.browseMovies')}</button
+							>
+						</div>
+					</div>
+				{/if}
 
-							<div class="ticket-details">
-								<div class="detail-item">
-									<span class="detail-label">Status:</span>
-									<span class="detail-value status-badge {ticket.status}">
-										{ticket.status}
-									</span>
-								</div>
-
-								<div class="detail-item">
-									<span class="detail-label">Screening:</span>
-									<span class="detail-value">{formatDateTime(ticket.screening_time)}</span>
-								</div>
-
-								<div class="detail-item">
-									<span class="detail-label">Hall:</span>
-									<span class="detail-value">{ticket.hall_name}</span>
-								</div>
-
-								<div class="detail-item">
-									<span class="detail-label">Seat:</span>
-									<span class="detail-value">{ticket.seat_label}</span>
-								</div>
-
-								<div class="detail-item">
-									<span class="detail-label">Price:</span>
-									<span class="detail-value">€{formatPrice(ticket.price)}</span>
-								</div>
-
-								<div class="detail-item">
-									<span class="detail-label">Ticket Code:</span>
-									<span class="detail-value code">{ticket.ticket_code}</span>
-								</div>
-
-								{#if ticket.status !== 'cancelled' && canBeCancelled(ticket.screening_time)}
-									<form
-										method="POST"
-										action="?/cancel"
-										use:enhance={() => {
-											cancelling = true;
-											return async ({ result }) => {
-												cancelling = false;
-												if (result.type === 'success') {
-													window.location.reload();
-												}
-											};
-										}}
-									>
-										<input type="hidden" name="ticketId" value={ticket.id} />
-										<button type="submit" class="cancel-button" disabled={cancelling}>
-											{cancelling ? 'Cancelling...' : 'Cancel Reservation'}
-										</button>
-									</form>
-								{/if}
+				{#if showQRModal && selectedTicket && selectedTicket.status === 'confirmed'}
+					<div class="modal-overlay" on:click|self={() => (showQRModal = false)}>
+						<div class="modal-content">
+							<div class="modal-header">
+								<h3>{$t('reservations.ticketQRCode')}</h3>
+								<button class="close-button" on:click={() => (showQRModal = false)}>
+									<Icon icon="mdi:close" width="24" height="24" />
+								</button>
+							</div>
+							<div class="modal-body">
+								<img src={currentQRCode} alt="Ticket QR Code" />
+								<p class="ticket-code">
+									{$t('reservations.ticketCodeLabel')}: {selectedTicket.ticket_code}
+								</p>
 							</div>
 						</div>
-					{/each}
-				</div>
+					</div>
+				{/if}
 			{:else}
 				<div class="empty-state">
 					<div class="empty-content">
-						<Icon icon="mdi:ticket-outline" width="64" height="64" />
-						<h2>No Reservations Found</h2>
-						<p>You haven't booked any movie tickets yet.</p>
-						<button class="auth-button" on:click={goToMovies}> Browse Movies </button>
+						<Icon icon="mdi:account-lock" width="64" height="64" />
+						<h2>{$t('reservations.authenticationRequired')}</h2>
+						<p>{$t('reservations.loginPrompt')}</p>
+						<button class="auth-button" on:click={goToLogin}>{$t('reservations.goToLogin')}</button>
 					</div>
 				</div>
 			{/if}
-
-			{#if showQRModal && selectedTicket && selectedTicket.status === 'confirmed'}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div class="modal-overlay" on:click|self={() => (showQRModal = false)}>
-					<div class="modal-content">
-						<div class="modal-header">
-							<h3>Ticket QR Code</h3>
-							<button class="close-button" on:click={() => (showQRModal = false)}>
-								<Icon icon="mdi:close" width="24" height="24" />
-							</button>
-						</div>
-						<div class="modal-body">
-							<img src={currentQRCode} alt="Ticket QR Code" />
-							<p class="ticket-code">Ticket Code: {selectedTicket.ticket_code}</p>
-						</div>
-					</div>
-				</div>
-			{/if}
-		{:else}
-			<div class="empty-state">
-				<div class="empty-content">
-					<Icon icon="mdi:account-lock" width="64" height="64" />
-					<h2>Authentication Required</h2>
-					<p>Please log in to view your reservations.</p>
-					<button class="auth-button" on:click={goToLogin}> Go to Login </button>
-				</div>
-			</div>
-		{/if}
-	</div>
-</main>
+		</div>
+	</main>
+{/if}
 
 <style>
 	main {
@@ -437,7 +456,6 @@
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 500;
-		text-transform: capitalize;
 	}
 
 	.status-badge.confirmed {

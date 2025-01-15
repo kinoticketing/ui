@@ -1,1 +1,28 @@
-{}
+{
+    "reservations": {
+        "backToHome": "Back to Home",
+        "pageTitle": "My Reservations",
+        "reservedOn": "Reserved on:",
+        "showQRCode": "Show QR Code",
+        "status": "Status:",
+        "screening": "Show:",
+        "hall": "Hall:",
+        "seat": "Seat:",
+        "price": "Price:",
+        "ticketCode": "Ticket Code:",
+        "cancelReservation": "Cancel Reservation",
+        "cancelling": "Cancelling...",
+        "noReservationsFound": "No Reservations Found",
+        "noBookingsYet": "You haven't booked any movie tickets yet.",
+        "browseMovies": "Browse Movies",
+        "authenticationRequired": "Authentication Required",
+        "loginPrompt": "Please log in to view your reservations.",
+        "goToLogin": "Go to Login",
+        "ticketCodeLabel": "Ticket Code:",
+        "ticket_status": {
+            "pending": "Pending",
+            "cancelled": "Cancelled",
+            "confirmed": "Confirmed"
+        }
+    }
+}
