@@ -70,6 +70,12 @@
 					<Icon icon="mdi:information" width="24" height="24" />
 					<span>About</span>
 				</a>
+				{#if $page.data.locals?.adminAuthenticated}
+					<a href="/admin" class="nav-link" class:active={$page.url.pathname.includes('/admin')}>
+						<Icon icon="mdi:shield-account" width="24" height="24" />
+						<span>Admin</span>
+					</a>
+				{/if}
 			</div>
 
 			<div class="account-dropdown">
@@ -98,6 +104,10 @@
 								<span>Sign Out</span>
 							</button>
 						{/if}
+						<a href="/admin/login" class="dropdown-item">
+							<Icon icon="mdi:shield-account" width="20" height="20" />
+							<span>Admin Access</span>
+						</a>
 					</div>
 				{/if}
 			</div>
@@ -126,19 +136,20 @@
 				<a href="/privacy">Privacy Policy</a>
 				<a href="/contact">Contact</a>
 				<a href="/faq">FAQ</a>
+				<a href="/admin/login">Admin Access</a>
 			</div>
 		</div>
 
 		<div class="footer-section">
 			<h2>Connect With Us</h2>
 			<div class="social-links">
-				<a href="#" class="social-link" aria-label="Facebook">
+				<a href="https://www.facebook.com/" class="social-link" aria-label="Facebook">
 					<Icon icon="mdi:facebook" width="24" height="24" />
 				</a>
-				<a href="#" class="social-link" aria-label="Twitter">
+				<a href="https://x.com/" class="social-link" aria-label="Twitter">
 					<Icon icon="mdi:twitter" width="24" height="24" />
 				</a>
-				<a href="#" class="social-link" aria-label="Instagram">
+				<a href="https://www.instagram.com/" class="social-link" aria-label="Instagram">
 					<Icon icon="mdi:instagram" width="24" height="24" />
 				</a>
 			</div>
@@ -236,7 +247,6 @@
 		color: #2563eb;
 		background-color: rgba(37, 99, 235, 0.1);
 	}
-
 	/* Account Dropdown */
 	.account-dropdown {
 		position: relative;
@@ -258,28 +268,6 @@
 		background-color: rgba(0, 0, 0, 0.05);
 	}
 
-	.dropdown-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		color: #1f2937;
-		text-decoration: none;
-		border-radius: 0.5rem;
-		transition: all 0.2s;
-		cursor: pointer;
-		border: none;
-		background: none;
-		width: calc(100% - 0.5rem); /* Subtract padding to prevent right side overflow */
-		text-align: left;
-		font-size: 1rem;
-		margin: 0.125rem 0.25rem; /* Add horizontal margin to center the items */
-		margin-left: 0.25rem;
-		margin-right: 0.25rem;
-		position: relative;
-		overflow: hidden;
-	}
-
 	.dropdown-menu {
 		position: absolute;
 		right: 0;
@@ -292,8 +280,24 @@
 		max-height: calc(100vh - 5rem);
 		overflow-y: auto;
 		z-index: 1001;
-		/* Add this to ensure consistent padding */
 		box-sizing: border-box;
+	}
+
+	.dropdown-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.4rem;
+		color: #1f2937;
+		text-decoration: none;
+		border-radius: 0.375rem;
+		transition: background-color 0.2s;
+		cursor: pointer;
+		border: none;
+		background: none;
+		text-align: left;
+		font-size: 1rem;
+		margin: 0.25rem 0.5rem;
 	}
 
 	.dropdown-item:hover {
@@ -302,12 +306,12 @@
 
 	.dropdown-item.logout {
 		color: #ef4444;
+		width: 90%;
 	}
 
 	.dropdown-item.logout:hover {
 		background-color: #fee2e2;
 	}
-
 	/* Main Content */
 	main {
 		margin-top: 4rem;
