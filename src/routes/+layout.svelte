@@ -345,7 +345,7 @@
 		align-items: center;
 		justify-content: space-between;
 		cursor: default;
-		padding: 0.5rem 0.75rem;
+		padding: 0.4rem;
 	}
 
 	.dropdown-item.language-toggle:hover {
