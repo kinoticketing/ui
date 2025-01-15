@@ -16,7 +16,7 @@
 		{
 			question: 'Kann ich meine Buchung stornieren?',
 			answer: `
-  <p>Ja, Sie können Ihre Buchung bis zu 24 Stunden vor der Vorstellung kostenfrei stornieren. Bitte besuchen Sie unsere <a href="/refund-policy">Rückerstattungsseite</a> für weitere Informationen.</p>
+  <p>Ja, Sie können Ihre Buchung bis zu 24 Stunden vor der Vorstellung kostenfrei stornieren.</p>
   `
 		},
 		{
