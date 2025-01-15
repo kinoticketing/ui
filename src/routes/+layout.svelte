@@ -11,6 +11,16 @@
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
 	let isScrolled = false;
+	let selectedLang = 'de';
+
+	function setLanguage(lang: string) {
+		selectedLang = lang;
+		// Here you can add future language switching logic
+		// For example:
+		// updateUILanguage(lang);
+		// updateStoredLanguagePreference(lang);
+		// etc.
+	}
 
 	function toggleMenu() {
 		showMenu = !showMenu;
@@ -85,6 +95,30 @@
 
 				{#if showMenu}
 					<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
+						<a href="/admin/login" class="dropdown-item">
+							<Icon icon="mdi:shield-account" width="20" height="20" />
+							<span>Admin Access</span>
+						</a>
+						<div class="dropdown-item language-toggle">
+							<Icon icon="mdi:translate" width="20" height="20" />
+							<span>Language</span>
+							<div class="language-switch">
+								<button
+									class="language-btn"
+									class:active={selectedLang === 'de'}
+									on:click={() => setLanguage('de')}
+								>
+									DE
+								</button>
+								<button
+									class="language-btn"
+									class:active={selectedLang === 'en'}
+									on:click={() => setLanguage('en')}
+								>
+									EN
+								</button>
+							</div>
+						</div>
 						{#if !$page.data.session?.user}
 							<a href="/auth/login" class="dropdown-item">
 								<Icon icon="mdi:login" width="20" height="20" />
@@ -95,19 +129,11 @@
 								<Icon icon="mdi:account-circle-outline" width="20" height="20" />
 								<span>My Account</span>
 							</a>
-							<a href="/settings" class="dropdown-item">
-								<Icon icon="mdi:cog" width="20" height="20" />
-								<span>Settings</span>
-							</a>
 							<button class="dropdown-item logout" on:click={handleLogout}>
 								<Icon icon="mdi:logout" width="20" height="20" />
 								<span>Sign Out</span>
 							</button>
 						{/if}
-						<a href="/admin/login" class="dropdown-item">
-							<Icon icon="mdi:shield-account" width="20" height="20" />
-							<span>Admin Access</span>
-						</a>
 					</div>
 				{/if}
 			</div>
@@ -311,6 +337,50 @@
 
 	.dropdown-item.logout:hover {
 		background-color: #fee2e2;
+	}
+
+	/* Language Toggle Styles */
+	.dropdown-item.language-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		cursor: default;
+		padding: 0.5rem 0.75rem;
+	}
+
+	.dropdown-item.language-toggle:hover {
+		background-color: transparent;
+	}
+
+	.language-switch {
+		display: flex;
+		gap: 2px;
+		background-color: #e5e7eb;
+		padding: 2px;
+		border-radius: 6px;
+		margin-left: auto;
+	}
+
+	.language-btn {
+		padding: 4px 8px;
+		border: none;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		background: transparent;
+		color: #6b7280;
+	}
+
+	.language-btn:hover {
+		color: #4b5563;
+	}
+
+	.language-btn.active {
+		background-color: white;
+		color: #2563eb;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 	/* Main Content */
 	main {
