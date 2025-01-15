@@ -1,16 +1,24 @@
 <script lang="ts">
+	import { generateTicketQRCode, type TicketInfo } from '$lib/util/qrCode';
 	import type { PageData } from './$types';
 	import Icon from '@iconify/svelte';
 
 	export let data: PageData;
 	const { payment } = data;
-
 	function formatDateTime(date: string) {
 		return new Date(date).toLocaleString();
 	}
 
 	function formatPrice(price: string | number) {
 		return typeof price === 'string' ? parseFloat(price).toFixed(2) : price.toFixed(2);
+	}
+
+	function createTicketInfo(ticket: { ticket_code: string; seat_label: string }): TicketInfo {
+		return {
+			showtime: payment.screening_time,
+			seats: [ticket.seat_label],
+			uniqueIdentifier: ticket.ticket_code
+		};
 	}
 </script>
 
@@ -53,6 +61,13 @@
 								<div class="ticket-code">
 									Code: {ticket.ticket_code}
 								</div>
+								{#await generateTicketQRCode(createTicketInfo(ticket))}
+									<p>Generating QR Code...</p>
+								{:then qrCodeDataUrl}
+									<img src={qrCodeDataUrl} alt="Ticket QR Code" class="qr-code" />
+								{:catch error}
+									<p>Error generating QR Code: {error.message}</p>
+								{/await}
 							</div>
 						{/each}
 					</div>
@@ -169,6 +184,12 @@
 	.ticket-code {
 		font-family: monospace;
 		color: #4b5563;
+	}
+
+	.qr-code {
+		width: 150px;
+		height: 150px;
+		margin-top: 1rem;
 	}
 
 	.actions {

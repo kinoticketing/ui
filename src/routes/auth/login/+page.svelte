@@ -10,10 +10,9 @@
 	let password = '';
 	let showPassword = false;
 
-	// Handle Github login with callbackUrl
 	function handleGithubLogin() {
 		signIn('github', {
-			callbackUrl: '/auth/account'
+			callbackUrl: '/auth/login-success'
 		});
 	}
 
@@ -25,191 +24,256 @@
 		showPassword = !showPassword;
 	}
 
-	// Show toast on successful login
 	onMount(() => {
 		if (browser && $page.data.session?.user) {
 			toast.success('Successfully logged in!', {
-				icon: '✅', // Using an emoji instead of Icon component
+				icon: '✅',
 				duration: 3000,
 				style: 'border-radius: 10px; background: #333; color: #fff;'
 			});
 		}
 	});
+
+	function goBackToHome() {
+		window.location.href = '/';
+	}
 </script>
 
-<div class="login-container">
-	{#if !$page.data.session?.user}
-		<h2>Login to Cinema System</h2>
+<main>
+	<div class="container">
+		<button class="back-button" on:click={goBackToHome}>
+			<Icon icon="mdi:arrow-left" width="20" height="20" />
+			Back to Home
+		</button>
 
-		<div class="auth-providers">
-			<button on:click={handleGithubLogin} class="provider-btn github">
-				<Icon icon="mdi:github" width="24" height="24" />
-				Log in with GitHub
-			</button>
-		</div>
+		{#if !$page.data.session?.user}
+			<h1 class="page-title">Login to Cinema System</h1>
 
-		<div class="spacer">
-			<span>or</span>
-		</div>
+			<div class="content-container">
+				<div class="login-section">
+					<div class="login-container">
+						<div class="auth-providers">
+							<button on:click={handleGithubLogin} class="provider-btn">
+								<Icon icon="mdi:github" width="24" height="24" />
+								Log in with GitHub
+							</button>
+						</div>
 
-		<form on:submit|preventDefault={handleLogin}>
-			<div class="input-group user-group">
-				<input type="text" bind:value={email} placeholder="Email or Username" required />
+						<div class="divider">
+							<span>or continue with email</span>
+						</div>
+
+						<form on:submit|preventDefault={handleLogin}>
+							<div class="input-group">
+								<input type="text" bind:value={email} placeholder="Email or Username" required />
+							</div>
+
+							<div class="input-group">
+								<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
+								<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
+									<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
+								</button>
+							</div>
+
+							<button type="submit" class="submit-button"> Login </button>
+						</form>
+
+						<div class="links-container">
+							<a href="/auth/forgot-password" class="text-link"> Forgot password? </a>
+							<a href="/auth/register" class="text-link"> Don't have an account? Create one </a>
+						</div>
+					</div>
+				</div>
 			</div>
-
-			<div class="input-group password-group">
-				<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
-				<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
-					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
-				</button>
-			</div>
-
-			<button type="submit" class="login-btn">Login</button>
-		</form>
-
-		<p class="forgot-password">
-			<a href="/auth/forgot-password">Forgot password?</a>
-		</p>
-		<p class="create-account">
-			<a href="/auth/register">Don't have an account? Create Account</a>
-		</p>
-	{/if}
-</div>
+		{/if}
+	</div>
+</main>
 
 <style>
-	.login-container {
-		max-width: 400px;
-		margin: 2rem auto;
-		padding: 2rem;
-		border: 1px solid #ddd;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		background-color: white;
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
 	}
 
-	h2 {
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		position: relative;
+	}
+
+	.back-button {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-button:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.page-title {
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 2rem;
 		text-align: center;
-		margin-bottom: 1.5rem;
+	}
+
+	.content-container {
+		display: flex;
+		justify-content: center;
+		padding-top: 2rem;
+	}
+
+	.login-section {
+		width: 100%;
+		max-width: 480px;
+	}
+
+	.login-container {
+		background: white;
+		padding: 2rem;
+		border-radius: 1rem;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	.auth-providers {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
 		margin-bottom: 1.5rem;
 	}
 
 	.provider-btn {
-		flex: 1;
+		width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 10px;
+		gap: 0.75rem;
 		padding: 0.75rem;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.9rem;
-	}
-
-	.github {
 		background-color: #24292e;
 		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.provider-btn:hover {
+		background-color: #1a1e23;
+	}
+
+	.divider {
+		display: flex;
+		align-items: center;
+		text-align: center;
+		margin: 1.5rem 0;
+	}
+
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.divider span {
+		padding: 0 1rem;
+		color: #6b7280;
+		font-size: 0.875rem;
 	}
 
 	.input-group {
-		margin-bottom: 1rem;
 		position: relative;
-	}
-
-	.user-group {
-		display: flex;
-		align-items: center;
-	}
-
-	.password-group {
-		display: flex;
-		align-items: center;
+		margin-bottom: 1rem;
 	}
 
 	input {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
+		padding: 0.75rem 1rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
 		font-size: 1rem;
+		transition: border-color 0.2s;
+	}
+
+	input:focus {
+		outline: none;
+		border-color: #2563eb;
 	}
 
 	.toggle-password {
 		position: absolute;
-		right: 10px;
+		right: 1rem;
 		top: 50%;
 		transform: translateY(-50%);
 		background: none;
 		border: none;
+		color: #6b7280;
 		cursor: pointer;
-		color: #777;
 	}
 
-	.login-btn {
+	.submit-button {
 		width: 100%;
 		padding: 0.75rem;
-		background-color: #007bff;
+		background-color: #2563eb;
 		color: white;
 		border: none;
-		border-radius: 4px;
+		border-radius: 0.5rem;
+		font-weight: 500;
 		cursor: pointer;
-		font-size: 1rem;
+		transition: all 0.2s ease;
 		margin-top: 1rem;
 	}
 
-	.forgot-password {
-		text-align: center;
-		margin-top: 1rem;
-		font-size: 0.9rem;
+	.submit-button:hover {
+		background-color: #1d4ed8;
 	}
 
-	.forgot-password a {
-		color: #007bff;
-		text-decoration: none;
-	}
-
-	.forgot-password a:hover {
-		text-decoration: underline;
-	}
-
-	.create-account {
-		text-align: center;
-		margin-top: 1rem;
-		font-size: 0.9rem;
-	}
-
-	.create-account a {
-		color: #007bff;
-		text-decoration: none;
-	}
-
-	.create-account a:hover {
-		text-decoration: underline;
-	}
-
-	.spacer {
+	.links-container {
+		margin-top: 1.5rem;
 		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 		align-items: center;
-		text-align: center;
-		margin: 20px 0;
 	}
 
-	.spacer::before,
-	.spacer::after {
-		content: '';
-		flex: 1;
-		border-bottom: 1px solid #ddd;
+	.text-link {
+		color: #2563eb;
+		text-decoration: none;
+		font-size: 0.875rem;
+		transition: color 0.2s;
 	}
 
-	.spacer span {
-		padding: 0 10px;
-		color: #777;
-		font-size: 0.9rem;
+	.text-link:hover {
+		color: #1d4ed8;
+		text-decoration: underline;
+	}
+
+	@media (max-width: 640px) {
+		.page-title {
+			font-size: 1.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.login-container {
+			padding: 1.5rem;
+		}
+
+		.back-button {
+			position: static;
+			margin-bottom: 1.5rem;
+		}
 	}
 </style>

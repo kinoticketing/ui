@@ -281,6 +281,7 @@
 	/* Account Dropdown */
 	.account-dropdown {
 		position: relative;
+		display: inline-block;
 	}
 
 	.account-button {
@@ -298,17 +299,6 @@
 		background-color: rgba(0, 0, 0, 0.05);
 	}
 
-	.dropdown-menu {
-		position: absolute;
-		right: 0;
-		top: calc(100% + 0.5rem);
-		background: white;
-		border-radius: 0.75rem;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-		min-width: 200px;
-		padding: 0.5rem;
-	}
-
 	.dropdown-item {
 		display: flex;
 		align-items: center;
@@ -321,9 +311,30 @@
 		cursor: pointer;
 		border: none;
 		background: none;
-		width: 100%;
+		width: calc(100% - 0.5rem); /* Subtract padding to prevent right side overflow */
 		text-align: left;
 		font-size: 1rem;
+		margin: 0.125rem 0.25rem; /* Add horizontal margin to center the items */
+		margin-left: 0.25rem;
+		margin-right: 0.25rem;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.dropdown-menu {
+		position: absolute;
+		right: 0;
+		top: calc(100% + 0.5rem);
+		background: white;
+		border-radius: 0.75rem;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+		min-width: 200px;
+		padding: 0.5rem;
+		max-height: calc(100vh - 5rem);
+		overflow-y: auto;
+		z-index: 1001;
+		/* Add this to ensure consistent padding */
+		box-sizing: border-box;
 	}
 
 	.dropdown-item:hover {
@@ -346,9 +357,10 @@
 
 	/* Footer Styles */
 	footer {
-		background-color: #1a1a1a;
-		color: #e5e7eb;
+		background-color: #f3f4f6;
+		color: #4b5563;
 		padding: 4rem 2rem 2rem;
+		border-top: 1px solid #e5e7eb;
 	}
 
 	.footer-content {
@@ -360,14 +372,15 @@
 	}
 
 	.footer-section h2 {
-		color: white;
+		font-family: 'Playfair Display', serif;
+		color: #1a1a1a;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 1.5rem;
 	}
 
 	.footer-section p {
-		color: #9ca3af;
+		color: #4b5563;
 		line-height: 1.6;
 	}
 
@@ -378,13 +391,16 @@
 	}
 
 	.footer-links a {
-		color: #9ca3af;
+		color: #4b5563;
 		text-decoration: none;
 		transition: color 0.2s;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.footer-links a:hover {
-		color: white;
+		color: #2563eb;
 	}
 
 	.social-links {
@@ -393,17 +409,22 @@
 	}
 
 	.social-link {
-		color: #9ca3af;
+		color: #4b5563;
 		transition: all 0.2s;
-		padding: 0.5rem;
+		padding: 0.75rem;
 		border-radius: 50%;
-		background-color: rgba(255, 255, 255, 0.1);
+		background-color: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.social-link:hover {
-		color: white;
-		background-color: rgba(255, 255, 255, 0.2);
+		color: #2563eb;
+		background-color: white;
 		transform: translateY(-2px);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	.newsletter-form {
@@ -414,10 +435,17 @@
 	.newsletter-form input {
 		flex: 1;
 		padding: 0.75rem 1rem;
-		border: 1px solid #374151;
+		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
-		background-color: rgba(255, 255, 255, 0.05);
-		color: white;
+		background-color: white;
+		color: #1a1a1a;
+		transition: all 0.2s;
+	}
+
+	.newsletter-form input:focus {
+		outline: none;
+		border-color: #2563eb;
+		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 	}
 
 	.newsletter-form input::placeholder {
@@ -426,17 +454,19 @@
 
 	.newsletter-form button {
 		padding: 0.75rem 1.5rem;
-		background-color: #60a5fa;
+		background-color: #2563eb;
 		color: white;
 		border: none;
 		border-radius: 0.5rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: all 0.2s;
 	}
 
 	.newsletter-form button:hover {
-		background-color: #3b82f6;
+		background-color: #1d4ed8;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.footer-bottom {
@@ -444,9 +474,9 @@
 		margin: 0 auto;
 		margin-top: 3rem;
 		padding-top: 2rem;
-		border-top: 1px solid #374151;
+		border-top: 1px solid #e5e7eb;
 		text-align: center;
-		color: #9ca3af;
+		color: #6b7280;
 	}
 
 	@media (max-width: 768px) {

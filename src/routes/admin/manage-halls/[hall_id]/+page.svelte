@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Icon from '@iconify/svelte';
 
 	export let data;
 
@@ -37,7 +38,7 @@
 		}
 		return 'regular';
 	}
-	
+
 	// Zurück navigieren
 	function goBack() {
 		goto('/admin/manage-halls');
@@ -49,18 +50,21 @@
 		<div class="container">
 			<header class="header">
 				<h1 class="page-title">
-					<button class="back-btn" on:click={goBack} aria-label="Zurück"> Back </button>
+					<button class="back-btn" on:click={goBack}>
+						<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+						Zurück
+					</button>
 					<span>{hall.name}</span>
 				</h1>
 				<p class="info">
-					Capacity: {hall.total_seats} seats
+					Kapazität: {hall.total_seats} Sitzplätze
 				</p>
 			</header>
 
 			<div class="seating-section">
 				<div class="screen-container">
 					<div class="screen"></div>
-					<p class="screen-label">Screen</p>
+					<p class="screen-label">Leinwand</p>
 				</div>
 
 				<div class="seat-plan">
@@ -98,6 +102,22 @@
 </main>
 
 <style>
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.header {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
+
 	.page-title {
 		position: relative;
 		text-align: center;
@@ -105,12 +125,12 @@
 	}
 
 	.back-btn {
-		position: absolute;
-		left: 0;
-		top: 0;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		position: absolute;
+		left: 0;
+		top: 0;
 		padding: 0.75rem 1.25rem;
 		background-color: white;
 		border: 1px solid #e5e7eb;
@@ -126,17 +146,6 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem;
-	}
-
-	.header {
-		text-align: center;
-		margin-bottom: 2rem;
-	}
-
 	.title {
 		font-size: 2rem;
 		margin: 0;
@@ -145,19 +154,6 @@
 	.info {
 		color: #666;
 		margin: 0.5rem 0;
-	}
-
-	.controls {
-		display: flex;
-		justify-content: center;
-		gap: 1rem;
-		margin-bottom: 2rem;
-	}
-
-	.edit-mode {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
 	}
 
 	.seating-section {
@@ -178,6 +174,11 @@
 		margin: 0 auto 1rem;
 		width: 80%;
 		border-radius: 4px;
+	}
+
+	.screen-label {
+		font-size: 0.875rem;
+		color: #666;
 	}
 
 	.seat-plan {
