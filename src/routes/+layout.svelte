@@ -2,11 +2,11 @@
 	import '../app.css';
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import '../i18n.js';
 	import { t, locale } from 'svelte-i18n';
 	import { i18nReady } from '../i18n.js';
