@@ -97,7 +97,7 @@
 			<div class="details-container">
 				<div class="section-header">
 					<h2>Demnächst bei uns</h2>
-					<a href="/coming-soon" class="view-all">
+					<a href="/movies" class="view-all">
 						Alle anzeigen
 						<Icon icon="mdi:arrow-right" width="16" height="16" />
 					</a>
