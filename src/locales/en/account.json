@@ -1,0 +1,30 @@
+{
+    "account": {
+        "backToHome": "Back to Home",
+        "title": "Account Settings",
+        "personalInfoTitle": "Personal Information",
+        "emailLabel": "Email",
+        "nameLabel": "Name",
+        "notProvided": "Not provided",
+        "streetAddressLabel": "Street Address",
+        "cityLabel": "City",
+        "stateLabel": "State",
+        "postalCodeLabel": "Postal Code",
+        "countryLabel": "Country",
+        "viewReservationsButton": "View My Reservations",
+        "passwordSettingsTitle": "Password Settings",
+        "createPasswordButton": "Create Password",
+        "changePasswordButton": "Change Password",
+        "currentPasswordLabel": "Current Password",
+        "newPasswordLabel": "New Password",
+        "confirmPasswordLabel": "Confirm Password",
+        "cancelButton": "Cancel",
+        "updatePasswordButton": "Update Password",
+        "loadingButton": "Loading...",
+        "addressInfoTitle": "Address Information",
+        "editAddressButton": "Edit Address",
+        "updateAddressButton": "Update Address",
+        "loginPrompt": "Please log in to view your account information.",
+        "loginButton": "Login"
+    }
+}
