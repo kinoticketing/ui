@@ -3,6 +3,17 @@
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 
+	import { onMount } from 'svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
+
 	function handleLogout() {
 		signOut({ callbackUrl: '/auth/login' });
 	}
@@ -12,52 +23,61 @@
 	}
 </script>
 
-<main>
-	<div class="container">
-		<h1 class="welcome-title">Welcome, {$page.data.session?.user?.name || 'User'}!</h1>
-		<p class="success-message">You've successfully logged in. Where would you like to go?</p>
+{#if loaded}
+	<main>
+		<div class="container">
+			<h1 class="welcome-title">
+				{$t('loginSuccess.title')}
+				{$page.data.session?.user?.name || $t('welcome.defaultName')}!
+			</h1>
+			<p class="success-message">{$t('loginSuccess.successMessage')}</p>
 
-		<div class="content-container">
-			<div class="options-section">
-				<div class="options-container">
-					<div class="navigation-buttons">
-						<button class="nav-button home" on:click={() => navigateTo('/')}>
-							<Icon icon="mdi:home" width="24" height="24" />
-							<div class="button-content">
-								<span class="button-title">Home Page</span>
-								<span class="button-description">Browse movies and showtimes</span>
-							</div>
-							<Icon icon="mdi:chevron-right" width="24" height="24" />
-						</button>
+			<div class="content-container">
+				<div class="options-section">
+					<div class="options-container">
+						<div class="navigation-buttons">
+							<button class="nav-button home" on:click={() => navigateTo('/')}>
+								<Icon icon="mdi:home" width="24" height="24" />
+								<div class="button-content">
+									<span class="button-title">{$t('loginSuccess.homePageTitle')}</span>
+									<span class="button-description">{$t('loginSuccess.homePageDescription')}</span>
+								</div>
+								<Icon icon="mdi:chevron-right" width="24" height="24" />
+							</button>
 
-						<button class="nav-button reservations" on:click={() => navigateTo('/reservations')}>
-							<Icon icon="mdi:ticket" width="24" height="24" />
-							<div class="button-content">
-								<span class="button-title">My Reservations</span>
-								<span class="button-description">View your booking history</span>
-							</div>
-							<Icon icon="mdi:chevron-right" width="24" height="24" />
-						</button>
+							<button class="nav-button reservations" on:click={() => navigateTo('/reservations')}>
+								<Icon icon="mdi:ticket" width="24" height="24" />
+								<div class="button-content">
+									<span class="button-title">{$t('loginSuccess.myReservationsTitle')}</span>
+									<span class="button-description"
+										>{$t('loginSuccess.myReservationsDescription')}</span
+									>
+								</div>
+								<Icon icon="mdi:chevron-right" width="24" height="24" />
+							</button>
 
-						<button class="nav-button account" on:click={() => navigateTo('/auth/account')}>
-							<Icon icon="mdi:account" width="24" height="24" />
-							<div class="button-content">
-								<span class="button-title">Account Settings</span>
-								<span class="button-description">Manage your profile and preferences</span>
-							</div>
-							<Icon icon="mdi:chevron-right" width="24" height="24" />
+							<button class="nav-button account" on:click={() => navigateTo('/auth/account')}>
+								<Icon icon="mdi:account" width="24" height="24" />
+								<div class="button-content">
+									<span class="button-title">{$t('loginSuccess.accountSettingsTitle')}</span>
+									<span class="button-description"
+										>{$t('loginSuccess.accountSettingsDescription')}</span
+									>
+								</div>
+								<Icon icon="mdi:chevron-right" width="24" height="24" />
+							</button>
+						</div>
+
+						<button class="logout-button" on:click={handleLogout}>
+							<Icon icon="mdi:logout" width="20" height="20" />
+							{$t('loginSuccess.logoutButton')}
 						</button>
 					</div>
-
-					<button class="logout-button" on:click={handleLogout}>
-						<Icon icon="mdi:logout" width="20" height="20" />
-						Logout
-					</button>
 				</div>
 			</div>
 		</div>
-	</div>
-</main>
+	</main>
+{/if}
 
 <style>
 	main {
