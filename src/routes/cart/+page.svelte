@@ -2,20 +2,32 @@
 	import type { PageData } from './$types';
 	import Icon from '@iconify/svelte';
 	import { cart } from '$lib/stores/cart';
+	import { formatDateTime, formatPrice } from '$lib/utils';
+	import type { CartTicket } from '$lib/types';
 
-	export let data: PageData;
 	let loading = false;
 
-	function removeFromCart(id: number) {
-		cart.removeItem(id);
+	// Constants
+	const BOOKING_FEE = 2.0; // Fixed booking fee per order
+
+	// Calculate totals
+	$: subtotal = $cart.reduce(
+		(sum, item) => sum + item.tickets.reduce((ticketSum, ticket) => ticketSum + ticket.price, 0),
+		0
+	);
+	$: bookingFee = $cart.length > 0 ? BOOKING_FEE : 0;
+	$: total = subtotal + bookingFee;
+
+	function getTicketLabels(tickets: CartTicket[]): string {
+		return tickets.map((t) => `${t.label} (${t.categoryName})`).join(', ');
 	}
 
 	async function proceedToCheckout() {
-		if (loading) return;
+		if (loading || $cart.length === 0) return;
 
 		loading = true;
 		try {
-			// Process all items in cart
+			// Process each screening in cart
 			for (const cartItem of $cart) {
 				const response = await fetch('/api/checkout', {
 					method: 'POST',
@@ -30,8 +42,8 @@
 				});
 
 				if (!response.ok) {
-					const error = await response.json();
-					throw new Error(error.error || 'Checkout failed');
+					const errorData = await response.json();
+					throw new Error(errorData.error || 'Checkout failed');
 				}
 
 				const { checkoutUrl } = await response.json();
@@ -43,18 +55,16 @@
 			}
 		} catch (error) {
 			console.error('Checkout error:', error);
-			alert('Failed to process checkout. Please try again.');
+			alert(
+				error instanceof Error ? error.message : 'Failed to process checkout. Please try again.'
+			);
 		} finally {
 			loading = false;
 		}
 	}
-
-	//$: total = data.cartItems.reduce((sum, item) => sum + item.price, 0);
-	//$: bookingFee = data.cartItems.length > 0 ? 2.0 : 0;
-	let total = 10;
-	let bookingFee = 5;
 </script>
 
+// src/routes/cart/+page.svelte
 <main>
 	<div class="container">
 		<h1 class="page-title">Shopping Cart</h1>
@@ -65,18 +75,37 @@
 				{#if $cart.length === 0}
 					<div class="empty-cart">
 						<p>Your cart is empty</p>
+						<a href="/movies" class="browse-movies">Browse Movies</a>
 					</div>
 				{:else}
 					{#each $cart as item}
 						<div class="cart-item">
-							<img src={item.movieImageUrl} alt={item.movieTitle} class="movie-poster" />
+							<img
+								src={item.movieImageUrl || '/fallback-movie-poster.jpg'}
+								alt={item.movieTitle}
+								class="movie-poster"
+							/>
 							<div class="item-details">
 								<h3 class="movie-title">{item.movieTitle}</h3>
-								<p class="screening-time">{item.screeningTime}</p>
-								<p class="seat-info">Seats: {item.tickets}</p>
+								<p class="screening-time">
+									Screening: {formatDateTime(item.screeningTime)}
+								</p>
+								<p class="seat-info">
+									Seats: {getTicketLabels(item.tickets)}
+								</p>
+								<div class="tickets-summary">
+									{#each item.tickets as ticket}
+										<div class="ticket-row">
+											<span>{ticket.label} ({ticket.categoryName})</span>
+											<span>${formatPrice(ticket.price)}</span>
+										</div>
+									{/each}
+								</div>
 								<div class="item-actions">
-									<span class="price">${item.tickets[0].price.toFixed(2)}</span>
-									<button class="remove-button" on:click={() => removeFromCart(item.screeningId)}>
+									<span class="price">
+										Total: ${formatPrice(item.tickets.reduce((sum, t) => sum + t.price, 0))}
+									</span>
+									<button class="remove-button" on:click={() => cart.removeItem(item.screeningId)}>
 										Remove
 									</button>
 								</div>
@@ -94,24 +123,29 @@
 					<div class="summary-details">
 						<div class="summary-row">
 							<span>Subtotal</span>
-							<span>${total.toFixed(2)}</span>
+							<span>${formatPrice(subtotal)}</span>
 						</div>
-						<div class="summary-row">
-							<span>Booking Fee</span>
-							<span>${bookingFee.toFixed(2)}</span>
-						</div>
+						{#if bookingFee > 0}
+							<div class="summary-row">
+								<span>Booking Fee</span>
+								<span>${formatPrice(bookingFee)}</span>
+							</div>
+						{/if}
 					</div>
 
 					<div class="total-row">
 						<span>Total</span>
-						<span>${(total + bookingFee).toFixed(2)}</span>
+						<span>${formatPrice(total)}</span>
 					</div>
 
 					<button
 						class="checkout-button"
-						disabled={data.cartItems.length === 0}
+						disabled={$cart.length === 0 || loading}
 						on:click={proceedToCheckout}
 					>
+						{#if loading}
+							<span class="loading-spinner"></span>
+						{/if}
 						Proceed to Checkout
 					</button>
 				</div>
@@ -121,6 +155,52 @@
 </main>
 
 <style>
+	/* Your existing styles... */
+
+	.browse-movies {
+		display: inline-block;
+		margin-top: 1rem;
+		color: #2563eb;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.browse-movies:hover {
+		text-decoration: underline;
+	}
+
+	.tickets-summary {
+		margin: 0.5rem 0;
+		padding: 0.5rem 0;
+		border-top: 1px solid #e5e7eb;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.ticket-row {
+		display: flex;
+		justify-content: space-between;
+		color: #4b5563;
+		font-size: 0.875rem;
+		padding: 0.25rem 0;
+	}
+
+	.loading-spinner {
+		display: inline-block;
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid #ffffff;
+		border-radius: 50%;
+		border-top-color: transparent;
+		animation: spin 1s linear infinite;
+		margin-right: 0.5rem;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	main {
 		min-height: 100vh;
 		background-color: #f8f9fa;
@@ -167,6 +247,16 @@
 		display: flex;
 		gap: 1rem;
 		margin-bottom: 1rem;
+		transition: all 0.2s ease;
+	}
+
+	.cart-item:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.cart-item:hover .movie-poster {
+		transform: scale(1.02);
 	}
 
 	.movie-poster {
@@ -174,6 +264,7 @@
 		height: 180px;
 		object-fit: cover;
 		border-radius: 0.5rem;
+		transition: transform 0.3s ease;
 	}
 
 	.item-details {

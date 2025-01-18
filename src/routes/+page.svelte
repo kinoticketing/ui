@@ -46,7 +46,7 @@
 						<a href="/movies/{movie.id}" class="movie-card">
 							<div class="poster-container">
 								<img
-									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg'}
+									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
 									alt={movie.Title}
 									class="movie-poster"
 								/>
@@ -108,7 +108,7 @@
 						<a href="/movies/{movie.id}" class="movie-card">
 							<div class="poster-container">
 								<img
-									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg'}
+									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
 									alt={movie.Title}
 									class="movie-poster"
 								/>

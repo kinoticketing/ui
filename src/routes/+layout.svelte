@@ -48,8 +48,7 @@
 			isScrolled = window.scrollY > 20;
 		});
 	});
-	// $: ticketCount = $cart.reduce((sum, item) => sum + item.seats.length, 0);
-	$: ticketCount = 3;
+	$: ticketCount = $cart.reduce((sum, item) => sum + item.tickets.length, 0);
 </script>
 
 <svelte:window on:click={handleClickOutside} />

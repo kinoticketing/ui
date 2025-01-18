@@ -66,7 +66,7 @@
 			<div class="details-section">
 				<div class="details-container">
 					<img
-						src={data.movie.Poster !== 'N/A' ? data.movie.Poster : '/fallback-image.jpg'}
+						src={data.movie.Poster !== 'N/A' ? data.movie.Poster : '/fallback-movie-poster.jpg'}
 						alt={data.movie.Title}
 						class="poster"
 					/>

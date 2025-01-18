@@ -17,8 +17,10 @@ const pool = new Pool({
 
 export const load: PageServerLoad = async ({ params }) => {
 	try {
-		// Get movie data
+		// Get movie data with explicit fields
 		const movieResult = await pool.query('SELECT * FROM movies WHERE imdb_id = $1', [params.id]);
+
+		console.log('Movie data from DB:', movieResult.rows[0]);
 
 		if (movieResult.rows.length === 0) {
 			throw error(404, 'Movie not found');

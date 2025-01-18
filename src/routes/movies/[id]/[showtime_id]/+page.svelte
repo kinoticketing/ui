@@ -32,7 +32,8 @@
 					price: seat.price,
 					categoryName: seat.categoryName
 				})),
-				movieImageUrl: '/fallback-image.jpg'
+				// Change this line to use Poster instead of movieImageUrl
+				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
 			});
 
 			// Navigate to cart
