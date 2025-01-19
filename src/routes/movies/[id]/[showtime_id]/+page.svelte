@@ -1,4 +1,3 @@
-<!-- src/routes/movies/[id]/[showtime_id]/+page.svelte -->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
@@ -11,44 +10,38 @@
 	function goBackToMovie() {
 		window.location.href = `/movies/${movie.imdb_id}`;
 	}
-	async function handleCheckout() {
-		if (loading) return;
-
-		loading = true;
-		try {
-			// Store selected seats in localStorage as backup
-			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-
-			// Add to cart
-			cart.addItem({
-				screeningId: screening.id,
-				movieTitle: movie.title,
-				screeningTime: screening.start_time,
-				tickets: selectedSeats.map((seat) => ({
-					seatId: seat.seatId,
-					row: seat.row,
-					col: seat.col,
-					label: seat.label,
-					price: seat.price,
-					categoryName: seat.categoryName
-				})),
-				// Change this line to use Poster instead of movieImageUrl
-				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
-			});
-
-			// Navigate to cart
-			window.location.href = '/cart';
-		} catch (error) {
-			console.error('Add to cart error:', error);
-			alert('Failed to add tickets to cart. Please try again.');
-		} finally {
-			loading = false;
-		}
-	}
 
 	let selectedSeats: SelectedSeat[] = [];
 	let loading = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
+
+	// Add these type definitions at the top of your script section
+	type CategoryType = 'vip' | 'premium' | 'regular' | 'disabled';
+
+	interface CategoryDetails {
+		background: string;
+		text: string;
+		modifier: number;
+	}
+
+	// Update the seatCategories declaration
+	const seatCategories: Record<CategoryType, CategoryDetails> = {
+		vip: { background: '#fcd34d', text: '#000', modifier: 5.0 },
+		premium: { background: '#f87171', text: '#fff', modifier: 3.0 },
+		regular: { background: '#93c5fd', text: '#000', modifier: 1.0 },
+		disabled: { background: '#86efac', text: '#000', modifier: 0.8 }
+	};
+
+	// Update the helper functions
+	function getCategoryColor(categoryName: string | undefined): string {
+		const categoryKey = (categoryName?.toLowerCase() || 'regular') as CategoryType;
+		return seatCategories[categoryKey]?.background || seatCategories.regular.background;
+	}
+
+	function getCategoryTextColor(categoryName: string | undefined): string {
+		const categoryKey = (categoryName?.toLowerCase() || 'regular') as CategoryType;
+		return seatCategories[categoryKey]?.text || seatCategories.regular.text;
+	}
 
 	onMount(async () => {
 		// Check for stored seats
@@ -97,7 +90,7 @@
 	}
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
-		if (!seat || seat.isBooked || loading) return;
+		if (!seat || seat.isBooked || loading || seat.status === 'inactive') return;
 
 		loading = true;
 		const seatKey = `${rowIndex}-${colIndex}`;
@@ -168,6 +161,40 @@
 		selectedSeats = selectedSeats.filter((seat) => seat.key !== seatKey);
 	}
 
+	async function handleCheckout() {
+		if (loading) return;
+
+		loading = true;
+		try {
+			// Store selected seats in localStorage as backup
+			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+
+			// Add to cart
+			cart.addItem({
+				screeningId: screening.id,
+				movieTitle: movie.title,
+				screeningTime: screening.start_time,
+				tickets: selectedSeats.map((seat) => ({
+					seatId: seat.seatId,
+					row: seat.row,
+					col: seat.col,
+					label: seat.label,
+					price: seat.price,
+					categoryName: seat.categoryName
+				})),
+				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
+			});
+
+			// Navigate to cart
+			window.location.href = '/cart';
+		} catch (error) {
+			console.error('Add to cart error:', error);
+			alert('Failed to add tickets to cart. Please try again.');
+		} finally {
+			loading = false;
+		}
+	}
+
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString();
 	}
@@ -176,17 +203,6 @@
 		const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 		if (isNaN(numericPrice)) return '0.00';
 		return numericPrice.toFixed(2);
-	}
-
-	function getCategoryColor(categoryName: string): string {
-		switch (categoryName.toLowerCase()) {
-			case 'vip':
-				return '#fbbf24';
-			case 'premium':
-				return '#60a5fa';
-			default:
-				return '#e5e7eb';
-		}
 	}
 </script>
 
@@ -211,23 +227,32 @@
 					<div class="seat-plan">
 						{#each screening.hall.seatPlan as row, rowIndex}
 							<div class="seat-row">
-								{#each row as seat, colIndex}
+								<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
+								{#each row.filter((seat) => seat !== null) as seat}
 									<button
 										class="seat-button"
 										class:seat-selected={selectedSeats.some(
-											(s) => s.key === `${rowIndex}-${colIndex}`
+											(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 										)}
 										class:seat-booked={seat?.isBooked}
-										class:seat-empty={!seat}
+										class:seat-inactive={seat?.status === 'inactive'}
 										style={seat
 											? `background-color: ${
-													selectedSeats.some((s) => s.key === `${rowIndex}-${colIndex}`)
+													selectedSeats.some(
+														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+													)
 														? '#3b82f6'
-														: getCategoryColor(seat.category.name)
+														: getCategoryColor(seat.category?.name)
+												}; color: ${
+													selectedSeats.some(
+														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+													)
+														? '#ffffff'
+														: getCategoryTextColor(seat.category?.name)
 												}`
 											: ''}
-										disabled={!seat || seat.isBooked}
-										on:click={() => handleSeatClick(rowIndex, colIndex, seat)}
+										disabled={!seat || seat.isBooked || seat.status === 'inactive'}
+										on:click={() => handleSeatClick(rowIndex, seat.column_number - 1, seat)}
 									>
 										{seat?.seat_label ?? ''}
 									</button>
@@ -237,21 +262,29 @@
 					</div>
 
 					<div class="seat-legend">
-						<div class="legend-item">
-							<div class="legend-box premium"></div>
-							<span>Premium</span>
+						<div class="legend-section">
+							<span class="legend-section-title">Seat Categories</span>
+							{#each Object.entries(seatCategories) as [type, data]}
+								<div class="legend-item">
+									<div
+										class="legend-box"
+										style="background-color: {data.background}; color: {data.text}"
+									></div>
+									<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
+								</div>
+							{/each}
 						</div>
-						<div class="legend-item">
-							<div class="legend-box vip"></div>
-							<span>VIP</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-box selected"></div>
-							<span>Selected</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-box booked"></div>
-							<span>Booked</span>
+
+						<div class="legend-section">
+							<span class="legend-section-title">Seat Status</span>
+							<div class="legend-item">
+								<div class="legend-box selected"></div>
+								<span>Selected</span>
+							</div>
+							<div class="legend-item">
+								<div class="legend-box booked"></div>
+								<span>Booked</span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -310,11 +343,16 @@
 </main>
 
 <style>
-	/* Previous styles remain the same */
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
+
 	.container {
 		max-width: 1200px;
 		margin: 0 auto;
-		position: relative; /* Change from your original */
+		position: relative;
 	}
 
 	.back-button {
@@ -339,25 +377,6 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.legend-box.premium {
-		background-color: #60a5fa;
-	}
-
-	.legend-box.vip {
-		background-color: #fbbf24;
-	}
-
-	main {
-		min-height: 100vh;
-		background-color: #f8f9fa;
-		padding: 2rem 1rem;
-	}
-
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
 	.movie-title {
 		font-size: 2rem;
 		font-weight: 600;
@@ -376,6 +395,7 @@
 		display: flex;
 		gap: 2rem;
 		align-items: flex-start;
+		justify-content: space-between;
 	}
 
 	.seating-section {
@@ -384,22 +404,26 @@
 		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		height: 650px;
-		display: flex;
-		flex-direction: column;
+	}
+
+	.cart-section {
+		flex: 2;
+		position: sticky;
+		top: 2rem;
+		min-width: 350px;
 	}
 
 	.screen-container {
-		margin-bottom: 2rem;
+		margin-bottom: 3rem;
 		text-align: center;
-		flex-shrink: 0;
+		padding-left: 2.5rem;
 	}
 
 	.screen {
 		height: 8px;
 		background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
 		margin: 0 auto 1rem;
-		width: 80%;
+		width: calc(100%-2.5rem);
 		border-radius: 4px;
 	}
 
@@ -409,37 +433,22 @@
 	}
 
 	.seat-plan {
-		margin-bottom: 2rem;
-		flex-grow: 1;
-		overflow-y: auto;
-		padding-right: 0.5rem;
-		scrollbar-width: thin;
-		scrollbar-color: #cbd5e1 #f1f5f9;
-	}
-
-	.seat-plan::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.seat-plan::-webkit-scrollbar-track {
-		background: #f1f5f9;
-		border-radius: 3px;
-	}
-
-	.seat-plan::-webkit-scrollbar-thumb {
-		background: #cbd5e1;
-		border-radius: 3px;
-	}
-
-	.seat-plan::-webkit-scrollbar-thumb:hover {
-		background: #94a3b8;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		align-items: center;
 	}
 
 	.seat-row {
 		display: flex;
-		justify-content: center;
 		gap: 0.5rem;
-		margin-bottom: 0.5rem;
+		align-items: center;
+	}
+
+	.row-label {
+		width: 2rem;
+		text-align: right;
+		font-weight: bold;
 	}
 
 	.seat-button {
@@ -447,13 +456,13 @@
 		height: 2.5rem;
 		border: none;
 		border-radius: 0.375rem;
-		background-color: #e5e7eb;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 0.875rem;
+		transition: all 0.2s;
+		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: #1a1a1a;
 	}
 
 	.seat-button:not(:disabled):hover {
@@ -461,27 +470,41 @@
 	}
 
 	.seat-selected {
-		background-color: #3b82f6;
-		color: white;
+		background-color: #3b82f6 !important;
+		color: white !important;
 	}
 
 	.seat-booked {
-		background-color: #9ca3af;
+		background-color: #9ca3af !important;
 		cursor: not-allowed;
+		color: white !important;
 	}
 
-	.seat-empty {
-		visibility: hidden;
+	.seat-inactive {
+		background-color: #9ca3af !important;
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
 
 	.seat-legend {
-		display: flex;
-		justify-content: center;
-		gap: 2rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 1rem;
 		margin-top: 2rem;
-		flex-shrink: 0;
 		padding-top: 1rem;
 		border-top: 1px solid #e5e7eb;
+	}
+
+	.legend-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+	.legend-section-title {
+		font-size: 0.875rem;
+		color: #666;
+		font-weight: 500;
+		margin-bottom: 0.25rem;
 	}
 
 	.legend-item {
@@ -512,13 +535,14 @@
 
 	.cart-container {
 		background: white;
-		padding: 1.5rem;
+		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
 		height: calc(100vh - 8rem);
 		max-height: 800px;
+		width: 100%;
 	}
 
 	.cart-title {
@@ -566,10 +590,15 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem;
+		padding: 1.25rem;
 		background-color: #f8f9fa;
-		border-radius: 0.5rem;
-		margin-bottom: 0.75rem;
+		border-radius: 0.75rem;
+		margin-bottom: 1rem;
+		transition: transform 0.2s ease;
+	}
+
+	.ticket-item:hover {
+		transform: translateX(4px);
 	}
 
 	.ticket-info {
@@ -622,12 +651,24 @@
 	}
 
 	.checkout-button {
+		width: 100%;
+		padding: 0.875rem;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
 		background-color: #2563eb;
 		color: white;
 	}
 
 	.checkout-button:hover:not(:disabled) {
 		background-color: #1d4ed8;
+	}
+
+	.checkout-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	.error-container {
@@ -646,19 +687,15 @@
 		.booking-container {
 			flex-direction: column;
 		}
+		.seating-section,
+		.cart-section {
+			width: 100%;
+			flex: none;
+		}
 
 		.cart-section {
 			position: static;
-			width: 100%;
-		}
-
-		.cart-container {
-			height: auto;
-			max-height: 500px;
-		}
-
-		.seating-section {
-			width: 100%;
+			margin-top: 2rem;
 		}
 	}
 
@@ -673,6 +710,10 @@
 			flex-direction: column;
 			align-items: center;
 			gap: 1rem;
+		}
+
+		.movie-title {
+			font-size: 1.5rem;
 		}
 	}
 </style>

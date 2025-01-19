@@ -20,8 +20,6 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Get movie data with explicit fields
 		const movieResult = await pool.query('SELECT * FROM movies WHERE imdb_id = $1', [params.id]);
 
-		console.log('Movie data from DB:', movieResult.rows[0]);
-
 		if (movieResult.rows.length === 0) {
 			throw error(404, 'Movie not found');
 		}
@@ -36,7 +34,7 @@ export const load: PageServerLoad = async ({ params }) => {
                 s.end_time,
                 s.created_at,
                 s.updated_at,
-                h.name,
+                h.name as hall_name,
                 h.total_rows,
                 h.total_columns,
                 (
@@ -46,6 +44,7 @@ export const load: PageServerLoad = async ({ params }) => {
                             'seat_label', seats.seat_label,
                             'row_number', seats.row_number,
                             'column_number', seats.column_number,
+							'status', seats.status,
                             'category', (
                                 SELECT json_build_object(
                                     'id', sc.id,
@@ -99,8 +98,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			screening: {
 				...screening,
 				hall: {
-					id: screening.id,
-					name: screening.name,
+					id: screening.hall_id,
+					name: screening.hall_name,
 					total_rows: screening.total_rows,
 					total_columns: screening.total_columns,
 					seatPlan
