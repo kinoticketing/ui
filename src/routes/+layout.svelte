@@ -7,6 +7,7 @@
 	import { quintOut } from 'svelte/easing';
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { goto } from '$app/navigation';
+	import { cart } from '$lib/stores/cart';
 
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
@@ -47,6 +48,7 @@
 			isScrolled = window.scrollY > 20;
 		});
 	});
+	$: ticketCount = $cart.reduce((sum, item) => sum + item.tickets.length, 0);
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -88,54 +90,63 @@
 				{/if}
 			</div>
 
-			<div class="account-dropdown">
-				<button class="account-button" on:click={toggleMenu}>
-					<Icon icon="mdi:account-circle" width="32" height="32" />
-				</button>
+			<div class="user-actions">
+				<a href="/cart" class="cart-button">
+					<Icon icon="mdi:cart" width="24" height="24" />
+					{#if ticketCount > 0}
+						<span class="cart-count">{ticketCount}</span>
+					{/if}
+				</a>
 
-				{#if showMenu}
-					<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
-						<a href="/admin/login" class="dropdown-item">
-							<Icon icon="mdi:shield-account" width="20" height="20" />
-							<span>Admin Access</span>
-						</a>
-						<div class="dropdown-item language-toggle">
-							<Icon icon="mdi:translate" width="20" height="20" />
-							<span>Language</span>
-							<div class="language-switch">
-								<button
-									class="language-btn"
-									class:active={selectedLang === 'de'}
-									on:click={() => setLanguage('de')}
-								>
-									DE
-								</button>
-								<button
-									class="language-btn"
-									class:active={selectedLang === 'en'}
-									on:click={() => setLanguage('en')}
-								>
-									EN
-								</button>
+				<div class="account-dropdown">
+					<button class="account-button" on:click={toggleMenu}>
+						<Icon icon="mdi:account-circle" width="32" height="32" />
+					</button>
+
+					{#if showMenu}
+						<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
+							<a href="/admin/login" class="dropdown-item">
+								<Icon icon="mdi:shield-account" width="20" height="20" />
+								<span>Admin Access</span>
+							</a>
+							<div class="dropdown-item language-toggle">
+								<Icon icon="mdi:translate" width="20" height="20" />
+								<span>Language</span>
+								<div class="language-switch">
+									<button
+										class="language-btn"
+										class:active={selectedLang === 'de'}
+										on:click={() => setLanguage('de')}
+									>
+										DE
+									</button>
+									<button
+										class="language-btn"
+										class:active={selectedLang === 'en'}
+										on:click={() => setLanguage('en')}
+									>
+										EN
+									</button>
+								</div>
 							</div>
+							{#if !$page.data.session?.user}
+								<a href="/auth/login" class="dropdown-item">
+									<Icon icon="mdi:login" width="20" height="20" />
+									<span>Sign In</span>
+								</a>
+							{:else}
+								<a href="/auth/account" class="dropdown-item">
+									<Icon icon="mdi:account-circle-outline" width="20" height="20" />
+									<span>My Account</span>
+								</a>
+								<button class="dropdown-item logout" on:click={handleLogout}>
+									<Icon icon="mdi:logout" width="20" height="20" />
+									<span>Sign Out</span>
+								</button>
+							{/if}
 						</div>
-						{#if !$page.data.session?.user}
-							<a href="/auth/login" class="dropdown-item">
-								<Icon icon="mdi:login" width="20" height="20" />
-								<span>Sign In</span>
-							</a>
-						{:else}
-							<a href="/auth/account" class="dropdown-item">
-								<Icon icon="mdi:account-circle-outline" width="20" height="20" />
-								<span>My Account</span>
-							</a>
-							<button class="dropdown-item logout" on:click={handleLogout}>
-								<Icon icon="mdi:logout" width="20" height="20" />
-								<span>Sign Out</span>
-							</button>
-						{/if}
-					</div>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		</div>
 	</nav>
@@ -211,6 +222,51 @@
 	header.scrolled {
 		background-color: rgba(243, 244, 246, 0.98);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.user-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.cart-button {
+		position: relative;
+		display: flex;
+		align-items: center;
+		color: #4b5563;
+		text-decoration: none;
+		padding: 0.5rem;
+		border-radius: 50%;
+		transition: all 0.2s;
+	}
+
+	.cart-button:hover {
+		color: #1a1a1a;
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	.cart-count {
+		position: absolute;
+		top: -3px;
+		right: -3px;
+		background-color: #3b82f6; /* Changed from red to blue to match your theme */
+		color: white;
+		font-size: 0.7rem;
+		font-weight: 600;
+		padding: 1px 4px;
+		border-radius: 9999px;
+		min-width: 14px; /* Made smaller */
+		height: 14px; /* Made smaller */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	@media (max-width: 640px) {
+		.user-actions {
+			gap: 0.25rem;
+		}
 	}
 
 	nav {

@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { generateTicketQRCode } from '$lib/util/qrCode';
+	import { generateTicketQRCode } from '$lib/utils/qrCode';
 
 	interface Ticket {
 		id: string;

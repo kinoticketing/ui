@@ -2,6 +2,19 @@
 import { handle as authHandle } from '$lib/auth';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
+import pkg from 'pg';
+const { Pool } = pkg;
+
+const pool = new Pool({
+	user: process.env.PGUSER,
+	host: process.env.PGHOST,
+	database: process.env.PGDATABASE,
+	password: process.env.PGPASSWORD,
+	port: 5432,
+	ssl: {
+		rejectUnauthorized: false
+	}
+});
 
 // Handle admin authentication
 const adminHandle: Handle = async ({ event, resolve }) => {
@@ -26,7 +39,6 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	// Check admin authentication for admin routes
-	// Skip the check for the admin login page itself
 	if (
 		adminRoutes.some((route) => path.startsWith(route)) &&
 		!event.locals.adminAuthenticated &&
@@ -38,5 +50,21 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+// Handle seat lock cleanup
+const seatLockHandle: Handle = async ({ event, resolve }) => {
+	// Clean up expired locks periodically (10% chance to run)
+	if (Math.random() < 0.1) {
+		try {
+			await pool.query(`
+                DELETE FROM seat_locks 
+                WHERE locked_at < NOW() - INTERVAL '5 minutes'
+            `);
+		} catch (error) {
+			console.error('Error cleaning up expired locks:', error);
+		}
+	}
+	return resolve(event);
+};
+
 // Combine all handlers using sequence
-export const handle = sequence(authHandle, adminHandle, sessionHandle);
+export const handle = sequence(authHandle, adminHandle, sessionHandle, seatLockHandle);
