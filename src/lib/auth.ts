@@ -78,6 +78,5 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 			}
 			return session;
 		}
-	},
-	debug: true
+	}
 });

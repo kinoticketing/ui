@@ -3,6 +3,8 @@
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import { cart } from '$lib/stores/cart';
+	import { load } from '../../../cart/+page';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -200,11 +202,20 @@
 	}
 
 	async function handleCheckout() {
+        console.log(loading)
 		if (loading) return;
 
 		loading = true;
 		try {
-			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+			// Debug log to see what we're sending
+			console.log('Sending to checkout:', {
+				screeningId: screening.id,
+				seats: selectedSeats.map((seat) => ({
+					seatId: seat.seatId,
+					price: seat.price
+				}))
+			});
+
 			const response = await fetch('/api/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -218,12 +229,13 @@
 			});
 
 			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.error || 'Checkout failed');
+				const errorData = await response.json();
+				console.error('Checkout error details:', errorData); // Add this debug log
+				throw new Error(errorData.error || 'Checkout failed');
 			}
 
 			const { checkoutUrl } = await response.json();
-			window.location.href = checkoutUrl;
+			window.location.href = '/cart';
 		} catch (error) {
 			console.error('Checkout error:', error);
 			alert('Failed to process checkout. Please try again.');
@@ -231,6 +243,60 @@
 			loading = false;
 		}
 	}
+
+	// async function handleCheckout() {
+	// 	if (loading) return;
+
+	// 	loading = true;
+	// 	try {
+	// 		// First verify seats with server
+	// 		const response = await fetch('/api/checkout', {
+	// 			method: 'POST',
+	// 			headers: { 'Content-Type': 'application/json' },
+	// 			body: JSON.stringify({
+	// 				screeningId: screening.id,
+	// 				seats: selectedSeats.map((seat) => ({
+	// 					seatId: seat.seatId,
+	// 					price: seat.price
+	// 				}))
+	// 			})
+	// 		});
+	//         console.log('checkout endpoint fetch: ', response);
+
+	// 		const data = await response.json();
+
+	// 		if (!response.ok) {
+	// 			throw new Error(data.error || 'Checkout failed');
+	// 		}
+
+	// 		// If server verification successful, store backup and add to cart
+	// 		localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+
+	// 		// Add to cart using the cart store's addItem method
+	// 		cart.addItem({
+	// 			screeningId: screening.id,
+	// 			movieTitle: movie.title,
+	// 			screeningTime: screening.start_time,
+	// 			tickets: selectedSeats.map((seat) => ({
+	// 				seatId: seat.seatId,
+	// 				row: seat.row,
+	// 				col: seat.col,
+	// 				label: seat.label,
+	// 				price: seat.price,
+	// 				categoryName: seat.categoryName
+	// 			})),
+	// 			movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
+	// 		});
+
+	// 		// Navigate to cart
+	// 		window.location.href = '/cart';
+	// 	} catch (error) {
+	// 		console.error('Add to cart error:', error);
+	// 		alert('Failed to add tickets to cart. Please try again.');
+	// 	} finally {
+	// 		loading = false;
+	// 	}
+	// }
 
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString();
