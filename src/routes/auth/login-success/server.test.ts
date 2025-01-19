@@ -10,7 +10,7 @@ describe('login success page server', () => {
 
         try {
             await load({ locals: mockLocals } as any);
-            fail('Expected redirect to be thrown');
+            expect(true).toBe(false); // Alternative to using fail()
         } catch (error: any) {
             expect(error).toEqual(
                 expect.objectContaining({

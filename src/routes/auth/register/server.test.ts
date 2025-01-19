@@ -92,8 +92,10 @@ describe('register page server', () => {
             formData.append('password', 'password123');
 
             mockClient.query
-                .mockResolvedValueOnce({ rows: [] })
-                .mockResolvedValueOnce({ rows: [{ id: 1 }] });
+                .mockResolvedValueOnce({ rows: [] }) // No existing user
+                .mockResolvedValueOnce({ 
+                    rows: [{ id: 1 }] // Use number directly instead of parsing
+                }); 
 
             try {
                 await actions.default({
@@ -102,7 +104,7 @@ describe('register page server', () => {
                         body: formData
                     })
                 } as any);
-                fail('Expected redirect to be thrown');
+                expect(true).toBe(false); // Should not reach here
             } catch (error: any) {
                 expect(error).toEqual(
                     expect.objectContaining({

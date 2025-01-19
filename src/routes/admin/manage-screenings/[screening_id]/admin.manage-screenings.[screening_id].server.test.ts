@@ -250,9 +250,41 @@ describe('manage screenings [screening_id] endpoints', () => {
 
             expect(response.status).toBe(204);
             expect(mockQuery).toHaveBeenCalledTimes(2);
+            expect(mockQuery).toHaveBeenCalledWith(
+                'DELETE FROM seat_reservations WHERE screening_id = $1',
+                [1]
+            );
+            expect(mockQuery).toHaveBeenCalledWith(
+                'DELETE FROM screenings WHERE id = $1',
+                [1]
+            );
         });
 
-        it('should handle deletion errors', async () => {
+        it('should handle invalid screening_id', async () => {
+            // Mock a failed query for invalid ID
+            mockQuery.mockRejectedValueOnce(new Error('Invalid ID'));
+
+            const response = await DELETE({
+                params: { screening_id: 'invalid' }
+            } as any);
+
+            expect(response.status).toBe(500);
+            expect(await response.text()).toBe('Fehler beim Löschen der Vorstellung');
+        });
+
+        it('should handle missing screening_id', async () => {
+            // Mock a failed query for missing ID
+            mockQuery.mockRejectedValueOnce(new Error('Missing ID'));
+
+            const response = await DELETE({
+                params: {}
+            } as any);
+
+            expect(response.status).toBe(500);
+            expect(await response.text()).toBe('Fehler beim Löschen der Vorstellung');
+        });
+
+        it('should handle database errors', async () => {
             mockQuery.mockRejectedValueOnce(new Error('Database error'));
 
             const response = await DELETE({
