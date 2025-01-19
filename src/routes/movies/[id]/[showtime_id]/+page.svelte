@@ -219,7 +219,7 @@
 				<div class="seating-section">
 					<div class="screen-container">
 						<div class="screen"></div>
-						<p class="screen-label">Leinwand</p>
+						<p class="screen-label">Screen</p>
 					</div>
 
 					<div class="seat-plan">
@@ -260,22 +260,29 @@
 					</div>
 
 					<div class="seat-legend">
-						{#each Object.entries(seatCategories) as [type, data]}
-							<div class="legend-item">
-								<div
-									class="legend-box"
-									style="background-color: {data.background}; color: {data.text}"
-								></div>
-								<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
-							</div>
-						{/each}
-						<div class="legend-item">
-							<div class="legend-box selected"></div>
-							<span>Selected</span>
+						<div class="legend-section">
+							<span class="legend-section-title">Seat Categories</span>
+							{#each Object.entries(seatCategories) as [type, data]}
+								<div class="legend-item">
+									<div
+										class="legend-box"
+										style="background-color: {data.background}; color: {data.text}"
+									></div>
+									<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
+								</div>
+							{/each}
 						</div>
-						<div class="legend-item">
-							<div class="legend-box booked"></div>
-							<span>Booked</span>
+
+						<div class="legend-section">
+							<span class="legend-section-title">Seat Status</span>
+							<div class="legend-item">
+								<div class="legend-box selected"></div>
+								<span>Selected</span>
+							</div>
+							<div class="legend-item">
+								<div class="legend-box booked"></div>
+								<span>Booked</span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -386,25 +393,35 @@
 		display: flex;
 		gap: 2rem;
 		align-items: flex-start;
+		justify-content: space-between;
 	}
 
 	.seating-section {
+		flex: 3; /* Changed from default to flex: 3 */
 		background: white;
 		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	}
 
+	.cart-section {
+		flex: 2; /* Changed from flex: 2 to be proportional with seating section */
+		position: sticky;
+		top: 2rem;
+		min-width: 350px; /* Added minimum width */
+	}
+
 	.screen-container {
 		margin-bottom: 3rem;
 		text-align: center;
+        padding-left: 2.5rem;
 	}
 
 	.screen {
 		height: 8px;
 		background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
 		margin: 0 auto 1rem;
-		width: 80%;
+		width: calc(100%-2.5rem);
 		border-radius: 4px;
 	}
 
@@ -486,14 +503,26 @@
 	}
 
 	.seat-legend {
-		display: flex;
-		justify-content: center;
-		gap: 2rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 1rem;
 		margin-top: 2rem;
-		flex-shrink: 0;
 		padding-top: 1rem;
 		border-top: 1px solid #e5e7eb;
-		flex-wrap: wrap;
+	}
+
+	/* Add a new container for legend sections */
+	.legend-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.legend-section-title {
+		font-size: 0.875rem;
+		color: #666;
+		font-weight: 500;
+		margin-bottom: 0.25rem;
 	}
 
 	.legend-item {
@@ -516,21 +545,16 @@
 		background-color: #9ca3af;
 	}
 
-	.cart-section {
-		flex: 2;
-		position: sticky;
-		top: 2rem;
-	}
-
 	.cart-container {
 		background: white;
-		padding: 1.5rem;
+		padding: 2rem; /* Increased padding */
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
 		height: calc(100vh - 8rem);
 		max-height: 800px;
+		width: 100%; /* Added to ensure full width */
 	}
 
 	.cart-title {
@@ -578,10 +602,14 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem;
+		padding: 1.25rem; /* Increased padding */
 		background-color: #f8f9fa;
-		border-radius: 0.5rem;
-		margin-bottom: 0.75rem;
+		border-radius: 0.75rem; /* Increased border radius */
+		margin-bottom: 1rem; /* Increased margin */
+		transition: transform 0.2s ease; /* Added hover animation */
+	}
+	.ticket-item:hover {
+		transform: translateX(4px);
 	}
 
 	.ticket-info {
@@ -671,18 +699,15 @@
 			flex-direction: column;
 		}
 
+		.seating-section,
+		.cart-section {
+			width: 100%;
+			flex: none;
+		}
+
 		.cart-section {
 			position: static;
-			width: 100%;
-		}
-
-		.cart-container {
-			height: auto;
-			max-height: 500px;
-		}
-
-		.seating-section {
-			width: 100%;
+			margin-top: 2rem;
 		}
 	}
 
