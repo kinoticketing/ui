@@ -1,3 +1,4 @@
+// src/routes/admin/manage-halls/[hall_id]/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
 import pkg from 'pg';
 const { Pool } = pkg;

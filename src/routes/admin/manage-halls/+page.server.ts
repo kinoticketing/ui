@@ -1,3 +1,4 @@
+// src/routes/admin/manage-halls/+page.server.ts
 import pkg from 'pg';
 const { Pool } = pkg;
 import type { RequestEvent } from '@sveltejs/kit';

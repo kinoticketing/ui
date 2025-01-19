@@ -1,9 +1,7 @@
-<!-- src/routes/movies/[id]/[showtime_id]/+page.svelte -->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
 	import { onMount } from 'svelte';
-	import { cart } from '$lib/stores/cart';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -11,44 +9,38 @@
 	function goBackToMovie() {
 		window.location.href = `/movies/${movie.imdb_id}`;
 	}
-	async function handleCheckout() {
-		if (loading) return;
-
-		loading = true;
-		try {
-			// Store selected seats in localStorage as backup
-			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-
-			// Add to cart
-			cart.addItem({
-				screeningId: screening.id,
-				movieTitle: movie.title,
-				screeningTime: screening.start_time,
-				tickets: selectedSeats.map((seat) => ({
-					seatId: seat.seatId,
-					row: seat.row,
-					col: seat.col,
-					label: seat.label,
-					price: seat.price,
-					categoryName: seat.categoryName
-				})),
-				// Change this line to use Poster instead of movieImageUrl
-				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
-			});
-
-			// Navigate to cart
-			window.location.href = '/cart';
-		} catch (error) {
-			console.error('Add to cart error:', error);
-			alert('Failed to add tickets to cart. Please try again.');
-		} finally {
-			loading = false;
-		}
-	}
 
 	let selectedSeats: SelectedSeat[] = [];
 	let loading = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
+
+	// Add these type definitions at the top of your script section
+	type CategoryType = 'vip' | 'premium' | 'regular' | 'disabled';
+
+	interface CategoryDetails {
+		background: string;
+		text: string;
+		modifier: number;
+	}
+
+	// Update the seatCategories declaration
+	const seatCategories: Record<CategoryType, CategoryDetails> = {
+		vip: { background: '#fcd34d', text: '#000', modifier: 5.0 },
+		premium: { background: '#f87171', text: '#fff', modifier: 3.0 },
+		regular: { background: '#93c5fd', text: '#000', modifier: 1.0 },
+		disabled: { background: '#86efac', text: '#000', modifier: 0.8 }
+	};
+
+	// Update the helper functions
+	function getCategoryColor(categoryName: string | undefined): string {
+		const categoryKey = (categoryName?.toLowerCase() || 'regular') as CategoryType;
+		return seatCategories[categoryKey]?.background || seatCategories.regular.background;
+	}
+
+	function getCategoryTextColor(categoryName: string | undefined): string {
+		const categoryKey = (categoryName?.toLowerCase() || 'regular') as CategoryType;
+		return seatCategories[categoryKey]?.text || seatCategories.regular.text;
+	}
 
 	onMount(async () => {
 		// Check for stored seats
@@ -97,7 +89,7 @@
 	}
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
-		if (!seat || seat.isBooked || loading) return;
+		if (!seat || seat.isBooked || loading || seat.status === 'inactive') return;
 
 		loading = true;
 		const seatKey = `${rowIndex}-${colIndex}`;
@@ -168,6 +160,39 @@
 		selectedSeats = selectedSeats.filter((seat) => seat.key !== seatKey);
 	}
 
+	async function handleCheckout() {
+		if (loading) return;
+
+		loading = true;
+		try {
+			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+			const response = await fetch('/api/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					screeningId: screening.id,
+					seats: selectedSeats.map((seat) => ({
+						seatId: seat.seatId,
+						price: seat.price
+					}))
+				})
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || 'Checkout failed');
+			}
+
+			const { checkoutUrl } = await response.json();
+			window.location.href = checkoutUrl;
+		} catch (error) {
+			console.error('Checkout error:', error);
+			alert('Failed to process checkout. Please try again.');
+		} finally {
+			loading = false;
+		}
+	}
+
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString();
 	}
@@ -176,17 +201,6 @@
 		const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 		if (isNaN(numericPrice)) return '0.00';
 		return numericPrice.toFixed(2);
-	}
-
-	function getCategoryColor(categoryName: string): string {
-		switch (categoryName.toLowerCase()) {
-			case 'vip':
-				return '#fbbf24';
-			case 'premium':
-				return '#60a5fa';
-			default:
-				return '#e5e7eb';
-		}
 	}
 </script>
 
@@ -205,29 +219,38 @@
 				<div class="seating-section">
 					<div class="screen-container">
 						<div class="screen"></div>
-						<p class="screen-label">Screen</p>
+						<p class="screen-label">Leinwand</p>
 					</div>
 
 					<div class="seat-plan">
 						{#each screening.hall.seatPlan as row, rowIndex}
 							<div class="seat-row">
-								{#each row as seat, colIndex}
+								<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
+								{#each row.filter((seat) => seat !== null) as seat}
 									<button
 										class="seat-button"
 										class:seat-selected={selectedSeats.some(
-											(s) => s.key === `${rowIndex}-${colIndex}`
+											(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 										)}
 										class:seat-booked={seat?.isBooked}
-										class:seat-empty={!seat}
+										class:seat-inactive={seat?.status === 'inactive'}
 										style={seat
 											? `background-color: ${
-													selectedSeats.some((s) => s.key === `${rowIndex}-${colIndex}`)
+													selectedSeats.some(
+														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+													)
 														? '#3b82f6'
-														: getCategoryColor(seat.category.name)
+														: getCategoryColor(seat.category?.name)
+												}; color: ${
+													selectedSeats.some(
+														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+													)
+														? '#ffffff'
+														: getCategoryTextColor(seat.category?.name)
 												}`
 											: ''}
-										disabled={!seat || seat.isBooked}
-										on:click={() => handleSeatClick(rowIndex, colIndex, seat)}
+										disabled={!seat || seat.isBooked || seat.status === 'inactive'}
+										on:click={() => handleSeatClick(rowIndex, seat.column_number - 1, seat)}
 									>
 										{seat?.seat_label ?? ''}
 									</button>
@@ -237,14 +260,15 @@
 					</div>
 
 					<div class="seat-legend">
-						<div class="legend-item">
-							<div class="legend-box premium"></div>
-							<span>Premium</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-box vip"></div>
-							<span>VIP</span>
-						</div>
+						{#each Object.entries(seatCategories) as [type, data]}
+							<div class="legend-item">
+								<div
+									class="legend-box"
+									style="background-color: {data.background}; color: {data.text}"
+								></div>
+								<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
+							</div>
+						{/each}
 						<div class="legend-item">
 							<div class="legend-box selected"></div>
 							<span>Selected</span>
@@ -310,11 +334,16 @@
 </main>
 
 <style>
-	/* Previous styles remain the same */
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
+
 	.container {
 		max-width: 1200px;
 		margin: 0 auto;
-		position: relative; /* Change from your original */
+		position: relative;
 	}
 
 	.back-button {
@@ -339,25 +368,6 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.legend-box.premium {
-		background-color: #60a5fa;
-	}
-
-	.legend-box.vip {
-		background-color: #fbbf24;
-	}
-
-	main {
-		min-height: 100vh;
-		background-color: #f8f9fa;
-		padding: 2rem 1rem;
-	}
-
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
 	.movie-title {
 		font-size: 2rem;
 		font-weight: 600;
@@ -379,20 +389,15 @@
 	}
 
 	.seating-section {
-		flex: 3;
 		background: white;
 		padding: 2rem;
 		border-radius: 1rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		height: 650px;
-		display: flex;
-		flex-direction: column;
 	}
 
 	.screen-container {
-		margin-bottom: 2rem;
+		margin-bottom: 3rem;
 		text-align: center;
-		flex-shrink: 0;
 	}
 
 	.screen {
@@ -409,12 +414,10 @@
 	}
 
 	.seat-plan {
-		margin-bottom: 2rem;
-		flex-grow: 1;
-		overflow-y: auto;
-		padding-right: 0.5rem;
-		scrollbar-width: thin;
-		scrollbar-color: #cbd5e1 #f1f5f9;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		align-items: center;
 	}
 
 	.seat-plan::-webkit-scrollbar {
@@ -437,9 +440,14 @@
 
 	.seat-row {
 		display: flex;
-		justify-content: center;
 		gap: 0.5rem;
-		margin-bottom: 0.5rem;
+		align-items: center;
+	}
+
+	.row-label {
+		width: 2rem;
+		text-align: right;
+		font-weight: bold;
 	}
 
 	.seat-button {
@@ -447,13 +455,13 @@
 		height: 2.5rem;
 		border: none;
 		border-radius: 0.375rem;
-		background-color: #e5e7eb;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 0.875rem;
+		transition: all 0.2s;
+		font-size: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: #1a1a1a;
 	}
 
 	.seat-button:not(:disabled):hover {
@@ -461,17 +469,20 @@
 	}
 
 	.seat-selected {
-		background-color: #3b82f6;
-		color: white;
+		background-color: #3b82f6 !important;
+		color: white !important;
 	}
 
 	.seat-booked {
-		background-color: #9ca3af;
+		background-color: #9ca3af !important;
 		cursor: not-allowed;
+		color: white !important;
 	}
 
-	.seat-empty {
-		visibility: hidden;
+	.seat-inactive {
+		background-color: #9ca3af !important;
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
 
 	.seat-legend {
@@ -482,6 +493,7 @@
 		flex-shrink: 0;
 		padding-top: 1rem;
 		border-top: 1px solid #e5e7eb;
+		flex-wrap: wrap;
 	}
 
 	.legend-item {
@@ -622,12 +634,24 @@
 	}
 
 	.checkout-button {
+		width: 100%;
+		padding: 0.875rem;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
 		background-color: #2563eb;
 		color: white;
 	}
 
 	.checkout-button:hover:not(:disabled) {
 		background-color: #1d4ed8;
+	}
+
+	.checkout-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	.error-container {
@@ -673,6 +697,10 @@
 			flex-direction: column;
 			align-items: center;
 			gap: 1rem;
+		}
+
+		.movie-title {
+			font-size: 1.5rem;
 		}
 	}
 </style>

@@ -1,3 +1,4 @@
+<!--src/routes/admin/manage-halls/+page.svelte-->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
@@ -72,7 +73,7 @@
 		const seatsByRow = hall.seat_plan.reduce((acc: any, seat: any) => {
 			const rowMatch = seat.seat_label.match(/^[A-Z]+/);
 			const row = rowMatch ? rowMatch[0] : '';
-			
+
 			if (!acc[row]) {
 				acc[row] = [];
 			}

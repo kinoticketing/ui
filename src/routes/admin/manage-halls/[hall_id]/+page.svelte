@@ -1,3 +1,4 @@
+<!--src/routes/admin/manage-halls/[hall_id]/+page.svelte-->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
