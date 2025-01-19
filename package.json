@@ -26,6 +26,7 @@
 		"@types/node": "^22.10.1",
 		"@types/pg": "^8.11.10",
 		"@types/qrcode": "^1.5.5",
+		"@vitest/coverage-v8": "^2.1.8",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
