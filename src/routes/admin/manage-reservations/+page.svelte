@@ -1,13 +1,250 @@
-<script>
+<script lang="ts">
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import Icon from '@iconify/svelte';
+	export let data;
+
+	let searchTerm = '';
+	$: filteredReservations = data.reservations.filter(
+		(reservation) =>
+			reservation.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			reservation.movie_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			reservation.ticket_id.toString().includes(searchTerm)
+	);
+
+	function navigateToDetails(id: string) {
+		goto(`/admin/manage-reservations/${id}`);
+	}
+
+	// Zurück navigieren
+	function goBack() {
+		goto('/admin');
+	}
 </script>
 
+<svelte:head>
+	<title>Reservierungen verwalten</title>
+</svelte:head>
+
 <main>
-	<p>🚧</p>
+	<div class="container">
+		<h1 class="page-title">
+			<button class="back-btn" on:click={goBack}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+				Zurück
+			</button>
+			<span>Reservierungen verwalten</span>
+		</h1>
+
+		<input
+			type="text"
+			placeholder="Suche nach Benutzer, Film oder Ticket-ID"
+			bind:value={searchTerm}
+		/>
+
+		<div class="table-container">
+			<table>
+				<thead>
+					<tr>
+						<th>Ticket ID</th>
+						<th>Ticket Code</th>
+						<th>Benutzer</th>
+						<th>Film</th>
+						<th>Vorstellung</th>
+						<th>Saal</th>
+						<th>Sitz</th>
+						<th class="price-column">Preis</th>
+						<th>Status</th>
+						<th>Erstellt am</th>
+						<th>Aktionen</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each filteredReservations as reservation}
+						<tr class="clickable-row" on:click={() => navigateToDetails(reservation.ticket_id)}>
+							<td>{reservation.ticket_id}</td>
+							<td>{reservation.ticket_code}</td>
+							<td>{reservation.username}</td>
+							<td>{reservation.movie_title}</td>
+							<td>{new Date(reservation.start_time).toLocaleString()}</td>
+							<td>{reservation.hall_name}</td>
+							<td>{reservation.seat_label}</td>
+							<td class="price-column">{reservation.price} €</td>
+							<td><span class="status {reservation.status}">{reservation.status}</span></td>
+							<td>{new Date(reservation.created_at).toLocaleString()}</td>
+							<td>
+								{#if reservation.status !== 'cancelled'}
+									<!-- svelte-ignore a11y-click-events-have-key-events -->
+									<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+									<form method="POST" action="?/cancel" use:enhance on:click|stopPropagation>
+										<input type="hidden" name="ticketId" value={reservation.ticket_id} />
+										<button type="submit" class="cancel-btn"> Stornieren </button>
+									</form>
+								{/if}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</div>
 </main>
 
 <style>
-	p {
-		font-size: 8rem;
+	.page-title {
+		position: relative;
 		text-align: center;
+		margin-bottom: 20px;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.clickable-row {
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.clickable-row:hover {
+		background-color: #f3f4f6;
+	}
+	.price-column {
+		min-width: 10px;
+		white-space: nowrap;
+	}
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		position: relative;
+	}
+
+	h1 {
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 1.5rem;
+		text-align: center;
+	}
+
+	input {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		margin-bottom: 1.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		font-size: 1rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.table-container {
+		background: white;
+		border-radius: 1rem;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+	}
+
+	th,
+	td {
+		padding: 1rem;
+		text-align: left;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	th {
+		background-color: #f3f4f6;
+		font-weight: 600;
+		color: #374151;
+		text-transform: uppercase;
+		font-size: 0.875rem;
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+
+	.status {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.status.pending {
+		background-color: #fef3c7;
+		color: #d97706;
+	}
+
+	.status.confirmed {
+		background-color: #d1fae5;
+		color: #047857;
+	}
+
+	.status.cancelled {
+		background-color: #fee2e2;
+		color: #dc2626;
+	}
+
+	.cancel-btn {
+		background-color: #ef4444;
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 0.375rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.cancel-btn:hover {
+		background-color: #dc2626;
+	}
+
+	@media (max-width: 1024px) {
+		.table-container {
+			overflow-x: auto;
+		}
+	}
+
+	@media (max-width: 640px) {
+		h1 {
+			font-size: 1.5rem;
+		}
+
+		th,
+		td {
+			padding: 0.75rem;
+		}
 	}
 </style>

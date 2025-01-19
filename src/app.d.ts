@@ -11,6 +11,12 @@ declare global {
 			postal_code: string;
 			country: string;
 		}
+		interface User {
+			id?: string;
+			name?: string | null;
+			email?: string | null;
+			image?: string | null;
+		}
 
 		interface ExtendedUser extends User {
 			hasPassword?: boolean;
@@ -21,12 +27,19 @@ declare global {
 			session: {
 				user: ExtendedUser;
 			} | null;
+			adminAuthenticated: boolean;
 		}
 
 		interface PageData {
 			session: {
 				user: ExtendedUser;
 			} | null;
+		}
+
+		interface Platform {
+			env: {
+				TMDB_API_KEY: string;
+			};
 		}
 	}
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { writable } from 'svelte/store';
 	import { get } from 'svelte/store';
+	import Icon from '@iconify/svelte';
 
 	let row_count: number;
 	let col_count: number;
@@ -11,6 +13,11 @@
 	let seatTypes = ['Regular', 'VIP', 'Disabled'];
 	let rows = writable<string[][]>([[]]);
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
+
+	// Zurück navigieren
+	function goBack() {
+		goto('/admin/manage-halls');
+	}
 
 	function addColumn(rowIndex: number) {
 		col_count++;
@@ -108,15 +115,26 @@
 
 <svelte:window on:click={handleClickOutside} />
 
+<svelte:head>
+	<title>Saal erstellen</title>
+</svelte:head>
+
 <main>
-	<h1>Create Hall</h1>
 	<div class="container">
+		<div class="page-header">
+			<button class="back-btn" on:click={goBack}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+				Zurück
+			</button>
+			<h1 class="page-title">Saal erstellen</h1>
+		</div>
+
 		<div class="inputs">
-			<input type="text" placeholder="Hall Name" bind:value={hall_name} required />
+			<input type="text" placeholder="Saalname" bind:value={hall_name} required />
 			<input
 				type="number"
 				min="1"
-				placeholder="Number of Rows"
+				placeholder="Anzahl Reihen"
 				bind:value={row_count}
 				on:change={preview}
 				required
@@ -124,13 +142,19 @@
 			<input
 				type="number"
 				min="1"
-				placeholder="Seats per Row"
+				placeholder="Sitzplätze pro Reihe"
 				bind:value={col_count}
 				on:change={preview}
 				required
 			/>
-			<button class="save-btn" on:click={save}>Save</button>
-			<button class="delete-btn" on:click={removeAll}>Clear All</button>
+			<button class="save-btn" on:click={save}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-save" />
+				Speichern
+			</button>
+			<button class="delete-btn" on:click={removeAll}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-delete" />
+				Alles löschen
+			</button>
 		</div>
 
 		<div class="seat-grid">
@@ -181,37 +205,90 @@
 </main>
 
 <style>
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+		display: flex;
+		justify-content: center;
+	}
+
 	.container {
-		padding: 20px;
 		max-width: 1200px;
-		margin: 0 auto;
+		background-color: #ffffff;
+		padding: 2rem;
+		border-radius: 0.5rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.page-header {
+		position: relative;
+		margin-bottom: 2rem;
+	}
+
+	.page-title {
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin: 0;
+		text-align: center;
+	}
+
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.inputs {
 		display: flex;
-		gap: 10px;
-		margin-bottom: 20px;
+		gap: 1rem;
+		margin-bottom: 2rem;
 		justify-content: center;
 		flex-wrap: wrap;
 	}
 
 	.inputs input {
-		padding: 8px;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		width: 150px;
+		padding: 0.5rem;
+		font-size: 1rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		width: 200px;
+		transition: border-color 0.2s ease;
+	}
+
+	.inputs input:focus {
+		border-color: #6b7280;
+		outline: none;
 	}
 
 	.seat-grid {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 1rem;
 		align-items: center;
 	}
 
 	.seat-row {
 		display: flex;
-		gap: 5px;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
@@ -292,8 +369,8 @@
 
 	.row-controls {
 		display: flex;
-		gap: 5px;
-		margin-left: 10px;
+		gap: 0.5rem;
+		margin-left: 1rem;
 	}
 
 	.row-controls button {
@@ -305,6 +382,11 @@
 		color: white;
 		cursor: pointer;
 		transition: background-color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.25rem;
+		font-weight: bold;
 	}
 
 	.row-controls button:hover {
@@ -313,39 +395,46 @@
 
 	.save-btn,
 	.delete-btn {
-		padding: 8px 16px;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
 		border: none;
-		border-radius: 4px;
+		border-radius: 0.5rem;
+		font-weight: 500;
 		cursor: pointer;
-		font-weight: bold;
 		transition: background-color 0.2s;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
 
 	.save-btn {
-		background: #198754;
+		background-color: #28a745;
 		color: white;
 	}
 
 	.save-btn:hover {
-		background: #157347;
+		background-color: #218838;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.delete-btn {
-		background: #dc3545;
+		background-color: #dc3545;
 		color: white;
 	}
 
 	.delete-btn:hover {
-		background: #bb2d3b;
+		background-color: #c82333;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.feedback {
-		margin-top: 20px;
-		padding: 10px;
-		border-radius: 4px;
+		margin-top: 2rem;
+		padding: 1rem;
+		border-radius: 0.5rem;
 		text-align: center;
 		background: #d1e7dd;
 		color: #0f5132;
+		font-weight: 500;
 	}
 
 	.feedback.error {

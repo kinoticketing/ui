@@ -25,6 +25,7 @@
 		"@types/google.maps": "^3.58.1",
 		"@types/node": "^22.10.1",
 		"@types/pg": "^8.11.10",
+		"@types/qrcode": "^1.5.5",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
@@ -54,6 +55,7 @@
 		"dotenv": "^16.4.7",
 		"neon": "^2.0.0",
 		"pg": "^8.13.1",
+		"qrcode": "^1.5.4",
 		"svelte-french-toast": "^1.2.0",
 		"vercel": "^39.1.3"
 	}

@@ -1,258 +1,329 @@
 <script lang="ts">
-    export let data: { halls: { id: number; name: string }[] };
+	import { goto } from '$app/navigation';
+	import Icon from '@iconify/svelte';
 
-    let movieQuery: string = '';
-    let searchResults: { movie_id: string; title: string }[] = [];
-    let selectedMovie: { movie_id: string; title: string } | null = null;
+	export let data: { halls: { id: number; name: string }[] };
 
-    let hall_id: number | null = null;
+	let movieQuery: string = '';
+	let searchResults: { movie_id: string; title: string }[] = [];
+	let selectedMovie: { movie_id: string; title: string } | null = null;
 
-    // "start_time" aus dem datetime-local
-    let start_time: string | null = null;
+	let hall_id: number | null = null;
 
-    let saveMessage: string | null = null;
-    let searchError: string | null = null;
+	let start_time: string | null = null;
 
-    // Filme suchen
-    async function fetchMovies() {
-        if (!movieQuery.trim()) {
-            searchResults = [];
-            searchError = null;
-            return;
-        }
+	let saveMessage: string | null = null;
+	let searchError: string | null = null;
 
-        try {
-            const response = await fetch(`/admin/manage-screenings/search-movies?query=${encodeURIComponent(movieQuery)}`);
-            if (response.ok) {
-                const result = await response.json();
-                searchResults = result.movies;
-                searchError = result.movies.length === 0 ? 'Keine Filme gefunden.' : null;
-            } else {
-                const error = await response.json();
-                searchError = error.message || 'Fehler bei der Filmsuche.';
-            }
-        } catch (error) {
-            console.error('Netzwerkfehler:', error);
-            searchError = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
-        }
-    }
+	// Filme suchen
+	async function fetchMovies() {
+		if (!movieQuery.trim()) {
+			searchResults = [];
+			searchError = null;
+			return;
+		}
 
-    function selectMovie(movie: { movie_id: string; title: string }) {
-        selectedMovie = movie;
-        searchResults = [];
-        movieQuery = '';
-    }
+		try {
+			const response = await fetch(
+				`/admin/manage-screenings/search-movies?query=${encodeURIComponent(movieQuery)}`
+			);
+			if (response.ok) {
+				const result = await response.json();
+				searchResults = result.movies;
+				searchError = result.movies.length === 0 ? 'Keine Filme gefunden.' : null;
+			} else {
+				const error = await response.json();
+				searchError = error.message || 'Fehler bei der Filmsuche.';
+			}
+		} catch (error) {
+			console.error('Netzwerkfehler:', error);
+			searchError = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+		}
+	}
 
-    async function submitForm(event: Event) {
-        event.preventDefault();
-        saveMessage = null;
+	function selectMovie(movie: { movie_id: string; title: string }) {
+		selectedMovie = movie;
+		searchResults = [];
+		movieQuery = '';
+	}
 
-        console.log('[DEBUG] movie_id:', selectedMovie?.movie_id);
-        console.log('[DEBUG] hall_id:', hall_id);
-        console.log('[DEBUG] start_time:', start_time);
+	async function submitForm(event: Event) {
+		event.preventDefault();
+		saveMessage = null;
 
-        if (!selectedMovie || !hall_id || !start_time) {
-            saveMessage = 'Bitte füllen Sie alle Felder aus.';
-            return;
-        }
+		if (!selectedMovie || !hall_id || !start_time) {
+			saveMessage = 'Bitte füllen Sie alle Felder aus.';
+			return;
+		}
 
-        // First, save the movie to the movies table
-        try {
-            const movieResponse = await fetch('/admin/manage-screenings/create-screening/save-movie', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    movie_id: selectedMovie.movie_id,
-                    title: selectedMovie.title
-                })
-            });
+		// First, save the movie to the movies table
+		try {
+			const movieResponse = await fetch('/admin/manage-screenings/create-screening/save-movie', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					movie_id: selectedMovie.movie_id,
+					title: selectedMovie.title
+				})
+			});
 
-            if (!movieResponse.ok) {
-                const error = await movieResponse.json();
-                saveMessage = error.message || 'Fehler beim Speichern des Films.';
-                return;
-            }
+			if (!movieResponse.ok) {
+				const error = await movieResponse.json();
+				saveMessage = error.message || 'Fehler beim Speichern des Films.';
+				return;
+			}
 
-            // Then proceed with creating the screening
-            const formData = new FormData();
-            formData.append('movie_id', selectedMovie.movie_id);
-            formData.append('hall_id', String(hall_id));
-            formData.append('start_time', start_time);
+			// Then proceed with creating the screening
+			const formData = new FormData();
+			formData.append('movie_id', selectedMovie.movie_id);
+			formData.append('hall_id', String(hall_id));
+			formData.append('start_time', start_time);
 
-            const response = await fetch('/admin/manage-screenings/create-screening', {
-                method: 'POST',
-                body: formData
-            });
+			const response = await fetch('/admin/manage-screenings/create-screening', {
+				method: 'POST',
+				body: formData
+			});
 
-            if (response.ok) {
-                const result = await response.json();
-                saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
-                // Reset form
-                selectedMovie = null;
-                hall_id = null;
-                start_time = null;
-                movieQuery = '';
-            } else {
-                const error = await response.json();
-                saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
-            }
-        } catch (error) {
-            console.error('Fehler:', error);
-            saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
-        }
-    }
-    
+			if (response.ok) {
+				const result = await response.json();
+				saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
+				// Reset form
+				selectedMovie = null;
+				hall_id = null;
+				start_time = null;
+				movieQuery = '';
+			} else {
+				const error = await response.json();
+				saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
+			}
+		} catch (error) {
+			console.error('Fehler:', error);
+			saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
+		}
+	}
+
+	// Zurück navigieren
+	function goBack() {
+		goto('/admin/manage-screenings');
+	}
 </script>
 
+<svelte:head>
+	<title>Neue Vorstellung erstellen</title>
+</svelte:head>
+
 <main>
-    <div class="container">
-        <h1>Neue Vorstellung erstellen</h1>
+	<div class="container">
+		<div class="page-header">
+			<button class="back-btn" on:click={goBack}>
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
+				Zurück
+			</button>
+			<h1 class="page-title">Neue Vorstellung erstellen</h1>
+		</div>
 
-        {#if saveMessage}
-            <p class="feedback">{saveMessage}</p>
-        {/if}
+		{#if saveMessage}
+			<p class="feedback">{saveMessage}</p>
+		{/if}
 
-        <form on:submit={submitForm} class="form">
-            <label>
-                Film suchen:
-                <input
-                    type="text"
-                    bind:value={movieQuery}
-                    placeholder="Film suchen..."
-                    on:input={fetchMovies}
-                />
-            </label>
+		<form on:submit={submitForm} class="form">
+			<div class="form-group">
+				<label>
+					Film suchen:
+					<input
+						type="text"
+						bind:value={movieQuery}
+						placeholder="Film suchen..."
+						on:input={fetchMovies}
+					/>
+				</label>
 
-            {#if searchError}
-                <p class="error">{searchError}</p>
-            {/if}
+				{#if searchError}
+					<p class="error">{searchError}</p>
+				{/if}
 
-            {#if searchResults.length > 0}
-                <ul class="search-results">
-                    {#each searchResults as movie}
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-                        <li on:click={() => selectMovie(movie)}>
-                            {movie.title}
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
+				{#if searchResults.length > 0}
+					<ul class="search-results">
+						{#each searchResults as movie}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+							<li on:click={() => selectMovie(movie)}>
+								{movie.title}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 
-            {#if selectedMovie}
-                <p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
-            {/if}
+				{#if selectedMovie}
+					<p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
+				{/if}
+			</div>
 
-            <label>
-                Saal:
-                <select name="hall_id" bind:value={hall_id}>
-                    <option value="" disabled selected>Saal auswählen</option>
-                    {#each data.halls as hall}
-                        <option value={hall.id}>{hall.name}</option>
-                    {/each}
-                </select>
-            </label>
+			<div class="form-group">
+				<label>
+					Saal:
+					<select name="hall_id" bind:value={hall_id}>
+						<option value="" disabled selected>Saal auswählen</option>
+						{#each data.halls as hall}
+							<option value={hall.id}>{hall.name}</option>
+						{/each}
+					</select>
+				</label>
+			</div>
 
-            <label>
-                Datum und Uhrzeit:
-                <input type="datetime-local" name="start_time" bind:value={start_time} />
-            </label>
+			<div class="form-group">
+				<label>
+					Datum und Uhrzeit:
+					<input type="datetime-local" name="start_time" bind:value={start_time} />
+				</label>
+			</div>
 
-            <button type="submit" class="submit-btn">Vorstellung erstellen</button>
-        </form>
-    </div>
+			<button type="submit" class="submit-btn">
+				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-add" />
+				Vorstellung erstellen
+			</button>
+		</form>
+	</div>
 </main>
 
 <style>
-    .container {
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 20px;
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
+		padding: 2rem 1rem;
+	}
 
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 24px;
-        color: #333;
-    }
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+		background-color: #ffffff;
+		padding: 2rem;
+		border-radius: 0.5rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
 
-    .form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
+	.page-header {
+		position: relative;
+		margin-bottom: 2rem;
+	}
 
-    label {
-        font-weight: bold;
-        color: #444;
-    }
+	.page-title {
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin: 0;
+		text-align: center;
+	}
 
-    input,
-    select {
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 100%;
-    }
+	.back-btn {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		font-weight: 500;
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
 
-    input:focus,
-    select:focus {
-        border-color: #007bff;
-        outline: none;
-    }
+	.back-btn:hover {
+		background-color: #f3f4f6;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
 
-    .search-results {
-        list-style: none;
-        padding: 0;
-        margin: 10px 0;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        max-height: 150px;
-        overflow-y: auto;
-        background-color: #fff;
-    }
+	.form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
 
-    .search-results li {
-        padding: 10px;
-        cursor: pointer;
-        transition: background 0.2s ease;
-    }
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
 
-    .search-results li:hover {
-        background-color: #f1f1f1;
-    }
+	label {
+		font-weight: 500;
+		color: #374151;
+	}
 
-    .error {
-        color: red;
-        font-size: 14px;
-    }
+	input,
+	select {
+		padding: 0.5rem;
+		font-size: 1rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		width: 100%;
+		transition: border-color 0.2s ease;
+	}
 
-    .feedback {
-        text-align: center;
-        font-size: 16px;
-        color: green;
-        margin-bottom: 20px;
-    }
+	input:focus,
+	select:focus {
+		border-color: #6b7280;
+		outline: none;
+	}
 
-    .submit-btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
+	.search-results {
+		list-style: none;
+		padding: 0;
+		margin: 0.5rem 0;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		max-height: 150px;
+		overflow-y: auto;
+		background-color: #fff;
+	}
 
-    .submit-btn:hover {
-        background-color: #0056b3;
-    }
+	.search-results li {
+		padding: 0.5rem;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	.search-results li:hover {
+		background-color: #f3f4f6;
+	}
+
+	.error {
+		color: #dc3545;
+		font-size: 0.875rem;
+	}
+
+	.feedback {
+		text-align: center;
+		font-size: 1rem;
+		color: #28a745;
+		margin-bottom: 1rem;
+	}
+
+	.submit-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 0.75rem 1.25rem;
+		background-color: #28a745;
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.submit-btn:hover {
+		background-color: #218838;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
 </style>
