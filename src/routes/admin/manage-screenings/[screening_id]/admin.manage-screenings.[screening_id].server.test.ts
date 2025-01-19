@@ -34,6 +34,17 @@ vi.mock('@sveltejs/kit', async () => {
     };
 });
 
+// Add type for the expected load function return
+type LoadReturn = {
+    screening: {
+        screening_id: number;
+        movie_title: string;
+        hall_name: string;
+        seat_plan: any[];
+        [key: string]: any;
+    };
+};
+
 describe('manage screenings [screening_id] endpoints', () => {
     let mockQuery: any;
 
@@ -75,7 +86,7 @@ describe('manage screenings [screening_id] endpoints', () => {
 
             const result = await load({
                 params: { screening_id: '1' }
-            } as any);
+            } as any) as LoadReturn;  // Add type assertion here
 
             expect(result).toBeDefined();
             expect(result.screening).toMatchObject({
