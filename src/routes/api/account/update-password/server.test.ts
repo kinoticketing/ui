@@ -3,11 +3,11 @@ import { POST } from './+server';
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
 
-// Mock bcrypt
+// Fix bcrypt mock typing
 vi.mock('bcrypt', () => ({
     default: {
-        compare: vi.fn(),
-        hash: vi.fn()
+        compare: vi.fn().mockImplementation(() => Promise.resolve(true)),
+        hash: vi.fn().mockImplementation(() => Promise.resolve('hashedPassword123'))
     }
 }));
 
@@ -33,8 +33,9 @@ describe('Password Update API', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockQuery = vi.mocked(Pool)().query;
-        vi.mocked(bcrypt.compare).mockResolvedValue(true);
-        vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword123');
+        // Update mock implementations instead of return values
+        vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true));
+        vi.mocked(bcrypt.hash).mockImplementation(() => Promise.resolve('hashedPassword123'));
     });
 
     describe('POST handler', () => {
@@ -114,7 +115,8 @@ describe('Password Update API', () => {
             mockQuery.mockResolvedValueOnce({ 
                 rows: [{ password_hash: 'existingHash' }] 
             });
-            vi.mocked(bcrypt.compare).mockResolvedValueOnce(false);
+            // Update mock for this specific test
+            vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(false));
 
             const response = await POST({
                 locals: { userId: 'user123' },
@@ -136,7 +138,8 @@ describe('Password Update API', () => {
             mockQuery
                 .mockResolvedValueOnce({ rows: [{ password_hash: 'existingHash' }] })
                 .mockResolvedValueOnce({ rowCount: 1 });
-            vi.mocked(bcrypt.compare).mockResolvedValueOnce(true);
+            // Update mock for this specific test    
+            vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true));
 
             const response = await POST({
                 locals: { userId: 'user123' },

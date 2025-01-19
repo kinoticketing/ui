@@ -172,8 +172,11 @@ describe('Checkout API', () => {
             })
         } as any);
 
-        // Verify payment amount calculation
-        const paymentCall = mockClient.query.mock.calls.find(call => 
+        // Add type for query call array
+        type QueryCall = [string, any[]];
+        
+        // Update the find callback with proper typing
+        const paymentCall = mockClient.query.mock.calls.find((call: QueryCall) => 
             call[0].includes('INSERT INTO payments')
         );
         expect(paymentCall[1][1]).toBe(26.25); // 10.50 + 15.75

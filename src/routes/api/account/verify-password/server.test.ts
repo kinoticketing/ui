@@ -3,10 +3,10 @@ import { POST } from './+server';
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
 
-// Mock bcrypt
+// Fix bcrypt mock typing
 vi.mock('bcrypt', () => ({
     default: {
-        compare: vi.fn()
+        compare: vi.fn().mockImplementation(() => Promise.resolve(true))
     }
 }));
 
@@ -32,7 +32,8 @@ describe('Password Verification API', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockQuery = vi.mocked(Pool)().query;
-        vi.mocked(bcrypt.compare).mockResolvedValue(true);
+        // Update mock implementation instead of return value
+        vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true));
     });
 
     it('should reject unauthorized requests', async () => {
@@ -101,7 +102,8 @@ describe('Password Verification API', () => {
         mockQuery.mockResolvedValueOnce({ 
             rows: [{ password_hash: 'hashedPassword123' }] 
         });
-        vi.mocked(bcrypt.compare).mockResolvedValueOnce(true);
+        // Update mock implementation for this specific test
+        vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true));
 
         const response = await POST({
             locals: { userId: 'user123' },
@@ -120,7 +122,8 @@ describe('Password Verification API', () => {
         mockQuery.mockResolvedValueOnce({ 
             rows: [{ password_hash: 'hashedPassword123' }] 
         });
-        vi.mocked(bcrypt.compare).mockResolvedValueOnce(false);
+        // Update mock implementation for this specific test
+        vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(false));
 
         const response = await POST({
             locals: { userId: 'user123' },
