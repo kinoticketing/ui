@@ -238,10 +238,6 @@
 
 					<div class="seat-legend">
 						<div class="legend-item">
-							<div class="legend-box standard"></div>
-							<span>Standard</span>
-						</div>
-						<div class="legend-item">
 							<div class="legend-box premium"></div>
 							<span>Premium</span>
 						</div>
@@ -341,10 +337,6 @@
 	.back-button:hover {
 		background-color: #f3f4f6;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.legend-box.standard {
-		background-color: #e5e7eb;
 	}
 
 	.legend-box.premium {

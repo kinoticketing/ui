@@ -10,7 +10,6 @@
 		vip: { modifier: 5.0, class: 'vip' },
 		premium: { modifier: 3.0, class: 'premium' },
 		regular: { modifier: 1.0, class: 'regular' },
-		standard: { modifier: 1.0, class: 'standard' },
 		disabled: { modifier: 0.8, class: 'disabled' }
 	};
 
@@ -300,10 +299,6 @@
 		background-color: #93c5fd;
 		color: #000;
 	}
-	.seat.standard {
-		background-color: #e5e7eb;
-		color: #000;
-	}
 	.seat.disabled {
 		background-color: #86efac;
 		color: #000;
@@ -345,9 +340,6 @@
 	}
 	.legend-box.regular {
 		background-color: #93c5fd;
-	}
-	.legend-box.standard {
-		background-color: #e5e7eb;
 	}
 	.legend-box.disabled {
 		background-color: #86efac;
