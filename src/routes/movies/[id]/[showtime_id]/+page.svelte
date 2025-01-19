@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { page } from '$app/stores';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -13,8 +14,16 @@
 	let selectedSeats: SelectedSeat[] = [];
 	let loading = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
+	let seatStatuses: Map<number, SeatStatus> = new Map();
+	let statusUpdateInterval: ReturnType<typeof setInterval>;
 
-	// Add these type definitions at the top of your script section
+	interface SeatStatus {
+		seat_id: number;
+		is_booked: boolean;
+		is_locked: boolean;
+		locked_by: string | null;
+	}
+
 	type CategoryType = 'vip' | 'premium' | 'regular' | 'disabled';
 
 	interface CategoryDetails {
@@ -23,7 +32,6 @@
 		modifier: number;
 	}
 
-	// Update the seatCategories declaration
 	const seatCategories: Record<CategoryType, CategoryDetails> = {
 		vip: { background: '#fcd34d', text: '#000', modifier: 5.0 },
 		premium: { background: '#f87171', text: '#fff', modifier: 3.0 },
@@ -31,7 +39,6 @@
 		disabled: { background: '#86efac', text: '#000', modifier: 0.8 }
 	};
 
-	// Update the helper functions
 	function getCategoryColor(categoryName: string | undefined): string {
 		const categoryKey = (categoryName?.toLowerCase() || 'regular') as CategoryType;
 		return seatCategories[categoryKey]?.background || seatCategories.regular.background;
@@ -42,30 +49,52 @@
 		return seatCategories[categoryKey]?.text || seatCategories.regular.text;
 	}
 
-	onMount(async () => {
-		// Check for stored seats
-		const storedSeats = localStorage.getItem('selectedSeats');
-		if (storedSeats) {
-			const seats = JSON.parse(storedSeats);
-			// Re-lock each seat
-			for (const seat of seats) {
-				try {
-					const lockResponse = await fetch(`/api/seats/${seat.seatId}/lock`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ screeningId: screening.id })
-					});
+	async function updateSeatStatuses() {
+		try {
+			const statusPromises = screening.hall.seatPlan
+				.flat()
+				.filter((seat) => seat !== null)
+				.map(async (seat) => {
+					const response = await fetch(`/api/seats/${seat.id}/status?screeningId=${screening.id}`);
+					if (!response.ok) throw new Error(`Failed to fetch status for seat ${seat.id}`);
+					return response.json();
+				});
 
-					if (lockResponse.ok) {
-						selectedSeats = [...selectedSeats, seat];
-					}
-				} catch (error) {
-					console.error('Error relocking seat:', error);
-				}
-			}
-			// Clear stored seats after retrieving them
-			localStorage.removeItem('selectedSeats');
+			const statuses = await Promise.all(statusPromises);
+			seatStatuses = new Map(statuses.map((status: SeatStatus) => [status.seat_id, status]));
+		} catch (error) {
+			console.error('Error updating seat statuses:', error);
 		}
+	}
+
+	onMount(async () => {
+		await updateSeatStatuses();
+		statusUpdateInterval = setInterval(updateSeatStatuses, 30000);
+
+		// Iterate through the seats and find the ones locked by the current user
+		const userLockedSeats = [];
+		for (const seat of $page.data.screening.seats) {
+			if (seat.isLocked && seat.lockedBy === $page.data.session?.user?.id) {
+				userLockedSeats.push({
+					key: `${seat.row_number - 1}-${seat.column_number - 1}`,
+					row: seat.row_number,
+					col: seat.column_number,
+					label: seat.seat_label,
+					seatId: seat.id,
+					price: seat.category ? seat.category.price_modifier * 10 : 0, // Adjust pricing logic as needed
+					categoryName: seat.category?.name
+				});
+			}
+		}
+
+		// Update the selectedSeats array with the locked seats
+		if (userLockedSeats.length > 0) {
+			selectedSeats = userLockedSeats;
+		}
+	});
+
+	onDestroy(() => {
+		if (statusUpdateInterval) clearInterval(statusUpdateInterval);
 	});
 
 	async function getSeatPrice(seatId: number): Promise<PriceResponse> {
@@ -90,6 +119,15 @@
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
 		if (!seat || seat.isBooked || loading || seat.status === 'inactive') return;
+
+		const seatStatus = seatStatuses.get(seat.id);
+		// Only block if seat is booked or locked by someone else
+		if (
+			seatStatus?.is_booked ||
+			(seatStatus?.is_locked && seatStatus.locked_by !== $page.data.session?.user?.id)
+		) {
+			return;
+		}
 
 		loading = true;
 		const seatKey = `${rowIndex}-${colIndex}`;
@@ -135,6 +173,7 @@
 					}
 				];
 			}
+			await updateSeatStatuses();
 		} catch (e) {
 			console.error('Error handling seat selection:', e);
 			alert('Failed to process seat selection. Please try again.');
@@ -218,7 +257,7 @@
 				<!-- Left side - Seating Plan -->
 				<div class="seating-section">
 					<div class="screen-container">
-						<div class="screen"></div>
+						<div class="screen" />
 						<p class="screen-label">Screen</p>
 					</div>
 
@@ -232,15 +271,22 @@
 										class:seat-selected={selectedSeats.some(
 											(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 										)}
-										class:seat-booked={seat?.isBooked}
+										class:seat-booked={seat?.isBooked || seatStatuses.get(seat?.id)?.is_booked}
+										class:seat-locked={!seatStatuses.get(seat?.id)?.is_booked &&
+											seatStatuses.get(seat?.id)?.is_locked}
 										class:seat-inactive={seat?.status === 'inactive'}
 										style={seat
 											? `background-color: ${
 													selectedSeats.some(
 														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 													)
-														? '#3b82f6'
-														: getCategoryColor(seat.category?.name)
+														? '#3b82f6' // Selected
+														: seatStatuses.get(seat.id)?.is_booked
+															? '#6b7280' // Booked - darker grey
+															: seatStatuses.get(seat.id)?.is_locked &&
+																  !seatStatuses.get(seat.id)?.is_booked
+																? '#9ca3af' // Locked - lighter grey
+																: getCategoryColor(seat.category?.name) // Available
 												}; color: ${
 													selectedSeats.some(
 														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
@@ -249,7 +295,14 @@
 														: getCategoryTextColor(seat.category?.name)
 												}`
 											: ''}
-										disabled={!seat || seat.isBooked || seat.status === 'inactive'}
+										disabled={!seat ||
+											seat.isBooked ||
+											seat.status === 'inactive' ||
+											seatStatuses.get(seat?.id)?.is_booked ||
+											(seatStatuses.get(seat?.id)?.is_locked &&
+												!selectedSeats.some(
+													(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+												))}
 										on:click={() => handleSeatClick(rowIndex, seat.column_number - 1, seat)}
 									>
 										{seat?.seat_label ?? ''}
@@ -266,8 +319,8 @@
 								<div class="legend-item">
 									<div
 										class="legend-box"
-										style="background-color: {data.background}; color: {data.text}"
-									></div>
+										style="background-color: {data.background}; color: {data.text}; border: 1px solid #e5e7eb;"
+									/>
 									<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
 								</div>
 							{/each}
@@ -276,12 +329,25 @@
 						<div class="legend-section">
 							<span class="legend-section-title">Seat Status</span>
 							<div class="legend-item">
-								<div class="legend-box selected"></div>
+								<div
+									class="legend-box"
+									style="background-color: #3b82f6; color: white; border: 1px solid #e5e7eb;"
+								/>
 								<span>Selected</span>
 							</div>
 							<div class="legend-item">
-								<div class="legend-box booked"></div>
+								<div
+									class="legend-box"
+									style="background-color: #6b7280; opacity: 0.8; border: 1px solid #e5e7eb;"
+								/>
 								<span>Booked</span>
+							</div>
+							<div class="legend-item">
+								<div
+									class="legend-box"
+									style="background-color: #9ca3af; opacity: 0.6; border: 1px solid #e5e7eb;"
+								/>
+								<span>Locked</span>
 							</div>
 						</div>
 					</div>
@@ -414,7 +480,7 @@
 	.screen-container {
 		margin-bottom: 3rem;
 		text-align: center;
-        padding-left: 2.5rem;
+		padding-left: 2.5rem;
 	}
 
 	.screen {
@@ -491,8 +557,19 @@
 	}
 
 	.seat-booked {
+		background-color: #6b7280 !important;
+		cursor: not-allowed;
+		opacity: 0.8;
+	}
+
+	.seat-locked {
 		background-color: #9ca3af !important;
 		cursor: not-allowed;
+		opacity: 0.6;
+	}
+
+	.seat-selected {
+		background-color: #3b82f6 !important;
 		color: white !important;
 	}
 
@@ -503,26 +580,25 @@
 	}
 
 	.seat-legend {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 1rem;
+		display: flex;
+		justify-content: center;
+		gap: 2rem;
 		margin-top: 2rem;
+		flex-shrink: 0;
 		padding-top: 1rem;
 		border-top: 1px solid #e5e7eb;
 	}
 
-	/* Add a new container for legend sections */
 	.legend-section {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.5rem;
 	}
 
 	.legend-section-title {
-		font-size: 0.875rem;
-		color: #666;
-		font-weight: 500;
-		margin-bottom: 0.25rem;
+		font-weight: 600;
+		color: #374151;
+		margin-bottom: 0.5rem;
 	}
 
 	.legend-item {
@@ -535,14 +611,7 @@
 		width: 1.5rem;
 		height: 1.5rem;
 		border-radius: 0.25rem;
-	}
-
-	.legend-box.selected {
-		background-color: #3b82f6;
-	}
-
-	.legend-box.booked {
-		background-color: #9ca3af;
+		flex-shrink: 0;
 	}
 
 	.cart-container {
