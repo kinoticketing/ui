@@ -9,8 +9,9 @@ export default defineConfig({
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		coverage: {
-			enabled: false
-		  }
+            enabled: true,
+            reporter: ['text-summary'] // Only output the coverage summary to the terminal
+        }
 	}
 });
  
