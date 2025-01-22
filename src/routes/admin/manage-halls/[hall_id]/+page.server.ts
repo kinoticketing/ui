@@ -83,28 +83,3 @@ export const load: PageServerLoad = async ({ params }) => {
 		return { hall: null, error: 'Failed to load hall data' };
 	}
 };
-
-export const actions: Actions = {
-	updateSeat: async ({ request, params }) => {
-		const hallId = Number(params.hall_id);
-		const body = await request.json();
-		const { row_number, column_number, category_id } = body;
-
-		try {
-			// Update single seat
-			await pool.query(
-				`
-UPDATE seats
-SET category_id = $1
-WHERE hall_id = $2 AND row_number = $3 AND column_number = $4
-`,
-				[category_id, hallId, row_number, column_number]
-			);
-
-			return { success: true };
-		} catch (error) {
-			console.error('Error updating seat:', error);
-			return { success: false, error: 'Error updating seat.' };
-		}
-	}
-};
