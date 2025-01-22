@@ -113,18 +113,6 @@
 		}
 	}
 
-	function getSeat(rowIndex: number, colIndex: number) {
-		const existingSeat = seatPlan?.[rowIndex]?.[colIndex];
-		if (existingSeat) {
-			return existingSeat;
-		}
-		return {
-			label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`,
-			category: 'regular',
-			status: 'active'
-		};
-	}
-
 	function getSeatClass(seat: any) {
 		if (!seat) return 'seat-empty';
 		if (seat.status === 'inactive') return 'seat-inactive';
@@ -143,21 +131,6 @@
 			`Sitz geklickt: row=${rowIndex}, col=${colIndex}, Wert=`,
 			seatPlan[rowIndex][colIndex]
 		);
-	}
-
-	async function updateSeatPlan() {
-		const formData = new FormData();
-		formData.append('new_seat_plan', JSON.stringify(seatPlan));
-		const response = await fetch('./updateSeatPlan', {
-			method: 'POST',
-			body: formData
-		});
-		const result = await response.json();
-		if (result.success) {
-			alert('Sitzplan erfolgreich aktualisiert!');
-		} else {
-			alert('Fehler: ' + result.error);
-		}
 	}
 
 	function goBack() {
@@ -302,11 +275,6 @@
 					{/each}
 				</div>
 			</div>
-
-			<button class="save-button" on:click={updateSeatPlan}>
-				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-save" />
-				Sitzplan speichern
-			</button>
 		</div>
 	{/if}
 </main>
