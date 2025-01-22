@@ -7,15 +7,7 @@
 	let seatPlan = screening?.seat_plan ?? [];
 	let isEditMode = false;
 
-	let editForm = {
-		movie_id: screening?.movie_id || '',
-		start_time: screening?.start_time
-			? new Date(screening.start_time).toISOString().slice(0, 16)
-			: '',
-		end_time: screening?.end_time ? new Date(screening.end_time).toISOString().slice(0, 16) : '',
-		hall_id: screening?.hall_id || ''
-	};
-
+	// Add seatTypes definition
 	const seatTypes = {
 		vip: { modifier: 5.0, class: 'vip' },
 		premium: { modifier: 3.0, class: 'premium' },
@@ -23,8 +15,76 @@
 		disabled: { modifier: 0.8, class: 'disabled' }
 	};
 
+	// Movie search state
+	let movieQuery = '';
+	let searchResults: { movie_id: string; title: string }[] = [];
+	let selectedMovie: { movie_id: string; title: string } | null = null;
+	let searchError: string | null = null;
+
+	let editForm = {
+		movie_id: screening?.movie_id || '',
+		start_time: screening?.start_time
+			? new Date(screening.start_time).toISOString().slice(0, 16)
+			: '',
+		hall_id: screening?.hall_id || ''
+	};
+
+	// Movie search function
+	async function fetchMovies() {
+		if (!movieQuery.trim()) {
+			searchResults = [];
+			searchError = null;
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`/admin/manage-screenings/search-movies?query=${encodeURIComponent(movieQuery)}`
+			);
+			if (response.ok) {
+				const result = await response.json();
+				searchResults = result.movies;
+				searchError = result.movies.length === 0 ? 'Keine Filme gefunden.' : null;
+			} else {
+				const error = await response.json();
+				searchError = error.message || 'Fehler bei der Filmsuche.';
+			}
+		} catch (error) {
+			console.error('Netzwerkfehler:', error);
+			searchError = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+		}
+	}
+
+	function selectMovie(movie: { movie_id: string; title: string }) {
+		selectedMovie = movie;
+		editForm.movie_id = movie.movie_id;
+		searchResults = [];
+		movieQuery = '';
+	}
+
 	async function handleEdit() {
 		try {
+			// First save the movie if it's a new selection
+			if (selectedMovie) {
+				const movieResponse = await fetch('/admin/manage-screenings/create-screening/save-movie', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						movie_id: selectedMovie.movie_id,
+						title: selectedMovie.title
+					})
+				});
+
+				if (!movieResponse.ok) {
+					const error = await movieResponse.json();
+					alert(error.message || 'Fehler beim Speichern des Films.');
+					return;
+				}
+			}
+
+			// Then update the screening
 			const response = await fetch('', {
 				method: 'PUT',
 				headers: {
@@ -37,13 +97,13 @@
 
 			if (result.success) {
 				isEditMode = false;
-				// Update local data with new values
 				screening = {
 					...screening,
 					...result.screening,
-					movie_title: screening.movie_title, // Preserve title
-					hall_name: halls.find((h) => h.id === result.screening.hall_id)?.name
+					movie_title: selectedMovie?.title || screening.movie_title,
+					hall_name: halls.find(h => h.id === result.screening.hall_id)?.name
 				};
+				selectedMovie = null;
 			} else {
 				alert('Fehler beim Aktualisieren: ' + result.error);
 			}
@@ -130,9 +190,36 @@
 				{#if isEditMode}
 					<form on:submit|preventDefault={handleEdit} class="edit-form">
 						<div class="form-group">
-							<label for="movie_id">Film-ID:</label>
-							<input type="text" id="movie_id" bind:value={editForm.movie_id} required />
-						</div>
+								<label>
+									Film suchen:
+									<input
+										type="text"
+										bind:value={movieQuery}
+										placeholder="Film suchen..."
+										on:input={fetchMovies}
+									/>
+								</label>
+
+								{#if searchError}
+									<p class="error">{searchError}</p>
+								{/if}
+
+								{#if searchResults.length > 0}
+									<ul class="search-results">
+										{#each searchResults as movie}
+											<!-- svelte-ignore a11y-click-events-have-key-events -->
+											<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+											<li on:click={() => selectMovie(movie)}>
+												{movie.title}
+											</li>
+										{/each}
+									</ul>
+								{/if}
+
+								{#if selectedMovie}
+									<p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
+								{/if}
+							</div>
 
 						<div class="form-group">
 							<label for="hall_id">Saal:</label>
@@ -523,5 +610,33 @@
 
 	.save-changes-btn:hover {
 		background-color: #218838;
+	}
+
+	/* Add these styles */
+	.search-results {
+		list-style: none;
+		padding: 0;
+		margin: 0.5rem 0;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		max-height: 150px;
+		overflow-y: auto;
+		background-color: #fff;
+	}
+
+	.search-results li {
+		padding: 0.5rem;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	.search-results li:hover {
+		background-color: #f3f4f6;
+	}
+
+	.error {
+		color: #dc3545;
+		font-size: 0.875rem;
+		margin-top: 0.25rem;
 	}
 </style>
