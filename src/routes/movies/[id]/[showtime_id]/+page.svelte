@@ -1,8 +1,10 @@
+<!--src/routes/movies/[id]/[showtime_id]/+page.svelte-->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { cart } from '$lib/stores/cart';
+	import { page } from '$app/stores';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -24,6 +26,19 @@
 		modifier: number;
 	}
 
+	interface SeatStatus {
+		seat_id: number;
+		is_booked: boolean;
+		is_locked: boolean;
+		locked_by: string | null;
+		status: string;
+		is_available: boolean;
+		current_user: string | null;
+	}
+
+	let seatStatuses = new Map<number, SeatStatus>();
+	let statusUpdateInterval: ReturnType<typeof setInterval>;
+
 	// Update the seatCategories declaration
 	const seatCategories: Record<CategoryType, CategoryDetails> = {
 		vip: { background: '#fcd34d', text: '#000', modifier: 5.0 },
@@ -31,6 +46,28 @@
 		regular: { background: '#93c5fd', text: '#000', modifier: 1.0 },
 		disabled: { background: '#86efac', text: '#000', modifier: 0.8 }
 	};
+
+	async function updateSeatStatuses() {
+		try {
+			const statusPromises = screening.hall.seatPlan
+				.flat()
+				.filter((seat): seat is NonNullable<typeof seat> => seat !== null)
+				.map(async (seat) => {
+					const response = await fetch(`/api/seats/${seat.id}/status?screeningId=${screening.id}`);
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || `Failed to fetch status for seat ${seat.id}`);
+					}
+					const status = await response.json();
+					return [seat.id, status] as [number, SeatStatus];
+				});
+
+			const statusResults = await Promise.all(statusPromises);
+			seatStatuses = new Map(statusResults);
+		} catch (error) {
+			console.error('Error updating seat statuses:', error);
+		}
+	}
 
 	// Update the helper functions
 	function getCategoryColor(categoryName: string | undefined): string {
@@ -44,29 +81,57 @@
 	}
 
 	onMount(async () => {
+		// Initial status check
+		await updateSeatStatuses();
+
+		// Regular polling
+		statusUpdateInterval = setInterval(updateSeatStatuses, 1000);
+
+		// Check cart for existing tickets for this screening
+		const cartItems = cart.getItems();
+		const existingCartSeats = cartItems
+			.filter((item) => item.screeningId === screening.id)
+			.flatMap((item) =>
+				item.tickets.map((ticket) => ({
+					key: `${ticket.row - 1}-${ticket.col - 1}`,
+					row: ticket.row,
+					col: ticket.col,
+					label: ticket.label,
+					seatId: ticket.seatId,
+					price: ticket.price,
+					categoryName: ticket.categoryName
+				}))
+			);
+
 		// Check for stored seats
 		const storedSeats = localStorage.getItem('selectedSeats');
-		if (storedSeats) {
-			const seats = JSON.parse(storedSeats);
-			// Re-lock each seat
-			for (const seat of seats) {
-				try {
-					const lockResponse = await fetch(`/api/seats/${seat.seatId}/lock`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ screeningId: screening.id })
-					});
+		const storedSeatsArray = storedSeats ? JSON.parse(storedSeats) : [];
 
-					if (lockResponse.ok) {
-						selectedSeats = [...selectedSeats, seat];
-					}
-				} catch (error) {
-					console.error('Error relocking seat:', error);
+		// Combine cart seats and stored seats
+		const seatsToRestore = [...existingCartSeats, ...storedSeatsArray];
+
+		// Re-lock each seat
+		for (const seat of seatsToRestore) {
+			try {
+				const lockResponse = await fetch(`/api/seats/${seat.seatId}/lock`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ screeningId: screening.id })
+				});
+
+				if (lockResponse.ok) {
+					selectedSeats = [...selectedSeats, seat];
 				}
+			} catch (error) {
+				console.error('Error relocking seat:', error);
 			}
-			// Clear stored seats after retrieving them
-			localStorage.removeItem('selectedSeats');
 		}
+		// Clear stored seats after retrieving them
+		localStorage.removeItem('selectedSeats');
+	});
+
+	onDestroy(() => {
+		if (statusUpdateInterval) clearInterval(statusUpdateInterval);
 	});
 
 	async function getSeatPrice(seatId: number): Promise<PriceResponse> {
@@ -90,7 +155,16 @@
 	}
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
-		if (!seat || seat.isBooked || loading || seat.status === 'inactive') return;
+		if (!seat || loading || seat.status === 'inactive') return;
+
+		const seatStatus = seatStatuses.get(seat.id);
+		// Block if seat is booked or locked by someone else
+		if (
+			seatStatus?.is_booked ||
+			(seatStatus?.is_locked && seatStatus.locked_by !== $page.data.session?.user?.id)
+		) {
+			return;
+		}
 
 		loading = true;
 		const seatKey = `${rowIndex}-${colIndex}`;
@@ -136,6 +210,7 @@
 					}
 				];
 			}
+			await updateSeatStatuses();
 		} catch (e) {
 			console.error('Error handling seat selection:', e);
 			alert('Failed to process seat selection. Please try again.');
@@ -166,15 +241,30 @@
 
 		loading = true;
 		try {
+			// Check if any of these seats are already in cart
+			const cartItems = cart.getItems();
+			const existingSeats = cartItems
+				.filter((item) => item.screeningId === screening.id)
+				.flatMap((item) => item.tickets)
+				.map((ticket) => ticket.seatId);
+
+			const newSeats = selectedSeats.filter((seat) => !existingSeats.includes(seat.seatId));
+
+			if (newSeats.length === 0) {
+				alert('These seats are already in your cart');
+				loading = false;
+				return;
+			}
+
 			// Store selected seats in localStorage as backup
-			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+			localStorage.setItem('selectedSeats', JSON.stringify(newSeats));
 
 			// Add to cart
 			cart.addItem({
 				screeningId: screening.id,
 				movieTitle: movie.title,
 				screeningTime: screening.start_time,
-				tickets: selectedSeats.map((seat) => ({
+				tickets: newSeats.map((seat) => ({
 					seatId: seat.seatId,
 					row: seat.row,
 					col: seat.col,
@@ -234,7 +324,10 @@
 										class:seat-selected={selectedSeats.some(
 											(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 										)}
-										class:seat-booked={seat?.isBooked}
+										class:seat-booked={seatStatuses.get(seat?.id)?.is_booked}
+										class:seat-locked={!seatStatuses.get(seat?.id)?.is_booked &&
+											seatStatuses.get(seat?.id)?.is_locked &&
+											seatStatuses.get(seat?.id)?.locked_by !== $page.data.session?.user?.id}
 										class:seat-inactive={seat?.status === 'inactive'}
 										style={seat
 											? `background-color: ${
@@ -242,7 +335,18 @@
 														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
 													)
 														? '#3b82f6'
-														: getCategoryColor(seat.category?.name)
+														: seatStatuses.get(seat.id)?.is_booked
+															? '#6b7280'
+															: seatStatuses.get(seat.id)?.is_locked &&
+																  seatStatuses.get(seat.id)?.locked_by !==
+																		$page.data.session?.user?.id
+																? '#9ca3af'
+																: getCategoryColor(seat.category?.name)
+												}; opacity: ${
+													seatStatuses.get(seat.id)?.is_locked &&
+													seatStatuses.get(seat.id)?.locked_by !== $page.data.session?.user?.id
+														? '0.6'
+														: '1'
 												}; color: ${
 													selectedSeats.some(
 														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
@@ -251,7 +355,11 @@
 														: getCategoryTextColor(seat.category?.name)
 												}`
 											: ''}
-										disabled={!seat || seat.isBooked || seat.status === 'inactive'}
+										disabled={!seat ||
+											seatStatuses.get(seat?.id)?.is_booked ||
+											seat.status === 'inactive' ||
+											(seatStatuses.get(seat?.id)?.is_locked &&
+												seatStatuses.get(seat?.id)?.locked_by !== $page.data.session?.user?.id)}
 										on:click={() => handleSeatClick(rowIndex, seat.column_number - 1, seat)}
 									>
 										{seat?.seat_label ?? ''}
@@ -266,15 +374,11 @@
 							<span class="legend-section-title">Seat Categories</span>
 							{#each Object.entries(seatCategories) as [type, data]}
 								<div class="legend-item">
-									<div
-										class="legend-box"
-										style="background-color: {data.background}; color: {data.text}"
-									></div>
-									<span>{type.charAt(0).toUpperCase() + type.slice(1)} ({data.modifier}x)</span>
+									<div class="legend-box" style="background-color: {getCategoryColor(type)}"></div>
+									<span>{type}</span>
 								</div>
 							{/each}
 						</div>
-
 						<div class="legend-section">
 							<span class="legend-section-title">Seat Status</span>
 							<div class="legend-item">
@@ -284,6 +388,10 @@
 							<div class="legend-item">
 								<div class="legend-box booked"></div>
 								<span>Booked</span>
+							</div>
+							<div class="legend-item">
+								<div class="legend-box locked"></div>
+								<span>Locked</span>
 							</div>
 						</div>
 					</div>
@@ -328,7 +436,7 @@
 								disabled={selectedSeats.length === 0}
 								on:click={handleCheckout}
 							>
-								Proceed to Checkout
+								Add to Cart
 							</button>
 						</div>
 					</div>
@@ -423,7 +531,7 @@
 		height: 8px;
 		background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
 		margin: 0 auto 1rem;
-		width: calc(100%-2.5rem);
+		width: calc(100% - 2.5rem);
 		border-radius: 4px;
 	}
 
@@ -475,9 +583,16 @@
 	}
 
 	.seat-booked {
+		background-color: #6b7280 !important;
+		cursor: not-allowed;
+		opacity: 0.8;
+	}
+
+	.seat-locked {
 		background-color: #9ca3af !important;
 		cursor: not-allowed;
-		color: white !important;
+		opacity: 0.6;
+		border: 1px solid #6b7280;
 	}
 
 	.seat-inactive {
@@ -500,6 +615,7 @@
 		flex-direction: column;
 		gap: 0.75rem;
 	}
+
 	.legend-section-title {
 		font-size: 0.875rem;
 		color: #666;
@@ -521,16 +637,18 @@
 
 	.legend-box.selected {
 		background-color: #3b82f6;
+		color: white;
 	}
 
 	.legend-box.booked {
-		background-color: #9ca3af;
+		background-color: #6b7280;
+		opacity: 0.8;
 	}
 
-	.cart-section {
-		flex: 2;
-		position: sticky;
-		top: 2rem;
+	.legend-box.locked {
+		background-color: #9ca3af;
+		opacity: 0.6;
+		border: 1px solid #6b7280;
 	}
 
 	.cart-container {

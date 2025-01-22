@@ -1,4 +1,3 @@
-// src/lib/stores/cart.ts
 import { writable } from 'svelte/store';
 import type { CartItem } from '$lib/types';
 
@@ -51,6 +50,13 @@ function createCartStore() {
 					item.screeningId === screeningId ? { ...item, tickets: updatedTickets } : item
 				);
 			}),
+		getItems: () => {
+			let items: CartItem[] = [];
+			subscribe((value) => {
+				items = value;
+			})();
+			return items;
+		},
 		clear: () => set([])
 	};
 }

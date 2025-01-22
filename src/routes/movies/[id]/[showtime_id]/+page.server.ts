@@ -1,3 +1,4 @@
+// src/routes/movies/[id]/[showtime_id]/+page.server.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -55,13 +56,37 @@ export const load: PageServerLoad = async ({ params }) => {
                                 FROM seat_categories sc 
                                 WHERE sc.id = seats.category_id
                             ),
-                            'isBooked', EXISTS (
-                                SELECT 1 
-                                FROM seat_reservations sr 
-                                WHERE sr.seat_id = seats.id 
-                                AND sr.screening_id = s.id
-                                AND sr.status = 'confirmed'
-                            )
+							'isBooked', (
+								EXISTS (
+									SELECT 1 
+									FROM tickets t 
+									WHERE t.seat_id = seats.id 
+									AND t.screening_id = s.id
+									AND t.status = 'confirmed'
+								) OR
+								EXISTS (
+									SELECT 1 
+									FROM seat_reservations sr 
+									WHERE sr.seat_id = seats.id 
+									AND sr.screening_id = s.id
+									AND sr.status = 'confirmed'
+								)
+							),
+							'isLocked', (
+								EXISTS (
+									SELECT 1 
+									FROM seat_locks sl 
+									WHERE sl.seat_id = seats.id 
+									AND sl.locked_at > NOW() - INTERVAL '5 minutes'
+								)
+							),
+							'lockedBy', (
+								SELECT sl.user_id 
+								FROM seat_locks sl 
+								WHERE sl.seat_id = seats.id 
+								AND sl.locked_at > NOW() - INTERVAL '5 minutes'
+								LIMIT 1
+							)
                         )
                         ORDER BY seats.row_number, seats.column_number
                     )
