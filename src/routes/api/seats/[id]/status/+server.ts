@@ -33,7 +33,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
             WHERE locked_at < NOW() - INTERVAL '5 minutes'
         `);
 
-		// Get comprehensive seat status
+		// Get comprehensive seat status with screening_id check in locks
 		const result = await client.query(
 			`
             SELECT 
@@ -59,6 +59,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
                         SELECT 1 
                         FROM seat_locks sl 
                         WHERE sl.seat_id = s.id 
+                        AND sl.screening_id = $2
                         AND sl.locked_at > NOW() - INTERVAL '5 minutes'
                     ) THEN true
                     ELSE false
@@ -67,6 +68,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
                     SELECT sl.user_id 
                     FROM seat_locks sl 
                     WHERE sl.seat_id = s.id 
+                    AND sl.screening_id = $2
                     AND sl.locked_at > NOW() - INTERVAL '5 minutes'
                     LIMIT 1
                 ) as locked_by,

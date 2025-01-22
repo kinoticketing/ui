@@ -64,6 +64,21 @@
 
 			const statusResults = await Promise.all(statusPromises);
 			seatStatuses = new Map(statusResults);
+
+			// Check if any of our selected seats are no longer locked by us
+			const expiredSeats = selectedSeats.filter((seat) => {
+				const status = seatStatuses.get(seat.seatId);
+				return !status?.is_locked || status.locked_by !== $page.data.session?.user?.id;
+			});
+
+			// Remove expired seats from selection
+			if (expiredSeats.length > 0) {
+				for (const seat of expiredSeats) {
+					removeSeat(seat.key);
+				}
+				// notify the user
+				alert('Some of your selected seats have expired and been released.');
+			}
 		} catch (error) {
 			console.error('Error updating seat statuses:', error);
 		}
@@ -80,6 +95,7 @@
 		return seatCategories[categoryKey]?.text || seatCategories.regular.text;
 	}
 
+	// In your onMount function
 	onMount(async () => {
 		// Initial status check
 		await updateSeatStatuses();
@@ -87,10 +103,10 @@
 		// Regular polling
 		statusUpdateInterval = setInterval(updateSeatStatuses, 1000);
 
-		// Check cart for existing tickets for this screening
+		// Check cart for existing tickets for this screening only
 		const cartItems = cart.getItems();
 		const existingCartSeats = cartItems
-			.filter((item) => item.screeningId === screening.id)
+			.filter((item) => item.screeningId === screening.id) // This line is important
 			.flatMap((item) =>
 				item.tickets.map((ticket) => ({
 					key: `${ticket.row - 1}-${ticket.col - 1}`,
@@ -103,9 +119,11 @@
 				}))
 			);
 
-		// Check for stored seats
+		// Check for stored seats - IMPORTANT: Only restore if they match the current screening
 		const storedSeats = localStorage.getItem('selectedSeats');
-		const storedSeatsArray = storedSeats ? JSON.parse(storedSeats) : [];
+		const storedSeatsArray = storedSeats
+			? JSON.parse(storedSeats).filter((seat: { screeningId: number; }) => seat.screeningId === screening.id)
+			: [];
 
 		// Combine cart seats and stored seats
 		const seatsToRestore = [...existingCartSeats, ...storedSeatsArray];

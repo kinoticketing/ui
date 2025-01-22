@@ -59,6 +59,7 @@ export interface CartItem {
 	screeningTime: string;
 	tickets: CartTicket[];
 	movieImageUrl: string;
+	addedAt: number;
 }
 
 export interface PriceResponse {
