@@ -21,25 +21,35 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 
 		// 1) Screening (Vorstellung) + zugehörigen Hall (Saal) laden
-		const screeningResult = await pool.query(
-			`
-			SELECT
-				s.id AS screening_id,
-				s.movie_id,
-				s.hall_id,
-				s.start_time,
-				s.end_time,
-				h.name AS hall_name,
-				h.total_rows,
-				h.total_columns,
-				m.title AS movie_title
-			FROM screenings s
-			JOIN halls h ON h.id = s.hall_id
-			JOIN movies m ON m.imdb_id = s.movie_id
-			WHERE s.id = $1
-			`,
-			[screeningId]
-		);
+		const [screeningResult, hallsResult] = await Promise.all([
+			pool.query(
+				`SELECT
+					s.id AS screening_id,
+					s.movie_id,
+					s.hall_id,
+					s.start_time,
+					s.end_time,
+					h.name AS hall_name,
+					h.total_rows,
+					h.total_columns,
+					m.title AS movie_title
+				FROM screenings s
+				JOIN halls h ON h.id = s.hall_id
+				JOIN movies m ON m.imdb_id = s.movie_id
+				WHERE s.id = $1`,
+				[screeningId]
+			),
+			pool.query(`
+				SELECT id, name 
+				FROM halls 
+				WHERE id IN (
+					SELECT DISTINCT hall_id 
+					FROM seats 
+					WHERE status = 'active'
+				)
+				ORDER BY name
+			`)
+		]);
 
 		if (screeningResult.rowCount === 0) {
 			throw error(404, `Vorstellung (screening) mit ID ${screeningId} nicht gefunden`);
@@ -90,19 +100,23 @@ export const load: PageServerLoad = async ({ params }) => {
 		});
 
 		// 4) Dem Frontend ein Objekt zurückgeben, das "wie früher" aufgebaut ist
-		const capacity = seatPlan.flat().filter(seat => seat !== null).length;
+		const capacity = seatPlan.flat().filter((seat) => seat !== null).length;
 		return {
 			screening: {
 				screening_id: row.screening_id,
 				movie_id: row.movie_id,
-				movie_title: row.movie_title, // Add movie title
+				movie_title: row.movie_title,
 				hall_id: row.hall_id,
 				hall_name: row.hall_name,
 				start_time: row.start_time,
 				end_time: row.end_time,
 				capacity,
 				seat_plan: seatPlan
-			}
+			},
+			halls: hallsResult.rows.map((hall) => ({
+				id: hall.id,
+				name: hall.name
+			}))
 		};
 	} catch (err) {
 		console.error('Fehler im load:', err);
@@ -163,13 +177,10 @@ export const actions: Actions = {
 					const seatObj = seatPlanArray[r][c];
 					// Falls in einer Zelle kein Objekt vorhanden ist, erzeugen wir einen Default-Wert (z. B. "regular")
 					const label =
-						seatObj && seatObj.label
-							? seatObj.label
-							: `${String.fromCharCode(65 + r)}${c + 1}`;
+						seatObj && seatObj.label ? seatObj.label : `${String.fromCharCode(65 + r)}${c + 1}`;
 					const status = seatObj && seatObj.status ? seatObj.status : 'active';
 					// category_id kann entweder explizit übergeben werden oder auf null/default gesetzt werden
-					const category_id =
-						seatObj && seatObj.category_id ? seatObj.category_id : null;
+					const category_id = seatObj && seatObj.category_id ? seatObj.category_id : null;
 
 					// Da in der DB Zeilen und Spalten in der Regel 1-basiert sind, speichern wir r+1 und c+1
 					await pool.query(

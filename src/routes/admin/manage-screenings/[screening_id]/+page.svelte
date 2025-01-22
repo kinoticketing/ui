@@ -3,8 +3,18 @@
 	import Icon from '@iconify/svelte';
 
 	export let data;
-	const { screening } = data;
+	const { screening, halls } = data;
 	let seatPlan = screening?.seat_plan ?? [];
+	let isEditMode = false;
+
+	let editForm = {
+		movie_id: screening?.movie_id || '',
+		start_time: screening?.start_time
+			? new Date(screening.start_time).toISOString().slice(0, 16)
+			: '',
+		end_time: screening?.end_time ? new Date(screening.end_time).toISOString().slice(0, 16) : '',
+		hall_id: screening?.hall_id || ''
+	};
 
 	const seatTypes = {
 		vip: { modifier: 5.0, class: 'vip' },
@@ -12,6 +22,24 @@
 		regular: { modifier: 1.0, class: 'regular' },
 		disabled: { modifier: 0.8, class: 'disabled' }
 	};
+
+	async function handleEdit() {
+		const response = await fetch('', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(editForm)
+		});
+
+		const result = await response.json();
+		if (result.success) {
+			isEditMode = false;
+			window.location.reload();
+		} else {
+			alert('Fehler beim Aktualisieren: ' + result.error);
+		}
+	}
 
 	function getSeat(rowIndex: number, colIndex: number) {
 		const existingSeat = seatPlan?.[rowIndex]?.[colIndex];
@@ -80,29 +108,71 @@
 					Zurück
 				</button>
 				<h1 class="page-title">Vorstellung {screening.screening_id}</h1>
+				<button class="edit-toggle-btn" on:click={() => (isEditMode = !isEditMode)}>
+					<Icon icon={isEditMode ? 'ic:baseline-close' : 'ic:baseline-edit'} />
+					{isEditMode ? 'Abbrechen' : 'Bearbeiten'}
+				</button>
 			</div>
 
 			<div class="info-card">
-				<div class="info-item">
-					<span class="label">Film:</span>
-					<span class="value">{screening.movie_title}</span>
-				</div>
-				<div class="info-item">
-					<span class="label">Saal:</span>
-					<span class="value">{screening.hall_name} (ID: {screening.hall_id})</span>
-				</div>
-				<div class="info-item">
-					<span class="label">Kapazität:</span>
-					<span class="value">{screening.capacity}</span>
-				</div>
-				<div class="info-item">
-					<span class="label">Startzeit:</span>
-					<span class="value">{screening.start_time}</span>
-				</div>
-				<div class="info-item">
-					<span class="label">Endzeit:</span>
-					<span class="value">{screening.end_time}</span>
-				</div>
+				{#if isEditMode}
+					<form on:submit|preventDefault={handleEdit} class="edit-form">
+						<div class="form-group">
+							<label for="movie_id">Film-ID:</label>
+							<input type="text" id="movie_id" bind:value={editForm.movie_id} required />
+						</div>
+
+						<div class="form-group">
+							<label for="hall_id">Saal:</label>
+							<select id="hall_id" bind:value={editForm.hall_id} required>
+								{#each halls as hall}
+									<option value={hall.id}>{hall.name}</option>
+								{/each}
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="start_time">Startzeit:</label>
+							<input
+								type="datetime-local"
+								id="start_time"
+								bind:value={editForm.start_time}
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="end_time">Endzeit:</label>
+							<input type="datetime-local" id="end_time" bind:value={editForm.end_time} required />
+						</div>
+
+						<button type="submit" class="save-changes-btn">
+							<Icon icon="ic:baseline-save" />
+							Änderungen speichern
+						</button>
+					</form>
+				{:else}
+					<div class="info-item">
+						<span class="label">Film:</span>
+						<span class="value">{screening.movie_title}</span>
+					</div>
+					<div class="info-item">
+						<span class="label">Saal:</span>
+						<span class="value">{screening.hall_name} (ID: {screening.hall_id})</span>
+					</div>
+					<div class="info-item">
+						<span class="label">Kapazität:</span>
+						<span class="value">{screening.capacity}</span>
+					</div>
+					<div class="info-item">
+						<span class="label">Startzeit:</span>
+						<span class="value">{screening.start_time}</span>
+					</div>
+					<div class="info-item">
+						<span class="label">Endzeit:</span>
+						<span class="value">{screening.end_time}</span>
+					</div>
+				{/if}
 			</div>
 
 			<div class="seating-section">
@@ -389,5 +459,62 @@
 			align-items: flex-start;
 			gap: 1rem;
 		}
+	}
+	.edit-toggle-btn {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background-color: #f3f4f6;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		color: #374151;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.edit-form {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.form-group {
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-weight: 500;
+		color: #374151;
+	}
+
+	.form-group input,
+	.form-group select {
+		padding: 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		width: 100%;
+	}
+
+	.save-changes-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background-color: #28a745;
+		color: white;
+		border: none;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.save-changes-btn:hover {
+		background-color: #218838;
 	}
 </style>
