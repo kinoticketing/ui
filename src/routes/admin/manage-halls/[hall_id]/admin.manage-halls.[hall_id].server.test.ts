@@ -88,6 +88,7 @@ describe('Hall Management Endpoints', () => {
                     }))
                 });
 
+            // @ts-ignore TODO: Fix type error
             const result = await load({ params: { hall_id: '1' } });
 
             expect(result).toBeDefined();
@@ -103,6 +104,7 @@ describe('Hall Management Endpoints', () => {
             });
 
             // Verify seat plan structure
+            // @ts-ignore TODO: Fix type error
             const { hall } = result;
             expect(hall?.seat_plan).toHaveLength(5);
             expect(hall?.seat_plan[0]).toHaveLength(6);
