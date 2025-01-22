@@ -3,7 +3,7 @@
 	import Icon from '@iconify/svelte';
 
 	export let data;
-	const { screening, halls } = data;
+	let { screening, halls } = data;
 	let seatPlan = screening?.seat_plan ?? [];
 	let isEditMode = false;
 
@@ -24,20 +24,32 @@
 	};
 
 	async function handleEdit() {
-		const response = await fetch('', {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(editForm)
-		});
+		try {
+			const response = await fetch('', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(editForm)
+			});
 
-		const result = await response.json();
-		if (result.success) {
-			isEditMode = false;
-			window.location.reload();
-		} else {
-			alert('Fehler beim Aktualisieren: ' + result.error);
+			const result = await response.json();
+
+			if (result.success) {
+				isEditMode = false;
+				// Update local data with new values
+				screening = {
+					...screening,
+					...result.screening,
+					movie_title: screening.movie_title, // Preserve title
+					hall_name: halls.find((h) => h.id === result.screening.hall_id)?.name
+				};
+			} else {
+				alert('Fehler beim Aktualisieren: ' + result.error);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Ein unerwarteter Fehler ist aufgetreten');
 		}
 	}
 
@@ -139,11 +151,6 @@
 								bind:value={editForm.start_time}
 								required
 							/>
-						</div>
-
-						<div class="form-group">
-							<label for="end_time">Endzeit:</label>
-							<input type="datetime-local" id="end_time" bind:value={editForm.end_time} required />
 						</div>
 
 						<button type="submit" class="save-changes-btn">
