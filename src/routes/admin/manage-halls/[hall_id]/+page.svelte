@@ -11,11 +11,9 @@
 	let saveMessage: string | null = null;
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
 
-	// Initialisiere die Stores mit den Daten des bestehenden Saals
+	// Initialisiere den Store mit den Daten des bestehenden Saals
 	let hall_name = hall?.name || '';
-	let row_count = hall?.total_rows || 0;
-	let col_count = hall?.total_columns || 0;
-	let rows = writable<string[][]>([[]]);
+	let rows = writable<any[]>([]);
 
 	// Seat types matching our categories
 	const seatTypes = ['Regular', 'VIP', 'Premium', 'Disabled'];
@@ -23,6 +21,8 @@
 	// Initialisiere den Sitzplan aus den bestehenden Daten
 	function initializeSeatPlan() {
 		if (!hall) return;
+
+		// Konvertiere das Sitzplan-Array in ein Array von Kategorien
 		const initialPlan = hall.seat_plan.map((row) =>
 			row.map((seat) => (seat ? seat.category : 'Regular'))
 		);
@@ -42,7 +42,6 @@
 	}
 
 	function addColumn(rowIndex: number) {
-		col_count++;
 		rows.update((r) => {
 			r[rowIndex].push('Regular');
 			return r;
@@ -50,31 +49,30 @@
 	}
 
 	function removeColumn(rowIndex: number) {
-		if (col_count > 0) {
-			col_count--;
-			rows.update((r) => {
+		rows.update((r) => {
+			if (r[rowIndex].length > 0) {
 				r[rowIndex].pop();
-				return r;
-			});
-		}
+			}
+			return r;
+		});
 	}
 
 	function addRow() {
-		row_count++;
 		rows.update((r) => {
-			r.push(Array(col_count).fill('Regular'));
+			// Neue Reihe mit Standard-Länge (z.B. wie die erste Reihe oder 1)
+			const defaultLength = r.length > 0 ? r[0].length : 1;
+			r.push(Array(defaultLength).fill('Regular'));
 			return r;
 		});
 	}
 
 	function removeRow() {
-		if (row_count > 0) {
-			row_count--;
-			rows.update((r) => {
+		rows.update((r) => {
+			if (r.length > 0) {
 				r.pop();
-				return r;
-			});
-		}
+			}
+			return r;
+		});
 	}
 
 	function changeSeatType(rowIndex: number, colIndex: number, newType: string) {
@@ -114,16 +112,15 @@
 			return;
 		}
 
-		if (!row_count || !col_count) {
-			saveMessage = 'Bitte geben Sie Reihen und Spalten an';
+		const currentRows = get(rows);
+		if (currentRows.length === 0) {
+			saveMessage = 'Der Sitzplan muss mindestens eine Reihe enthalten';
 			return;
 		}
 
-		const currentRows = get(rows);
-
 		// Erstelle den neuen Sitzplan im korrekten Format
 		const newSeatPlan = currentRows.map((row, rowIndex) =>
-			row.map((category, colIndex) => ({
+			row.map((category: string, colIndex: number) => ({
 				label: `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`,
 				category: category,
 				status: 'active'
@@ -138,8 +135,7 @@
 				},
 				body: JSON.stringify({
 					name: hall_name,
-					total_rows: row_count,
-					total_columns: col_count,
+					total_rows: currentRows.length,
 					seat_plan: newSeatPlan
 				})
 			});
@@ -151,8 +147,7 @@
 				hall = {
 					...hall,
 					name: hall_name,
-					total_rows: row_count,
-					total_columns: col_count,
+					total_rows: currentRows.length,
 					seat_plan: newSeatPlan
 				};
 			} else {
@@ -183,7 +178,6 @@
 					<span>{hall.name}</span>
 				</h1>
 
-				<!-- Edit Mode Toggle -->
 				<div class="edit-controls">
 					<button class="edit-toggle-btn {isEditMode ? 'active' : ''}" on:click={toggleEditMode}>
 						<Icon icon={isEditMode ? 'mdi:pencil-off' : 'mdi:pencil'} />
