@@ -22,6 +22,7 @@
 
 	// Initialisiere den Sitzplan aus den bestehenden Daten
 	function initializeSeatPlan() {
+		if (!hall) return;
 		const initialPlan = hall.seat_plan.map((row) =>
 			row.map((seat) => (seat ? seat.category : 'Regular'))
 		);
@@ -103,6 +104,11 @@
 	}
 
 	async function saveSeatPlan() {
+		if (!hall) {
+			saveMessage = 'Kein Saal gefunden';
+			return;
+		}
+
 		if (!hall_name?.trim()) {
 			saveMessage = 'Bitte geben Sie einen Saalnamen ein';
 			return;
