@@ -65,32 +65,31 @@ describe('Hall Management Endpoints', () => {
 
     describe('load function', () => {
         it('should load hall data successfully', async () => {
-            mockQuery.mockResolvedValueOnce({
-                rows: [{
-                    id: 1,
-                    name: 'Test Hall',
-                    total_rows: 5,
-                    total_columns: 6
-                }],
-                rowCount: 1
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rowCount: 1,
+                    rows: [{
+                        id: 1,
+                        name: 'Test Hall',
+                        total_rows: 5
+                    }]
+                })
+                .mockResolvedValueOnce({
+                    rowCount: 30,
+                    rows: Array(30).fill(0).map((_, i) => ({
+                        row_number: Math.floor(i / 6) + 1,
+                        column_number: (i % 6) + 1,
+                        seat_label: `${String.fromCharCode(65 + Math.floor(i / 6))}${(i % 6) + 1}`,
+                        status: 'active',
+                        category_id: 1,
+                        category_name: 'Regular',
+                        price_modifier: 1.0,
+                        seats_in_row: 6
+                    }))
+                });
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [{
-                    row_number: 1,
-                    column_number: 1,
-                    seat_label: 'A1',
-                    status: 'active',
-                    category_id: 1,
-                    category_name: 'Standard',
-                    price_modifier: 1.0
-                }],
-                rowCount: 1
-            });
-
-            const result = await load({
-                params: { hall_id: '1' }
-            } as any);
+            // @ts-ignore TODO: Fix type error
+            const result = await load({ params: { hall_id: '1' } });
 
             expect(result).toBeDefined();
             expect(result).toMatchObject({
@@ -98,9 +97,23 @@ describe('Hall Management Endpoints', () => {
                     id: 1,
                     name: 'Test Hall',
                     total_rows: 5,
-                    total_columns: 6,
-                    seat_plan: expect.any(Array)
+                    seat_plan: expect.any(Array),
+                    total_seats: 30,
+                    row_sizes: expect.any(Object)
                 }
+            });
+
+            // Verify seat plan structure
+            // @ts-ignore TODO: Fix type error
+            const { hall } = result;
+            expect(hall?.seat_plan).toHaveLength(5);
+            expect(hall?.seat_plan[0]).toHaveLength(6);
+            expect(hall?.seat_plan[0][0]).toMatchObject({
+                label: 'A1',
+                status: 'active',
+                category: 'Regular',
+                category_id: 1,
+                priceModifier: 1.0
             });
         });
 

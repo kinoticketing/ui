@@ -17,13 +17,13 @@ export const load: PageServerLoad = async ({ params }) => {
 	try {
 		const hallId = Number(params.hall_id);
 
-		// Load hall data
+		// Load hall data (ohne total_columns)
 		const hallResult = await pool.query(
 			`
-            SELECT id, name, total_rows, total_columns
+            SELECT id, name, total_rows
             FROM halls 
             WHERE id = $1
-        `,
+            `,
 			[hallId]
 		);
 
@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const hallRow = hallResult.rows[0];
 
-		// Load seats with their categories
+		// Lade Sitze gruppiert nach Reihen und zähle die Sitze pro Reihe
 		const seatsResult = await pool.query(
 			`
             SELECT 
@@ -43,68 +43,52 @@ export const load: PageServerLoad = async ({ params }) => {
                 s.status,
                 s.category_id,
                 sc.name as category_name,
-                sc.price_modifier
+                sc.price_modifier,
+                COUNT(*) OVER (PARTITION BY s.row_number) as seats_in_row
             FROM seats s
             LEFT JOIN seat_categories sc ON s.category_id = sc.id
             WHERE s.hall_id = $1
             ORDER BY s.row_number, s.column_number
-        `,
+            `,
 			[hallId]
 		);
 
-		// Create seat plan array
-		const seatPlan = Array(hallRow.total_rows)
-			.fill(null)
-			.map(() => Array(hallRow.total_columns).fill(null));
+		// Erstelle ein Object mit der Anzahl Sitze pro Reihe
+		const rowSizes = seatsResult.rows.reduce((acc, seat) => {
+			acc[seat.row_number] = seat.seats_in_row;
+			return acc;
+		}, {});
 
-		// Fill seat plan with actual seat data
-		seatsResult.rows.forEach((seat) => {
-			seatPlan[seat.row_number - 1][seat.column_number - 1] = {
-				label: seat.seat_label,
-				status: seat.status,
-				category: seat.category_name,
-				category_id: seat.category_id,
-				priceModifier: seat.price_modifier
-			};
-		});
+		// Erstelle den Sitzplan basierend auf den tatsächlichen Sitzen
+		const seatPlan = [];
+		for (let rowNum = 1; rowNum <= hallRow.total_rows; rowNum++) {
+			const rowSeats = seatsResult.rows
+				.filter((seat) => seat.row_number === rowNum)
+				.map((seat) => ({
+					label: seat.seat_label,
+					status: seat.status,
+					category: seat.category_name,
+					category_id: seat.category_id,
+					priceModifier: seat.price_modifier
+				}));
+
+			if (rowSeats.length > 0) {
+				seatPlan.push(rowSeats);
+			}
+		}
 
 		return {
 			hall: {
 				id: hallRow.id,
 				name: hallRow.name,
 				total_rows: hallRow.total_rows,
-				total_columns: hallRow.total_columns,
+				seat_plan: seatPlan,
 				total_seats: seatsResult.rowCount,
-				seat_plan: seatPlan
+				row_sizes: rowSizes // Falls du die Information über die Größe jeder Reihe brauchst
 			}
 		};
 	} catch (error) {
 		console.error('Error loading hall:', error);
 		return { hall: null, error: 'Failed to load hall data' };
-	}
-};
-
-export const actions: Actions = {
-	updateSeat: async ({ request, params }) => {
-		const hallId = Number(params.hall_id);
-		const body = await request.json();
-		const { row_number, column_number, category_id } = body;
-
-		try {
-			// Update single seat
-			await pool.query(
-				`
-UPDATE seats
-SET category_id = $1
-WHERE hall_id = $2 AND row_number = $3 AND column_number = $4
-`,
-				[category_id, hallId, row_number, column_number]
-			);
-
-			return { success: true };
-		} catch (error) {
-			console.error('Error updating seat:', error);
-			return { success: false, error: 'Error updating seat.' };
-		}
 	}
 };
