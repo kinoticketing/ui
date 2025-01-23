@@ -1,0 +1,11 @@
+{
+    "admin_manage_halls": {
+        "title": "Manage Halls",
+        "back_button": "Back",
+        "page_header": "All Halls",
+        "capacity_label": "Capacity:",
+        "capacity_unit": "Seats",
+        "no_halls": "No halls available.",
+        "create_hall_button": "Create New Hall"
+    }
+}

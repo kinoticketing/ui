@@ -1,0 +1,11 @@
+{
+    "admin_manage_halls": {
+        "title": "Säle verwalten",
+        "back_button": "Zurück",
+        "page_header": "Alle Säle",
+        "capacity_label": "Kapazität:",
+        "capacity_unit": "Sitzplätze",
+        "no_halls": "Es sind keine Säle vorhanden.",
+        "create_hall_button": "Neuen Saal erstellen"
+    }
+}
