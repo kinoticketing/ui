@@ -222,6 +222,7 @@
 	.input-group {
 		position: relative;
 		margin-bottom: 1rem;
+		padding-right: 2rem;
 	}
 
 	input {

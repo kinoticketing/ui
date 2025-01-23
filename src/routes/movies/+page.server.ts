@@ -78,7 +78,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 				Year: movie.Year,
 				Genre: movie.Genre,
 				Director: movie.Director,
-				Poster: movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg',
+				Poster: movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg',
 				Plot: movie.Plot,
 				imdbRating: movie.imdbRating,
 				nextScreening: upcomingMovies[index].next_screening

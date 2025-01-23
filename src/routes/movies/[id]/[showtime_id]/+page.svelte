@@ -3,12 +3,47 @@
 	import Icon from '@iconify/svelte';
 	import type { PriceResponse, SelectedSeat, PageData } from './types';
 	import { onMount } from 'svelte';
+	import { cart } from '$lib/stores/cart';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
 
 	function goBackToMovie() {
 		window.location.href = `/movies/${movie.imdb_id}`;
+	}
+	async function handleCheckout() {
+		if (loading) return;
+
+		loading = true;
+		try {
+			// Store selected seats in localStorage as backup
+			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+
+			// Add to cart
+			cart.addItem({
+				screeningId: screening.id,
+				movieTitle: movie.title,
+				screeningTime: screening.start_time,
+				tickets: selectedSeats.map((seat) => ({
+					seatId: seat.seatId,
+					row: seat.row,
+					col: seat.col,
+					label: seat.label,
+					price: seat.price,
+					categoryName: seat.categoryName
+				})),
+				// Change this line to use Poster instead of movieImageUrl
+				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
+			});
+
+			// Navigate to cart
+			window.location.href = '/cart';
+		} catch (error) {
+			console.error('Add to cart error:', error);
+			alert('Failed to add tickets to cart. Please try again.');
+		} finally {
+			loading = false;
+		}
 	}
 
 	let selectedSeats: SelectedSeat[] = [];
@@ -133,40 +168,6 @@
 		selectedSeats = selectedSeats.filter((seat) => seat.key !== seatKey);
 	}
 
-	async function handleCheckout() {
-		if (loading) return;
-
-		loading = true;
-		try {
-			// Store selected seats in localStorage
-			localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-			const response = await fetch('/api/checkout', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					screeningId: screening.id,
-					seats: selectedSeats.map((seat) => ({
-						seatId: seat.seatId,
-						price: seat.price
-					}))
-				})
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.error || 'Checkout failed');
-			}
-
-			const { checkoutUrl } = await response.json();
-			window.location.href = checkoutUrl;
-		} catch (error) {
-			console.error('Checkout error:', error);
-			alert('Failed to process checkout. Please try again.');
-		} finally {
-			loading = false;
-		}
-	}
-
 	function formatDateTime(dateString: string) {
 		return new Date(dateString).toLocaleString();
 	}
@@ -236,10 +237,6 @@
 					</div>
 
 					<div class="seat-legend">
-						<div class="legend-item">
-							<div class="legend-box standard"></div>
-							<span>Standard</span>
-						</div>
 						<div class="legend-item">
 							<div class="legend-box premium"></div>
 							<span>Premium</span>
@@ -340,10 +337,6 @@
 	.back-button:hover {
 		background-color: #f3f4f6;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.legend-box.standard {
-		background-color: #e5e7eb;
 	}
 
 	.legend-box.premium {
@@ -628,18 +621,6 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.checkout-button,
-	.paypal-button {
-		width: 100%;
-		padding: 0.875rem;
-		border: none;
-		border-radius: 0.5rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		margin-bottom: 0.75rem;
-	}
-
 	.checkout-button {
 		background-color: #2563eb;
 		color: white;
@@ -647,21 +628,6 @@
 
 	.checkout-button:hover:not(:disabled) {
 		background-color: #1d4ed8;
-	}
-
-	.paypal-button {
-		background-color: #fcd34d;
-		color: #1a1a1a;
-	}
-
-	.paypal-button:hover:not(:disabled) {
-		background-color: #fbbf24;
-	}
-
-	.checkout-button:disabled,
-	.paypal-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
 	}
 
 	.error-container {

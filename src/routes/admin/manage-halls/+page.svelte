@@ -21,7 +21,6 @@
 		vip: { class: 'vip' },
 		premium: { class: 'premium' },
 		regular: { class: 'regular' },
-		standard: { class: 'standard' },
 		disabled: { class: 'disabled' }
 	};
 
@@ -298,9 +297,6 @@
 	}
 	.seat-preview.regular {
 		background-color: #93c5fd;
-	}
-	.seat-preview.standard {
-		background-color: #e5e7eb;
 	}
 	.seat-preview.disabled {
 		background-color: #86efac;

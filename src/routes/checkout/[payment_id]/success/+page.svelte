@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { generateTicketQRCode, type TicketInfo } from '$lib/util/qrCode';
+	import { generateTicketQRCode, type TicketInfo } from '$lib/utils/qrCode';
 	import type { PageData } from './$types';
 	import Icon from '@iconify/svelte';
 

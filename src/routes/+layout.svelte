@@ -10,6 +10,7 @@
 	import '../i18n.js';
 	import { t, locale } from 'svelte-i18n';
 	import { i18nReady } from '../i18n.js';
+	import { cart } from '$lib/stores/cart';
 
 	let loaded = false;
 	onMount(async () => {
@@ -20,6 +21,16 @@
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
 	let isScrolled = false;
+	let selectedLang = 'de';
+
+	function setLanguage(lang: string) {
+		selectedLang = lang;
+		// Here you can add future language switching logic
+		// For example:
+		// updateUILanguage(lang);
+		// updateStoredLanguagePreference(lang);
+		// etc.
+	}
 
 	function toggleMenu() {
 		showMenu = !showMenu;
@@ -46,6 +57,7 @@
 			isScrolled = window.scrollY > 20;
 		});
 	});
+	$: ticketCount = $cart.reduce((sum, item) => sum + item.tickets.length, 0);
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -79,45 +91,88 @@
 						<Icon icon="mdi:information" width="24" height="24" />
 						<span>{$t('layout.nav.about')}</span>
 					</a>
-				</div>
-
-				<div class="language-selector">
-					<button class="lang-btn" class:active={$locale === 'en'} on:click={() => locale.set('en')}
-						>EN</button
-					>
-					<button class="lang-btn" class:active={$locale === 'de'} on:click={() => locale.set('de')}
-						>DE</button
-					>
-				</div>
-
-				<div class="account-dropdown">
-					<button class="account-button" on:click={toggleMenu}>
-						<Icon icon="mdi:account-circle" width="32" height="32" />
-					</button>
-
-					{#if showMenu}
-						<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
-							{#if !$page.data.session?.user}
-								<a href="/auth/login" class="dropdown-item">
-									<Icon icon="mdi:login" width="20" height="20" />
-									<span>{$t('layout.account.signIn')}</span>
-								</a>
-							{:else}
-								<a href="/auth/account" class="dropdown-item">
-									<Icon icon="mdi:account-circle-outline" width="20" height="20" />
-									<span>{$t('layout.account.myAccount')}</span>
-								</a>
-								<a href="/settings" class="dropdown-item">
-									<Icon icon="mdi:cog" width="20" height="20" />
-									<span>{$t('layout.account.settings')}</span>
-								</a>
-								<button class="dropdown-item logout" on:click={handleLogout}>
-									<Icon icon="mdi:logout" width="20" height="20" />
-									<span>{$t('layout.account.signOut')}</span>
-								</button>
-							{/if}
-						</div>
+					{#if $page.data.locals?.adminAuthenticated}
+						<a href="/admin" class="nav-link" class:active={$page.url.pathname.includes('/admin')}>
+							<Icon icon="mdi:shield-account" width="24" height="24" />
+							<span>Admin</span>
+						</a>
 					{/if}
+				</div>
+
+				<div class="user-actions">
+					<a href="/cart" class="cart-button">
+						<Icon icon="mdi:cart" width="24" height="24" />
+						{#if ticketCount > 0}
+							<span class="cart-count">{ticketCount}</span>
+						{/if}
+					</a>
+
+					<div class="language-selector">
+						<button
+							class="lang-btn"
+							class:active={$locale === 'en'}
+							on:click={() => locale.set('en')}>EN</button
+						>
+						<button
+							class="lang-btn"
+							class:active={$locale === 'de'}
+							on:click={() => locale.set('de')}>DE</button
+						>
+					</div>
+
+					<div class="account-dropdown">
+						<button class="account-button" on:click={toggleMenu}>
+							<Icon icon="mdi:account-circle" width="32" height="32" />
+						</button>
+
+						{#if showMenu}
+							<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
+								<a href="/admin/login" class="dropdown-item">
+									<Icon icon="mdi:shield-account" width="20" height="20" />
+									<span>Admin Access</span>
+								</a>
+								<div class="dropdown-item language-toggle">
+									<Icon icon="mdi:translate" width="20" height="20" />
+									<span>Language</span>
+									<div class="language-switch">
+										<button
+											class="language-btn"
+											class:active={selectedLang === 'de'}
+											on:click={() => setLanguage('de')}
+										>
+											DE
+										</button>
+										<button
+											class="language-btn"
+											class:active={selectedLang === 'en'}
+											on:click={() => setLanguage('en')}
+										>
+											EN
+										</button>
+									</div>
+								</div>
+								{#if !$page.data.session?.user}
+									<a href="/auth/login" class="dropdown-item">
+										<Icon icon="mdi:login" width="20" height="20" />
+										<span>{$t('layout.account.signIn')}</span>
+									</a>
+								{:else}
+									<a href="/auth/account" class="dropdown-item">
+										<Icon icon="mdi:account-circle-outline" width="20" height="20" />
+										<span>{$t('layout.account.myAccount')}</span>
+									</a>
+									<a href="/settings" class="dropdown-item">
+										<Icon icon="mdi:cog" width="20" height="20" />
+										<span>{$t('layout.account.settings')}</span>
+									</a>
+									<button class="dropdown-item logout" on:click={handleLogout}>
+										<Icon icon="mdi:logout" width="20" height="20" />
+										<span>{$t('layout.account.signOut')}</span>
+									</button>
+								{/if}
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 		</nav>
@@ -141,19 +196,32 @@
 					<a href="/privacy">{$t('layout.footer.quickLinks.privacy')}</a>
 					<a href="/contact">{$t('layout.footer.quickLinks.contact')}</a>
 					<a href="/faq">{$t('layout.footer.quickLinks.faq')}</a>
+					<a href="/admin/login">Admin Access</a>
 				</div>
 			</div>
 
 			<div class="footer-section">
 				<h2>{$t('layout.footer.connect.title')}</h2>
 				<div class="social-links">
-					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.facebook')}>
+					<a
+						href="https://www.facebook.com/"
+						class="social-link"
+						aria-label={$t('layout.footer.connect.facebook')}
+					>
 						<Icon icon="mdi:facebook" width="24" height="24" />
 					</a>
-					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.twitter')}>
+					<a
+						href="https://x.com/"
+						class="social-link"
+						aria-label={$t('layout.footer.connect.twitter')}
+					>
 						<Icon icon="mdi:twitter" width="24" height="24" />
 					</a>
-					<a href="#" class="social-link" aria-label={$t('layout.footer.connect.instagram')}>
+					<a
+						href="https://www.instagram.com/"
+						class="social-link"
+						aria-label={$t('layout.footer.connect.instagram')}
+					>
 						<Icon icon="mdi:instagram" width="24" height="24" />
 					</a>
 				</div>
@@ -217,6 +285,51 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
+	.user-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.cart-button {
+		position: relative;
+		display: flex;
+		align-items: center;
+		color: #4b5563;
+		text-decoration: none;
+		padding: 0.5rem;
+		border-radius: 50%;
+		transition: all 0.2s;
+	}
+
+	.cart-button:hover {
+		color: #1a1a1a;
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	.cart-count {
+		position: absolute;
+		top: -3px;
+		right: -3px;
+		background-color: #3b82f6; /* Changed from red to blue to match your theme */
+		color: white;
+		font-size: 0.7rem;
+		font-weight: 600;
+		padding: 1px 4px;
+		border-radius: 9999px;
+		min-width: 14px; /* Made smaller */
+		height: 14px; /* Made smaller */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	@media (max-width: 640px) {
+		.user-actions {
+			gap: 0.25rem;
+		}
+	}
+
 	nav {
 		padding: 1rem 2rem;
 	}
@@ -277,7 +390,6 @@
 		color: #2563eb;
 		background-color: rgba(37, 99, 235, 0.1);
 	}
-
 	/* Account Dropdown */
 	.account-dropdown {
 		position: relative;
@@ -299,28 +411,6 @@
 		background-color: rgba(0, 0, 0, 0.05);
 	}
 
-	.dropdown-item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		color: #1f2937;
-		text-decoration: none;
-		border-radius: 0.5rem;
-		transition: all 0.2s;
-		cursor: pointer;
-		border: none;
-		background: none;
-		width: calc(100% - 0.5rem); /* Subtract padding to prevent right side overflow */
-		text-align: left;
-		font-size: 1rem;
-		margin: 0.125rem 0.25rem; /* Add horizontal margin to center the items */
-		margin-left: 0.25rem;
-		margin-right: 0.25rem;
-		position: relative;
-		overflow: hidden;
-	}
-
 	.dropdown-menu {
 		position: absolute;
 		right: 0;
@@ -333,8 +423,24 @@
 		max-height: calc(100vh - 5rem);
 		overflow-y: auto;
 		z-index: 1001;
-		/* Add this to ensure consistent padding */
 		box-sizing: border-box;
+	}
+
+	.dropdown-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.4rem;
+		color: #1f2937;
+		text-decoration: none;
+		border-radius: 0.375rem;
+		transition: background-color 0.2s;
+		cursor: pointer;
+		border: none;
+		background: none;
+		text-align: left;
+		font-size: 1rem;
+		margin: 0.25rem 0.5rem;
 	}
 
 	.dropdown-item:hover {
@@ -343,12 +449,56 @@
 
 	.dropdown-item.logout {
 		color: #ef4444;
+		width: 90%;
 	}
 
 	.dropdown-item.logout:hover {
 		background-color: #fee2e2;
 	}
 
+	/* Language Toggle Styles */
+	.dropdown-item.language-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		cursor: default;
+		padding: 0.4rem;
+	}
+
+	.dropdown-item.language-toggle:hover {
+		background-color: transparent;
+	}
+
+	.language-switch {
+		display: flex;
+		gap: 2px;
+		background-color: #e5e7eb;
+		padding: 2px;
+		border-radius: 6px;
+		margin-left: auto;
+	}
+
+	.language-btn {
+		padding: 4px 8px;
+		border: none;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		background: transparent;
+		color: #6b7280;
+	}
+
+	.language-btn:hover {
+		color: #4b5563;
+	}
+
+	.language-btn.active {
+		background-color: white;
+		color: #2563eb;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
 	/* Main Content */
 	main {
 		margin-top: 4rem;

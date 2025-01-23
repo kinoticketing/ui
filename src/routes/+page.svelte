@@ -58,7 +58,7 @@
 							<a href="/movies/{movie.id}" class="movie-card">
 								<div class="poster-container">
 									<img
-										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg'}
+										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
 										alt={movie.Title}
 										class="movie-poster"
 									/>
@@ -109,7 +109,7 @@
 				<div class="details-container">
 					<div class="section-header">
 						<h2>{$t('home.comingSoon.heading')}</h2>
-						<a href="/coming-soon" class="view-all">
+						<a href="/movies" class="view-all">
 							{$t('home.comingSoon.viewAll')}
 							<Icon icon="mdi:arrow-right" width="16" height="16" />
 						</a>
@@ -120,7 +120,7 @@
 							<a href="/movies/{movie.id}" class="movie-card">
 								<div class="poster-container">
 									<img
-										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-image.jpg'}
+										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
 										alt={movie.Title}
 										class="movie-poster"
 									/>

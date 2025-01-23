@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
-	import { generateTicketQRCode } from '$lib/util/qrCode';
+	import { generateTicketQRCode } from '$lib/utils/qrCode';
 	import '../../i18n.js';
 	import { t } from 'svelte-i18n';
 	import { i18nReady } from '../../i18n.js';
