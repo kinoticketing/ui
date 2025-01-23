@@ -12,7 +12,7 @@
 	let saveMessage: string | null = null;
 
 	// Seat types matching our categories
-	let seatTypes = ['Regular', 'VIP', 'Disabled'];
+	let seatTypes = ['Regular', 'VIP', 'Premium', 'Disabled'];
 	let rows = writable<string[][]>([[]]);
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
 
@@ -333,6 +333,11 @@
 		background: #e9ecef;
 	}
 
+	.seat.premium {
+		background-color: #f87171;
+		color: #fff;
+	}
+
 	.seat.vip {
 		background: #fff3cd;
 		border-color: #ffc107;
@@ -367,6 +372,7 @@
 		z-index: 1000;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		width: 100px;
+		color: black;
 	}
 
 	.dropdown-item {

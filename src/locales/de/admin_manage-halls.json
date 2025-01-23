@@ -33,7 +33,8 @@
         "seat_types": {
             "Regular": "Standard",
             "VIP": "VIP",
-            "Disabled": "Barrierefrei"
+            "Disabled": "Barrierefrei",
+            "Premium": "Premium"
         }
     }
 }
