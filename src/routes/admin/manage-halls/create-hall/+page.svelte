@@ -3,6 +3,8 @@
 	import { writable } from 'svelte/store';
 	import { get } from 'svelte/store';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	let row_count: number;
 	let col_count: number;
@@ -116,7 +118,7 @@
 <svelte:window on:click={handleClickOutside} />
 
 <svelte:head>
-	<title>Saal erstellen</title>
+	<title>{$t('admin_manageHalls_createHall.title')}</title>
 </svelte:head>
 
 <main>
@@ -124,17 +126,22 @@
 		<div class="page-header">
 			<button class="back-btn" on:click={goBack}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-				Zurück
+				{$t('admin_manageHalls_createHall.back_button')}
 			</button>
-			<h1 class="page-title">Saal erstellen</h1>
+			<h1 class="page-title">{$t('admin_manageHalls_createHall.page_header')}</h1>
 		</div>
 
 		<div class="inputs">
-			<input type="text" placeholder="Saalname" bind:value={hall_name} required />
+			<input
+				type="text"
+				placeholder={$t('admin_manageHalls_createHall.inputs.hall_name')}
+				bind:value={hall_name}
+				required
+			/>
 			<input
 				type="number"
 				min="1"
-				placeholder="Anzahl Reihen"
+				placeholder={$t('admin_manageHalls_createHall.inputs.row_count')}
 				bind:value={row_count}
 				on:change={preview}
 				required
@@ -142,18 +149,18 @@
 			<input
 				type="number"
 				min="1"
-				placeholder="Sitzplätze pro Reihe"
+				placeholder={$t('admin_manageHalls_createHall.inputs.col_count')}
 				bind:value={col_count}
 				on:change={preview}
 				required
 			/>
 			<button class="save-btn" on:click={save}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-save" />
-				Speichern
+				{$t('admin_manageHalls_createHall.buttons.save')}
 			</button>
 			<button class="delete-btn" on:click={removeAll}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-delete" />
-				Alles löschen
+				{$t('admin_manageHalls_createHall.buttons.delete_all')}
 			</button>
 		</div>
 
@@ -172,7 +179,8 @@
 							on:click={(event) => toggleDropdown(rowIndex, colIndex, event)}
 						>
 							<span class="seat-label">{String.fromCharCode(65 + rowIndex)}{colIndex + 1}</span>
-							<span class="seat-type">{seat}</span>
+							<span class="seat-type">{$t('admin_manageHalls_createHall.seat_grid.seat_type')}</span
+							>
 
 							{#if activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex}
 								<div class="dropdown">
@@ -181,7 +189,7 @@
 											class="dropdown-item"
 											on:click|stopPropagation={() => changeSeatType(rowIndex, colIndex, type)}
 										>
-											{type}
+											{$t(`admin_manageHalls_createHall.seat_types.${type}`)}
 										</div>
 									{/each}
 								</div>
@@ -189,8 +197,12 @@
 						</div>
 					{/each}
 					<div class="row-controls">
-						<button on:click={() => addColumn(rowIndex)}>+</button>
-						<button on:click={() => removeColumn(rowIndex)}>-</button>
+						<button on:click={() => addColumn(rowIndex)}
+							>{$t('admin_manageHalls_createHall.buttons.add_column')}</button
+						>
+						<button on:click={() => removeColumn(rowIndex)}
+							>{$t('admin_manageHalls_createHall.buttons.remove_column')}</button
+						>
 					</div>
 				</div>
 			{/each}

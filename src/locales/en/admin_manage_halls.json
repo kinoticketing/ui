@@ -7,5 +7,33 @@
         "capacity_unit": "Seats",
         "no_halls": "No halls available.",
         "create_hall_button": "Create New Hall"
+    },
+    "admin_manageHalls_createHall": {
+        "title": "Create Hall",
+        "back_button": "Back",
+        "page_header": "Create Hall",
+        "inputs": {
+            "hall_name": "Hall Name",
+            "row_count": "Number of Rows",
+            "col_count": "Seats per Row"
+        },
+        "buttons": {
+            "save": "Save",
+            "delete_all": "Delete All",
+            "add_column": "+",
+            "remove_column": "-"
+        },
+        "seat_grid": {
+            "seat_label": "Seat",
+            "seat_type": "Seat Type"
+        },
+        "feedback": {
+            "error": "An error occurred."
+        },
+        "seat_types": {
+            "Regular": "Regular",
+            "VIP": "VIP",
+            "Disabled": "Disabled"
+        }
     }
 }

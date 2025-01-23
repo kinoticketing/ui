@@ -7,5 +7,33 @@
         "capacity_unit": "Sitzplätze",
         "no_halls": "Es sind keine Säle vorhanden.",
         "create_hall_button": "Neuen Saal erstellen"
+    },
+    "admin_manageHalls_createHall": {
+        "title": "Saal erstellen",
+        "back_button": "Zurück",
+        "page_header": "Saal erstellen",
+        "inputs": {
+            "hall_name": "Saalname",
+            "row_count": "Anzahl Reihen",
+            "col_count": "Sitzplätze pro Reihe"
+        },
+        "buttons": {
+            "save": "Speichern",
+            "delete_all": "Alles löschen",
+            "add_column": "+",
+            "remove_column": "-"
+        },
+        "seat_grid": {
+            "seat_label": "Sitzplatz",
+            "seat_type": "Sitztyp"
+        },
+        "feedback": {
+            "error": "Ein Fehler ist aufgetreten."
+        },
+        "seat_types": {
+            "Regular": "Standard",
+            "VIP": "VIP",
+            "Disabled": "Barrierefrei"
+        }
     }
 }
