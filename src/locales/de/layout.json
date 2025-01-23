@@ -8,13 +8,16 @@
             "home": "Startseite",
             "movies": "Filme",
             "reservations": "Reservierungen",
-            "about": "Über uns"
+            "about": "Über uns",
+            "admin": "Admin"
         },
         "account": {
             "signIn": "Anmelden",
             "myAccount": "Mein Konto",
             "settings": "Einstellungen",
-            "signOut": "Abmelden"
+            "signOut": "Abmelden",
+            "adminAccess": "Admin-Zugang",
+            "language": "Sprache"
         },
         "footer": {
             "aboutUs": {
@@ -26,7 +29,8 @@
                 "terms": "Nutzungsbedingungen",
                 "privacy": "Datenschutzerklärung",
                 "contact": "Kontakt",
-                "faq": "FAQ"
+                "faq": "FAQ",
+                "adminAccess": "Admin-Zugang"
             },
             "connect": {
                 "title": "Vernetzen Sie sich mit uns",
@@ -40,6 +44,7 @@
                 "subscribe": "Abonnieren"
             },
             "copyright": "Alle Rechte vorbehalten."
-        }
+        },
+        "companyName": "Kinoreservierung"
     }
 }

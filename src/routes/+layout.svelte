@@ -8,7 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import '../i18n.js';
-	import { t, locale } from 'svelte-i18n';
+	import { t, locale, getLocaleFromNavigator } from 'svelte-i18n';
 	import { i18nReady } from '../i18n.js';
 	import { cart } from '$lib/stores/cart';
 
@@ -21,15 +21,11 @@
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
 	let isScrolled = false;
-	let selectedLang = 'de';
+	let selectedLang = getLocaleFromNavigator();
 
 	function setLanguage(lang: string) {
 		selectedLang = lang;
-		// Here you can add future language switching logic
-		// For example:
-		// updateUILanguage(lang);
-		// updateStoredLanguagePreference(lang);
-		// etc.
+		locale.set(selectedLang);
 	}
 
 	function toggleMenu() {
@@ -94,7 +90,7 @@
 					{#if $page.data.locals?.adminAuthenticated}
 						<a href="/admin" class="nav-link" class:active={$page.url.pathname.includes('/admin')}>
 							<Icon icon="mdi:shield-account" width="24" height="24" />
-							<span>Admin</span>
+							<span>{$t('layout.nav.admin')}</span>
 						</a>
 					{/if}
 				</div>
@@ -107,19 +103,6 @@
 						{/if}
 					</a>
 
-					<div class="language-selector">
-						<button
-							class="lang-btn"
-							class:active={$locale === 'en'}
-							on:click={() => locale.set('en')}>EN</button
-						>
-						<button
-							class="lang-btn"
-							class:active={$locale === 'de'}
-							on:click={() => locale.set('de')}>DE</button
-						>
-					</div>
-
 					<div class="account-dropdown">
 						<button class="account-button" on:click={toggleMenu}>
 							<Icon icon="mdi:account-circle" width="32" height="32" />
@@ -129,11 +112,11 @@
 							<div class="dropdown-menu" transition:fade={{ duration: 200, easing: quintOut }}>
 								<a href="/admin/login" class="dropdown-item">
 									<Icon icon="mdi:shield-account" width="20" height="20" />
-									<span>Admin Access</span>
+									<span>{$t('layout.account.adminAccess')}</span>
 								</a>
 								<div class="dropdown-item language-toggle">
 									<Icon icon="mdi:translate" width="20" height="20" />
-									<span>Language</span>
+									<span>{$t('layout.account.language')}</span>
 									<div class="language-switch">
 										<button
 											class="language-btn"
@@ -196,7 +179,7 @@
 					<a href="/privacy">{$t('layout.footer.quickLinks.privacy')}</a>
 					<a href="/contact">{$t('layout.footer.quickLinks.contact')}</a>
 					<a href="/faq">{$t('layout.footer.quickLinks.faq')}</a>
-					<a href="/admin/login">Admin Access</a>
+					<a href="/admin/login">{$t('layout.footer.quickLinks.adminAccess')}</a>
 				</div>
 			</div>
 
@@ -237,7 +220,7 @@
 		</div>
 
 		<div class="footer-bottom">
-			<p>&copy; {currentYear} Kinoreservierung. {$t('layout.footer.copyright')}</p>
+			<p>&copy; {currentYear} {$t('layout.companyName')}. {$t('layout.footer.copyright')}</p>
 		</div>
 	</footer>
 {/if}
