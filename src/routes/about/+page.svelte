@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import '../../i18n.js';
 	import { t } from 'svelte-i18n';
-	import { i18nReady } from '../../i18n.js';
 
 	interface CoreValue {
 		title: string;
@@ -18,79 +16,71 @@
 		image: string;
 	}
 
-	let loaded = false;
-	onMount(async () => {
-		await i18nReady;
-		loaded = true;
-	});
-
 	$: coreValues = $t('about.coreValues') as unknown as CoreValue[];
 	$: teamMembers = $t('about.teamMembers') as unknown as TeamMember[];
 </script>
 
-{#if loaded}
-	<main>
-		<section class="about-us">
-			<div class="header">
-				<h1>{$t('about.headerTitle')}</h1>
-			</div>
+<main>
+	<section class="about-us">
+		<div class="header">
+			<h1>{$t('about.headerTitle')}</h1>
+		</div>
 
-			<div class="content">
-				<div class="about-section">
-					<div class="about-image">
-						<img src="/PlaceholderBlue.png" alt="Cinema" />
-					</div>
+		<div class="content">
+			<div class="about-section">
+				<div class="about-image">
+					<img src="/PlaceholderBlue.png" alt="Cinema" />
+				</div>
+				<div class="about-text">
 					<div class="about-text">
-						<div class="about-text">
-							<h2>{$t('about.ourStoryTitle')}</h2>
-							<p>{$t('about.ourStoryParagraph')}</p>
+						<h2>{$t('about.ourStoryTitle')}</h2>
+						<p>{$t('about.ourStoryParagraph')}</p>
 
-							<h2>{$t('about.ourMissionTitle')}</h2>
-							<p>{$t('about.missionStatement')}</p>
-						</div>
-					</div>
-				</div>
-				<div>
-					<h2>{$t('about.attentionTitle')}</h2>
-					<p>
-						{$t('about.attentionParagraph')}
-					</p>
-				</div>
-
-				<div class="values">
-					<h2>{$t('about.coreValuesTitle')}</h2>
-					<div class="value-grid">
-						<!-- If your version of svelte-i18n supports objects/arrays directly, 
-					     $t('about.coreValues') will be an array. -->
-						{#each coreValues as value (value.title)}
-							<div class="value-card">
-								<div class="icon">{value.icon}</div>
-								<h3>{value.title}</h3>
-								<p>{value.description}</p>
-							</div>
-						{/each}
-					</div>
-				</div>
-
-				<div class="team">
-					<h2>{$t('about.teamTitle')}</h2>
-					<div class="team-grid">
-						{#each teamMembers as member (member.key)}
-							<div class="team-card">
-								<div class="profile-image">
-									<img src={member.image} alt={member.name} />
-								</div>
-								<h3>{member.name}</h3>
-								<p class="role">{member.role}</p>
-								<p>{member.bio}</p>
-							</div>
-						{/each}
+						<h2>{$t('about.ourMissionTitle')}</h2>
+						<p>{$t('about.missionStatement')}</p>
 					</div>
 				</div>
 			</div>
-		</section>
-	</main>
-{/if}
+			<div>
+				<h2>{$t('about.attentionTitle')}</h2>
+				<p>
+					{$t('about.attentionParagraph')}
+				</p>
+			</div>
+
+			<div class="values">
+				<h2>{$t('about.coreValuesTitle')}</h2>
+				<div class="value-grid">
+					<!-- If your version of svelte-i18n supports objects/arrays directly, 
+					     $t('about.coreValues') will be an array. -->
+					{#each coreValues as value (value.title)}
+						<div class="value-card">
+							<div class="icon">{value.icon}</div>
+							<h3>{value.title}</h3>
+							<p>{value.description}</p>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<div class="team">
+				<h2>{$t('about.teamTitle')}</h2>
+				<div class="team-grid">
+					{#each teamMembers as member (member.key)}
+						<div class="team-card">
+							<div class="profile-image">
+								<img src={member.image} alt={member.name} />
+							</div>
+							<h3>{member.name}</h3>
+							<p class="role">{member.role}</p>
+							<p>{member.bio}</p>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</section>
+</main>
 
 <style>
 	.about-us {
