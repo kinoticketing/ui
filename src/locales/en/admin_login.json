@@ -1,0 +1,11 @@
+{
+    "admin_login": {
+        "title": "Admin Login",
+        "form": {
+            "label": "Admin Code",
+            "placeholder": "Enter admin code",
+            "submit": "Login",
+            "error": "Invalid admin code"
+        }
+    }
+}

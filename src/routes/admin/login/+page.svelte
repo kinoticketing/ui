@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { t } from 'svelte-i18n';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
 	let code = '';
@@ -11,15 +12,14 @@
 			if (result.type === 'redirect') {
 				await goto(result.location);
 			} else if (result.type === 'failure') {
-				error = 'Invalid admin code';
+				error = $t('admin_login.form.error');
 			}
 		};
 	};
 </script>
 
-// src/routes/admin/login/+page.svelte
 <div class="admin-login">
-	<h1>Admin Login</h1>
+	<h1>{$t('admin_login.title')}</h1>
 
 	<form method="POST" use:enhance={handleSubmit}>
 		{#if error}
@@ -27,11 +27,11 @@
 		{/if}
 
 		<div class="form-group">
-			<label for="code">Admin Code</label>
+			<label for="code">{$t('admin_login.form.label')}</label>
 			<input type="password" id="code" name="code" bind:value={code} required />
 		</div>
 
-		<button type="submit">Login</button>
+		<button type="submit">{$t('admin_login.form.submit')}</button>
 	</form>
 </div>
 
