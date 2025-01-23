@@ -3,14 +3,6 @@
 	import Icon from '@iconify/svelte';
 	import '../i18n.js';
 	import { t } from 'svelte-i18n';
-	import { i18nReady } from '../i18n.js';
-	import { onMount } from 'svelte';
-
-	let loaded = false;
-	onMount(async () => {
-		await i18nReady;
-		loaded = true;
-	});
 
 	interface Movie {
 		Title: string;
@@ -26,133 +18,131 @@
 	export let data: { movies: Movie[] };
 </script>
 
-{#if loaded}
-	<main>
-		<div class="container">
-			<!-- Hero Section -->
-			<section class="hero">
-				<img src="/banner.png" alt="Cinema Banner" />
-				<div class="hero-content">
-					<h1>{$t('home.hero.heading')}</h1>
-					<p>{$t('home.hero.description')}</p>
-					<a href="/movies" class="cta-button">
-						{$t('home.hero.buttonText')}
-						<Icon icon="mdi:arrow-right" width="20" height="20" />
+<main>
+	<div class="container">
+		<!-- Hero Section -->
+		<section class="hero">
+			<img src="/banner.png" alt="Cinema Banner" />
+			<div class="hero-content">
+				<h1>{$t('home.hero.heading')}</h1>
+				<p>{$t('home.hero.description')}</p>
+				<a href="/movies" class="cta-button">
+					{$t('home.hero.buttonText')}
+					<Icon icon="mdi:arrow-right" width="20" height="20" />
+				</a>
+			</div>
+		</section>
+
+		<!-- Now Playing Section -->
+		<section class="content-section">
+			<div class="details-container">
+				<div class="section-header">
+					<h2>{$t('home.nowPlaying.heading')}</h2>
+					<a href="/movies" class="view-all">
+						{$t('home.nowPlaying.viewAll')}
+						<Icon icon="mdi:arrow-right" width="16" height="16" />
 					</a>
 				</div>
-			</section>
 
-			<!-- Now Playing Section -->
-			<section class="content-section">
-				<div class="details-container">
-					<div class="section-header">
-						<h2>{$t('home.nowPlaying.heading')}</h2>
-						<a href="/movies" class="view-all">
-							{$t('home.nowPlaying.viewAll')}
-							<Icon icon="mdi:arrow-right" width="16" height="16" />
+				<div class="movie-grid">
+					{#each data.movies.slice(0, 6) as movie}
+						<a href="/movies/{movie.id}" class="movie-card">
+							<div class="poster-container">
+								<img
+									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
+									alt={movie.Title}
+									class="movie-poster"
+								/>
+								<div class="movie-rating">⭐ {movie.imdbRating}</div>
+							</div>
+							<div class="movie-info">
+								<h3 class="movie-title">{movie.Title}</h3>
+								<p class="movie-year">{movie.Year}</p>
+								<p class="movie-genre">{movie.Genre}</p>
+							</div>
 						</a>
-					</div>
+					{/each}
+				</div>
+			</div>
+		</section>
 
-					<div class="movie-grid">
-						{#each data.movies.slice(0, 6) as movie}
-							<a href="/movies/{movie.id}" class="movie-card">
-								<div class="poster-container">
-									<img
-										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
-										alt={movie.Title}
-										class="movie-poster"
-									/>
-									<div class="movie-rating">⭐ {movie.imdbRating}</div>
-								</div>
-								<div class="movie-info">
-									<h3 class="movie-title">{movie.Title}</h3>
-									<p class="movie-year">{movie.Year}</p>
-									<p class="movie-genre">{movie.Genre}</p>
-								</div>
-							</a>
-						{/each}
+		<!-- Features Section -->
+		<section class="content-section">
+			<div class="details-container">
+				<h2 class="features-title">{$t('home.features.heading')}</h2>
+				<div class="features-grid">
+					<div class="feature-card">
+						<Icon icon="mdi:theater" width="48" height="48" />
+						<h3>{$t('home.features.modernTech.title')}</h3>
+						<p>{$t('home.features.modernTech.description')}</p>
+					</div>
+					<div class="feature-card">
+						<Icon icon="mdi:sofa" width="48" height="48" />
+						<h3>{$t('home.features.premiumComfort.title')}</h3>
+						<p>{$t('home.features.premiumComfort.description')}</p>
+					</div>
+					<div class="feature-card">
+						<Icon icon="mdi:food" width="48" height="48" />
+						<h3>{$t('home.features.snackBar.title')}</h3>
+						<p>{$t('home.features.snackBar.description')}</p>
+					</div>
+					<div class="feature-card">
+						<Icon icon="mdi:ticket-percent" width="48" height="48" />
+						<h3>{$t('home.features.attractiveOffers.title')}</h3>
+						<p>{$t('home.features.attractiveOffers.description')}</p>
 					</div>
 				</div>
-			</section>
+			</div>
+		</section>
 
-			<!-- Features Section -->
-			<section class="content-section">
-				<div class="details-container">
-					<h2 class="features-title">{$t('home.features.heading')}</h2>
-					<div class="features-grid">
-						<div class="feature-card">
-							<Icon icon="mdi:theater" width="48" height="48" />
-							<h3>{$t('home.features.modernTech.title')}</h3>
-							<p>{$t('home.features.modernTech.description')}</p>
-						</div>
-						<div class="feature-card">
-							<Icon icon="mdi:sofa" width="48" height="48" />
-							<h3>{$t('home.features.premiumComfort.title')}</h3>
-							<p>{$t('home.features.premiumComfort.description')}</p>
-						</div>
-						<div class="feature-card">
-							<Icon icon="mdi:food" width="48" height="48" />
-							<h3>{$t('home.features.snackBar.title')}</h3>
-							<p>{$t('home.features.snackBar.description')}</p>
-						</div>
-						<div class="feature-card">
-							<Icon icon="mdi:ticket-percent" width="48" height="48" />
-							<h3>{$t('home.features.attractiveOffers.title')}</h3>
-							<p>{$t('home.features.attractiveOffers.description')}</p>
-						</div>
-					</div>
+		<!-- Coming Soon Section -->
+		<section class="content-section">
+			<div class="details-container">
+				<div class="section-header">
+					<h2>{$t('home.comingSoon.heading')}</h2>
+					<a href="/movies" class="view-all">
+						{$t('home.comingSoon.viewAll')}
+						<Icon icon="mdi:arrow-right" width="16" height="16" />
+					</a>
 				</div>
-			</section>
 
-			<!-- Coming Soon Section -->
-			<section class="content-section">
-				<div class="details-container">
-					<div class="section-header">
-						<h2>{$t('home.comingSoon.heading')}</h2>
-						<a href="/movies" class="view-all">
-							{$t('home.comingSoon.viewAll')}
-							<Icon icon="mdi:arrow-right" width="16" height="16" />
+				<div class="movie-grid">
+					{#each data.movies.slice(6, 12) as movie}
+						<a href="/movies/{movie.id}" class="movie-card">
+							<div class="poster-container">
+								<img
+									src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
+									alt={movie.Title}
+									class="movie-poster"
+								/>
+								<div class="movie-rating">⭐ {movie.imdbRating}</div>
+							</div>
+							<div class="movie-info">
+								<h3 class="movie-title">{movie.Title}</h3>
+								<p class="movie-year">{movie.Year}</p>
+								<p class="movie-genre">{movie.Genre}</p>
+							</div>
 						</a>
-					</div>
-
-					<div class="movie-grid">
-						{#each data.movies.slice(6, 12) as movie}
-							<a href="/movies/{movie.id}" class="movie-card">
-								<div class="poster-container">
-									<img
-										src={movie.Poster !== 'N/A' ? movie.Poster : '/fallback-movie-poster.jpg'}
-										alt={movie.Title}
-										class="movie-poster"
-									/>
-									<div class="movie-rating">⭐ {movie.imdbRating}</div>
-								</div>
-								<div class="movie-info">
-									<h3 class="movie-title">{movie.Title}</h3>
-									<p class="movie-year">{movie.Year}</p>
-									<p class="movie-genre">{movie.Genre}</p>
-								</div>
-							</a>
-						{/each}
-					</div>
+					{/each}
 				</div>
-			</section>
+			</div>
+		</section>
 
-			<!-- Newsletter Section -->
-			<section class="newsletter-section">
-				<div class="details-container">
-					<div class="newsletter-content">
-						<h2>{$t('home.newsletter.heading')}</h2>
-						<p>{$t('home.newsletter.description')}</p>
-						<form class="newsletter-form">
-							<input type="email" placeholder={$t('home.newsletter.emailPlaceholder')} required />
-							<button type="submit">{$t('home.newsletter.subscribeButton')}</button>
-						</form>
-					</div>
+		<!-- Newsletter Section -->
+		<section class="newsletter-section">
+			<div class="details-container">
+				<div class="newsletter-content">
+					<h2>{$t('home.newsletter.heading')}</h2>
+					<p>{$t('home.newsletter.description')}</p>
+					<form class="newsletter-form">
+						<input type="email" placeholder={$t('home.newsletter.emailPlaceholder')} required />
+						<button type="submit">{$t('home.newsletter.subscribeButton')}</button>
+					</form>
 				</div>
-			</section>
-		</div>
-	</main>
-{/if}
+			</div>
+		</section>
+	</div>
+</main>
 
 <style>
 	main {
