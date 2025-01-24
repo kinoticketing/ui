@@ -179,8 +179,7 @@
 							on:click={(event) => toggleDropdown(rowIndex, colIndex, event)}
 						>
 							<span class="seat-label">{String.fromCharCode(65 + rowIndex)}{colIndex + 1}</span>
-							<span class="seat-type">{$t('admin_manageHalls_createHall.seat_grid.seat_type')}</span
-							>
+							<span class="seat-type">{$t(`admin_manageHalls_createHall.seat_types.${seat}`)}</span>
 
 							{#if activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex}
 								<div class="dropdown">
@@ -334,8 +333,8 @@
 	}
 
 	.seat.premium {
-		background-color: #f87171;
-		color: #fff;
+		border-color: #f87171;
+		background: #ffd7d7;
 	}
 
 	.seat.vip {

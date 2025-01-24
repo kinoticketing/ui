@@ -3,6 +3,8 @@
 	import { writable } from 'svelte/store';
 	import { get } from 'svelte/store';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data;
 	let { hall, error } = data;
@@ -103,18 +105,18 @@
 
 	async function saveSeatPlan() {
 		if (!hall) {
-			saveMessage = 'Kein Saal gefunden';
+			saveMessage = $t('admin_manageHalls_hallId.messages.no_hall_found');
 			return;
 		}
 
 		if (!hall_name?.trim()) {
-			saveMessage = 'Bitte geben Sie einen Saalnamen ein';
+			saveMessage = $t('admin_manageHalls_hallId.messages.enter_hall_name');
 			return;
 		}
 
 		const currentRows = get(rows);
 		if (currentRows.length === 0) {
-			saveMessage = 'Der Sitzplan muss mindestens eine Reihe enthalten';
+			saveMessage = $t('admin_manageHalls_hallId.messages.at_least_one_row');
 			return;
 		}
 
@@ -141,7 +143,7 @@
 			});
 
 			if (response.ok) {
-				saveMessage = 'Änderungen erfolgreich gespeichert';
+				saveMessage = $t('admin_manageHalls_hallId.messages.save_success');
 				isEditMode = false;
 				// Aktualisiere die hall-Daten
 				hall = {
@@ -155,7 +157,7 @@
 			}
 		} catch (error) {
 			console.error('Error saving changes:', error);
-			saveMessage = 'Ein Fehler ist aufgetreten';
+			saveMessage = $t('admin_manageHalls_hallId.messages.save_error');
 		}
 	}
 
@@ -173,7 +175,7 @@
 				<h1 class="page-title">
 					<button class="back-btn" on:click={goBack}>
 						<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-						Zurück
+						{$t('admin_manageHalls_hallId.back_button')}
 					</button>
 					<span>{hall.name}</span>
 				</h1>
@@ -181,25 +183,34 @@
 				<div class="edit-controls">
 					<button class="edit-toggle-btn {isEditMode ? 'active' : ''}" on:click={toggleEditMode}>
 						<Icon icon={isEditMode ? 'mdi:pencil-off' : 'mdi:pencil'} />
-						{isEditMode ? 'Bearbeitungsmodus aus' : 'Bearbeitungsmodus an'}
+						{isEditMode
+							? $t('admin_manageHalls_hallId.edit_mode_off')
+							: $t('admin_manageHalls_hallId.edit_mode_on')}
 					</button>
 				</div>
 			</header>
 
 			{#if isEditMode}
 				<div class="inputs">
-					<input type="text" placeholder="Saalname" bind:value={hall_name} required />
+					<input
+						type="text"
+						placeholder={$t('admin_manageHalls_hallId.inputs.hall_name')}
+						bind:value={hall_name}
+						required
+					/>
 					<div class="row-management">
 						<button class="management-btn" on:click={addRow}>
-							<Icon icon="mdi:plus" /> Reihe hinzufügen
+							<Icon icon="mdi:plus" />
+							{$t('admin_manageHalls_hallId.inputs.add_row')}
 						</button>
 						<button class="management-btn" on:click={removeRow}>
-							<Icon icon="mdi:minus" /> Reihe entfernen
+							<Icon icon="mdi:minus" />
+							{$t('admin_manageHalls_hallId.inputs.remove_row')}
 						</button>
 					</div>
 					<button class="save-btn" on:click={saveSeatPlan}>
 						<Icon icon="mdi:content-save" />
-						Speichern
+						{$t('admin_manageHalls_hallId.inputs.save')}
 					</button>
 				</div>
 			{/if}
@@ -207,7 +218,7 @@
 			<div class="seating-section">
 				<div class="screen-container">
 					<div class="screen"></div>
-					<p class="screen-label">Leinwand</p>
+					<p class="screen-label">{$t('admin_manageHalls_hallId.seating_section.screen_label')}</p>
 				</div>
 
 				<div class="seat-grid">
@@ -225,7 +236,9 @@
 									on:click={(event) => isEditMode && toggleDropdown(rowIndex, colIndex, event)}
 								>
 									<span class="seat-label">{String.fromCharCode(65 + rowIndex)}{colIndex + 1}</span>
-									<span class="seat-type">{seat}</span>
+									<span class="seat-type"
+										>{$t(`admin_manageHalls_createHall.seat_types.${seat}`)}</span
+									>
 
 									{#if isEditMode && activeDropdown?.rowIndex === rowIndex && activeDropdown?.colIndex === colIndex}
 										<div class="dropdown">
@@ -234,7 +247,7 @@
 													class="dropdown-item"
 													on:click|stopPropagation={() => changeSeatType(rowIndex, colIndex, type)}
 												>
-													{type}
+													{$t(`admin_manageHalls_createHall.seat_types.${type}`)}
 												</div>
 											{/each}
 										</div>
@@ -384,8 +397,8 @@
 		color: #000;
 	}
 	.seat.premium {
-		background-color: #f87171;
-		color: #fff;
+		border-color: #f87171;
+		background: #ffd7d7;
 	}
 	.seat.regular {
 		background-color: #93c5fd;
@@ -740,5 +753,12 @@
 	.feedback.error {
 		background: #f8d7da;
 		color: #842029;
+	}
+
+	.seat-type {
+		-webkit-hyphens: auto;
+		-moz-hyphens: auto;
+		-ms-hyphens: auto;
+		hyphens: auto;
 	}
 </style>

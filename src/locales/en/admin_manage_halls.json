@@ -36,5 +36,26 @@
             "Disabled": "Disabled",
             "Premium": "Premium"
         }
+    },
+    "admin_manageHalls_hallId": {
+        "back_button": "Back",
+        "edit_mode_on": "Enable Edit Mode",
+        "edit_mode_off": "Disable Edit Mode",
+        "inputs": {
+            "hall_name": "Hall Name",
+            "add_row": "Add Row",
+            "remove_row": "Remove Row",
+            "save": "Save"
+        },
+        "seating_section": {
+            "screen_label": "Screen"
+        },
+        "messages": {
+            "no_hall_found": "No hall found",
+            "enter_hall_name": "Please enter a hall name",
+            "at_least_one_row": "The seating plan must contain at least one row",
+            "save_success": "Changes saved successfully",
+            "save_error": "An error occurred"
+        }
     }
 }

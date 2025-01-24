@@ -28,13 +28,34 @@
             "seat_type": "Sitztyp"
         },
         "feedback": {
-            "error": "Ein Fehler ist aufgetreten."
+            "error": "error: Ein Fehler ist aufgetreten."
         },
         "seat_types": {
             "Regular": "Standard",
             "VIP": "VIP",
             "Disabled": "Barrierefrei",
             "Premium": "Premium"
+        }
+    },
+    "admin_manageHalls_hallId": {
+        "back_button": "Zurück",
+        "edit_mode_on": "Bearbeitungsmodus an",
+        "edit_mode_off": "Bearbeitungsmodus aus",
+        "inputs": {
+            "hall_name": "Saalname",
+            "add_row": "Reihe hinzufügen",
+            "remove_row": "Reihe entfernen",
+            "save": "Speichern"
+        },
+        "seating_section": {
+            "screen_label": "Leinwand"
+        },
+        "messages": {
+            "no_hall_found": "Kein Saal gefunden",
+            "enter_hall_name": "Bitte geben Sie einen Saalnamen ein",
+            "at_least_one_row": "Der Sitzplan muss mindestens eine Reihe enthalten",
+            "save_success": "Änderungen erfolgreich gespeichert",
+            "save_error": "error: Ein Fehler ist aufgetreten"
         }
     }
 }
