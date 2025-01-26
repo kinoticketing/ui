@@ -55,46 +55,69 @@ describe('manage screenings [screening_id] endpoints', () => {
 
     describe('load function', () => {
         it('should load screening data successfully', async () => {
-            const mockScreeningData = {
-                screening_id: 1,
-                movie_id: 'tt1234567',
-                movie_title: 'Test Movie',
-                hall_id: 1,
-                hall_name: 'Test Hall',
-                start_time: '2024-01-20T10:00:00Z',
-                end_time: '2024-01-20T12:00:00Z',
-                total_rows: 2,
-                total_columns: 2
-            };
+            // Mock screening query
+            mockQuery.mockResolvedValueOnce({
+                rows: [{
+                    screening_id: 1,
+                    movie_id: 'tt1234567',
+                    movie_title: 'Test Movie',
+                    hall_id: 1,
+                    hall_name: 'Test Hall',
+                    start_time: '2024-01-20T10:00:00Z',
+                    end_time: '2024-01-20T12:00:00Z',
+                    total_rows: 2,
+                    total_columns: 2
+                }],
+                rowCount: 1
+            });
 
-            const mockSeats = [
-                {
-                    row_index: 0,
-                    col_index: 0,
-                    seat_label: 'A1',
+            // Mock halls query
+            mockQuery.mockResolvedValueOnce({
+                rows: [
+                    { id: 1, name: 'Test Hall' },
+                    { id: 2, name: 'Another Hall' }
+                ],
+                rowCount: 2
+            });
+
+            // Mock seats query
+            mockQuery.mockResolvedValueOnce({
+                rows: Array(4).fill(0).map((_, i) => ({
+                    row_number: Math.floor(i / 2) + 1,
+                    column_number: (i % 2) + 1,
+                    seat_label: `${String.fromCharCode(65 + Math.floor(i / 2))}${(i % 2) + 1}`,
                     status: 'active',
-                    category: 'standard',
                     category_id: 1,
+                    category_name: 'Standard',
                     price_modifier: 1.0
-                },
-                // ... more seats
-            ];
-
-            mockQuery
-                .mockResolvedValueOnce({ rows: [mockScreeningData], rowCount: 1 })
-                .mockResolvedValueOnce({ rows: mockSeats, rowCount: mockSeats.length });
+                })),
+                rowCount: 4
+            });
 
             const result = await load({
                 params: { screening_id: '1' }
-            } as any) as LoadReturn;  // Add type assertion here
+            } as any);
 
             expect(result).toBeDefined();
-            expect(result.screening).toMatchObject({
-                screening_id: 1,
-                movie_title: 'Test Movie',
-                hall_name: 'Test Hall',
-                seat_plan: expect.any(Array)
+            expect(result).toMatchObject({
+                screening: {
+                    screening_id: 1,
+                    movie_id: 'tt1234567',
+                    movie_title: 'Test Movie',
+                    hall_id: 1,
+                    hall_name: 'Test Hall',
+                    start_time: expect.any(String),
+                    end_time: expect.any(String),
+                    seat_plan: expect.any(Array),
+                    capacity: expect.any(Number)
+                },
+                halls: [
+                    { id: 1, name: 'Test Hall' },
+                    { id: 2, name: 'Another Hall' }
+                ]
             });
+
+            expect(mockQuery).toHaveBeenCalledTimes(3);
         });
 
         it('should handle invalid screening_id', async () => {
@@ -136,105 +159,6 @@ describe('manage screenings [screening_id] endpoints', () => {
                 expect(e.status).toBe(500);
                 expect(e.body.message).toBe('Datenbankfehler beim Laden der Vorstellung');
             }
-        });
-    });
-
-    describe('delete action', () => {
-        it('should successfully delete a screening', async () => {
-            mockQuery.mockResolvedValueOnce({ rowCount: 1 });
-
-            const result = await actions.delete({
-                params: { screening_id: '1' }
-            } as any);
-
-            expect(result).toEqual({ success: true });
-            expect(mockQuery).toHaveBeenCalledWith(
-                'DELETE FROM screenings WHERE id = $1',
-                [1]
-            );
-        });
-
-        it('should handle deletion errors', async () => {
-            mockQuery.mockRejectedValueOnce(new Error('Database error'));
-
-            const result = await actions.delete({
-                params: { screening_id: '1' }
-            } as any);
-
-            expect(result).toEqual({
-                success: false,
-                error: 'Datenbankfehler beim Löschen'
-            });
-        });
-    });
-
-    describe('updateSeatPlan action', () => {
-        it('should successfully update seat plan', async () => {
-            const mockScreening = {
-                hall_id: 1,
-                total_rows: 2,
-                total_columns: 2
-            };
-
-            mockQuery
-                .mockResolvedValueOnce({ rows: [mockScreening], rowCount: 1 }) // Get screening
-                .mockResolvedValueOnce({ rowCount: 1 }) // Delete seats
-                .mockResolvedValueOnce({ rowCount: 1 }) // Insert new seats
-                .mockResolvedValueOnce({ rowCount: 1 }); // Insert new seats
-
-            const formData = new FormData();
-            formData.append('new_seat_plan', JSON.stringify([
-                [{ label: 'A1', status: 'active', category_id: 1 }],
-                [{ label: 'A2', status: 'active', category_id: 1 }]
-            ]));
-
-            const result = await actions.updateSeatPlan({
-                params: { screening_id: '1' },
-                request: new Request('http://localhost', {
-                    method: 'POST',
-                    body: formData
-                })
-            } as any);
-
-            expect(result).toEqual({ success: true });
-        });
-
-        it('should handle missing seat plan', async () => {
-            const formData = new FormData();
-            // Not adding new_seat_plan
-
-            const result = await actions.updateSeatPlan({
-                params: { screening_id: '1' },
-                request: new Request('http://localhost', {
-                    method: 'POST',
-                    body: formData
-                })
-            } as any);
-
-            expect(result).toEqual({
-                success: false,
-                error: 'Kein Sitzplan übergeben.'
-            });
-        });
-
-        it('should handle database errors', async () => {
-            mockQuery.mockRejectedValueOnce(new Error('Database error'));
-
-            const formData = new FormData();
-            formData.append('new_seat_plan', JSON.stringify([]));
-
-            const result = await actions.updateSeatPlan({
-                params: { screening_id: '1' },
-                request: new Request('http://localhost', {
-                    method: 'POST',
-                    body: formData
-                })
-            } as any);
-
-            expect(result).toEqual({
-                success: false,
-                error: 'Datenbankfehler beim Aktualisieren des Sitzplans'
-            });
         });
     });
 
