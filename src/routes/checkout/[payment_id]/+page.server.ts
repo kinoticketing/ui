@@ -1,7 +1,6 @@
 // src/routes/checkout/[payment_id]/+page.server.ts
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { PaymentData } from './types';
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -31,7 +30,7 @@ export const load = (async ({ params, locals }) => {
 
 		// First check if the payment exists and is still valid
 		const paymentCheck = await client.query(
-			`SELECT status, created_at
+			`SELECT status, created_at, amount
              FROM payments
              WHERE id = $1 AND user_id = $2`,
 			[paymentId, session.user.id]
@@ -51,7 +50,6 @@ export const load = (async ({ params, locals }) => {
 		// Check if payment is expired (15 minutes old)
 		const paymentAge = new Date().getTime() - new Date(payment.created_at).getTime();
 		if (paymentAge > 15 * 60 * 1000) {
-			// Mark payment as expired
 			await client.query(
 				`UPDATE payments
                  SET status = 'expired'
@@ -61,59 +59,44 @@ export const load = (async ({ params, locals }) => {
 			throw redirect(302, '/cart');
 		}
 
-		const result = await client.query<PaymentData>(
-			`WITH payment_data AS (
-                SELECT 
-                    p.id as payment_id,
-                    p.amount,
-                    p.status as payment_status,
-                    sc.id as screening_id,
-                    sc.start_time as screening_time,
-                    m.title,
-                    m.poster_url,
-                    m.imdb_id,
-                    json_agg(json_build_object(
-                        'id', t.id,
-                        'seat_id', t.seat_id,
-                        'seat_label', s.seat_label,
-                        'row', s.row_number,
-                        'column', s.column_number,
-                        'price', t.price,
-                        'ticket_code', t.ticket_code,
-                        'screening_id', sc.id,
-                        'category_name', scat.name
-                    )) as tickets
-                FROM payments p
-                JOIN tickets t ON t.payment_id = p.id
-                JOIN seats s ON s.id = t.seat_id
-                JOIN seat_categories scat ON s.category_id = scat.id
-                JOIN screenings sc ON sc.id = t.screening_id
-                JOIN movies m ON m.imdb_id = sc.movie_id
-                WHERE p.id = $1 AND p.user_id = $2
-                GROUP BY p.id, p.amount, p.status, sc.id, sc.start_time, m.title, m.poster_url, m.imdb_id
-            )
-            SELECT *,
-                   CASE
-                       WHEN EXISTS (
-                           SELECT 1 FROM seat_reservations sr
-                           JOIN tickets t ON t.seat_id = sr.seat_id
-                           WHERE t.payment_id = payment_data.payment_id
-                           AND sr.expiration_time < NOW()
-                       ) THEN true
-                       ELSE false
-                   END as is_expired
-            FROM payment_data`,
-			[paymentId, session.user.id]
+		// Get all screenings and tickets in this payment
+		const result = await client.query(
+			`SELECT 
+				s.id as screening_id,
+				s.start_time,
+				m.title,
+				m.poster_url,
+				m.imdb_id,
+				t.id as ticket_id,
+				t.seat_id,
+				CAST(t.price AS FLOAT) as price,
+				t.ticket_code,
+				seats.seat_label,
+				seats.row_number as row,
+				seats.column_number as column,
+				sc.name as category_name
+			 FROM screenings s
+			 JOIN tickets t ON t.screening_id = s.id
+			 JOIN movies m ON m.imdb_id = s.movie_id
+			 JOIN seats ON seats.id = t.seat_id
+			 JOIN seat_categories sc ON sc.id = seats.category_id
+			 WHERE t.payment_id = $1
+			 ORDER BY s.start_time, seats.row_number, seats.column_number`,
+			[paymentId]
 		);
 
-		if (result.rows.length === 0) {
-			throw redirect(302, '/cart');
-		}
-
 		// Check if any seats have expired reservations
-		const hasExpiredReservations = result.rows[0].is_expired;
-		if (hasExpiredReservations) {
-			// Mark payment as expired
+		const expiredReservations = await client.query(
+			`SELECT 1 
+             FROM seat_reservations sr
+             JOIN tickets t ON t.seat_id = sr.seat_id
+             WHERE t.payment_id = $1
+             AND sr.expiration_time < NOW()
+             LIMIT 1`,
+			[paymentId]
+		);
+
+		if (expiredReservations.rows.length > 0) {
 			await client.query(
 				`UPDATE payments
                  SET status = 'expired'
@@ -122,23 +105,45 @@ export const load = (async ({ params, locals }) => {
 			);
 			throw redirect(302, '/cart');
 		}
+
+		// Group tickets by screening
+		const screeningsMap = new Map();
+
+		result.rows.forEach((row) => {
+			if (!screeningsMap.has(row.screening_id)) {
+				screeningsMap.set(row.screening_id, {
+					id: row.screening_id,
+					time: row.start_time,
+					movie: {
+						title: row.title,
+						poster_url: row.poster_url,
+						imdb_id: row.imdb_id
+					},
+					tickets: []
+				});
+			}
+
+			const screening = screeningsMap.get(row.screening_id);
+			screening.tickets.push({
+				id: row.ticket_id,
+				seat_id: row.seat_id,
+				seat_label: row.seat_label,
+				row: row.row,
+				column: row.column,
+				price: row.price,
+				ticket_code: row.ticket_code,
+				category_name: row.category_name,
+				screening_id: row.screening_id
+			});
+		});
 
 		return {
 			payment: {
-				id: result.rows[0].payment_id,
-				amount: parseFloat(result.rows[0].amount),
-				status: result.rows[0].payment_status
+				id: paymentId,
+				amount: parseFloat(payment.amount),
+				status: payment.status
 			},
-			screenings: result.rows.map((row) => ({
-				id: row.screening_id,
-				time: row.screening_time,
-				movie: {
-					title: row.title,
-					poster_url: row.poster_url,
-					imdb_id: row.imdb_id
-				},
-				tickets: row.tickets.filter((t) => t.screening_id === row.screening_id)
-			}))
+			screenings: Array.from(screeningsMap.values())
 		};
 	} catch (err) {
 		if (err instanceof Error && 'location' in err) {
