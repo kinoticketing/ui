@@ -483,6 +483,9 @@
 	.legend-box.disabled {
 		background-color: #86efac;
 	}
+	.legend-box.booked {
+		background-color: #9ca3af;
+	}
 
 	.modifier {
 		color: #666;
