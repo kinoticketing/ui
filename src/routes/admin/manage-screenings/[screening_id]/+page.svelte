@@ -12,7 +12,8 @@
 		vip: { modifier: 5.0, class: 'vip' },
 		premium: { modifier: 3.0, class: 'premium' },
 		regular: { modifier: 1.0, class: 'regular' },
-		disabled: { modifier: 0.8, class: 'disabled' }
+		disabled: { modifier: 0.8, class: 'disabled' },
+		booked: { modifier: 0.0, class: 'booked' } // Add booked status
 	};
 
 	// Movie search state
@@ -116,6 +117,7 @@
 	function getSeatClass(seat: any) {
 		if (!seat) return 'seat-empty';
 		if (seat.status === 'inactive') return 'seat-inactive';
+		if (seat.isBooked) return 'booked';
 
 		const categoryLower = seat.category?.toLowerCase() || 'regular';
 		for (const [type, data] of Object.entries(seatTypes)) {
@@ -442,6 +444,11 @@
 	.seat.seat-empty {
 		visibility: hidden;
 	}
+	.seat.booked {
+		background-color: #9ca3af;
+		cursor: not-allowed;
+		color: #fff;
+	}
 
 	.seat-legend {
 		display: flex;
@@ -475,6 +482,9 @@
 	}
 	.legend-box.disabled {
 		background-color: #86efac;
+	}
+	.legend-box.booked {
+		background-color: #9ca3af;
 	}
 
 	.modifier {
