@@ -117,7 +117,7 @@
 	function getSeatClass(seat: any) {
 		if (!seat) return 'seat-empty';
 		if (seat.status === 'inactive') return 'seat-inactive';
-		if (seat.status === 'booked') return 'booked'; // Check for booked status first
+		if (seat.isBooked) return 'booked';
 
 		const categoryLower = seat.category?.toLowerCase() || 'regular';
 		for (const [type, data] of Object.entries(seatTypes)) {

@@ -64,12 +64,19 @@ export const load: PageServerLoad = async ({ params }) => {
                 s.status,
                 s.category_id,
                 sc.name as category_name,
-                sc.price_modifier
+                sc.price_modifier,
+                CASE 
+                    WHEN t.id IS NOT NULL THEN true 
+                    ELSE false 
+                END as is_booked
             FROM seats s
             LEFT JOIN seat_categories sc ON s.category_id = sc.id
-            WHERE s.hall_id = $1
+            LEFT JOIN tickets t ON t.seat_id = s.id 
+                AND t.screening_id = $1 
+                AND t.status = 'confirmed'
+            WHERE s.hall_id = $2
             ORDER BY s.row_number, s.column_number
-        `, [row.hall_id]);
+        `, [params.screening_id, row.hall_id]);
 
 		// Fill seat plan with actual seat data
 		seatsResult.rows.forEach((seat) => {
@@ -78,7 +85,8 @@ export const load: PageServerLoad = async ({ params }) => {
 				status: seat.status,
 				category: seat.category_name,
 				category_id: seat.category_id,
-				priceModifier: seat.price_modifier
+				priceModifier: seat.price_modifier,
+				isBooked: seat.is_booked
 			};
 		});
 
