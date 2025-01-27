@@ -5,6 +5,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { cart } from '$lib/stores/cart';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -16,6 +17,14 @@
 	let selectedSeats: SelectedSeat[] = [];
 	let loading = false;
 	let timeoutId: ReturnType<typeof setTimeout>;
+	let showLoginModal = false;
+	let pendingSeatSelection: { rowIndex: number; colIndex: number; seat: any } | null = null;
+
+	function goToLogin() {
+		localStorage.setItem(`selectedSeats_${screening.id}`, JSON.stringify(selectedSeats));
+		localStorage.setItem('redirectUrl', `/movies/${movie.imdb_id}/${screening.id}`);
+		goto('/auth/login');
+	}
 
 	// Add these type definitions at the top of your script section
 	type CategoryType = 'vip' | 'premium' | 'regular' | 'disabled';
@@ -95,7 +104,6 @@
 		return seatCategories[categoryKey]?.text || seatCategories.regular.text;
 	}
 
-	// In your onMount function
 	onMount(async () => {
 		// Initial status check
 		await updateSeatStatuses();
@@ -106,7 +114,7 @@
 		// Check cart for existing tickets for this screening only
 		const cartItems = cart.getItems();
 		const existingCartSeats = cartItems
-			.filter((item) => item.screeningId === screening.id) // This line is important
+			.filter((item) => item.screeningId === screening.id)
 			.flatMap((item) =>
 				item.tickets.map((ticket) => ({
 					key: `${ticket.row - 1}-${ticket.col - 1}`,
@@ -119,14 +127,28 @@
 				}))
 			);
 
-		// Check for stored seats - IMPORTANT: Only restore if they match the current screening
+		// Check both general stored seats and screening-specific stored seats
 		const storedSeats = localStorage.getItem('selectedSeats');
+		const screeningSpecificSeats = localStorage.getItem(`selectedSeats_${screening.id}`);
+
+		// Parse and filter general stored seats
 		const storedSeatsArray = storedSeats
-			? JSON.parse(storedSeats).filter((seat: { screeningId: number; }) => seat.screeningId === screening.id)
+			? JSON.parse(storedSeats).filter(
+					(seat: { screeningId: number }) => seat.screeningId === screening.id
+				)
 			: [];
 
-		// Combine cart seats and stored seats
-		const seatsToRestore = [...existingCartSeats, ...storedSeatsArray];
+		// Parse screening-specific stored seats
+		const screeningSpecificSeatsArray = screeningSpecificSeats
+			? JSON.parse(screeningSpecificSeats)
+			: [];
+
+		// Combine all seats (cart seats and both types of stored seats)
+		const seatsToRestore = [
+			...existingCartSeats,
+			...storedSeatsArray,
+			...screeningSpecificSeatsArray
+		];
 
 		// Re-lock each seat
 		for (const seat of seatsToRestore) {
@@ -144,8 +166,10 @@
 				console.error('Error relocking seat:', error);
 			}
 		}
-		// Clear stored seats after retrieving them
+
+		// Clear both types of stored seats after retrieving them
 		localStorage.removeItem('selectedSeats');
+		localStorage.removeItem(`selectedSeats_${screening.id}`);
 	});
 
 	onDestroy(() => {
@@ -173,6 +197,11 @@
 	}
 
 	async function handleSeatClick(rowIndex: number, colIndex: number, seat: any) {
+		if (!$page.data.session) {
+			pendingSeatSelection = { rowIndex, colIndex, seat };
+			showLoginModal = true;
+			return;
+		}
 		if (!seat || loading || seat.status === 'inactive') return;
 
 		const seatStatus = seatStatuses.get(seat.id);
@@ -256,44 +285,46 @@
 
 	async function handleCheckout() {
 		if (loading) return;
-
 		loading = true;
+
 		try {
-			// Check if any of these seats are already in cart
+			// Get current cart items
 			const cartItems = cart.getItems();
 			const existingSeats = cartItems
 				.filter((item) => item.screeningId === screening.id)
 				.flatMap((item) => item.tickets)
 				.map((ticket) => ticket.seatId);
 
-			const newSeats = selectedSeats.filter((seat) => !existingSeats.includes(seat.seatId));
+			// Find which seats are new and which are already in cart
+			const seatsToAdd = selectedSeats.filter((seat) => !existingSeats.includes(seat.seatId));
+			const existingSelectedSeats = selectedSeats.filter((seat) =>
+				existingSeats.includes(seat.seatId)
+			);
 
-			if (newSeats.length === 0) {
-				alert('These seats are already in your cart');
-				loading = false;
-				return;
+			// If we have any new seats to add, add them to cart
+			if (seatsToAdd.length > 0) {
+				// Store selected seats in localStorage as backup
+				localStorage.setItem('selectedSeats', JSON.stringify(seatsToAdd));
+
+				// Add new seats to cart
+				cart.addItem({
+					screeningId: screening.id,
+					movieId: movie.imdb_id,
+					movieTitle: movie.title,
+					screeningTime: screening.start_time,
+					tickets: seatsToAdd.map((seat) => ({
+						seatId: seat.seatId,
+						row: seat.row,
+						col: seat.col,
+						label: seat.label,
+						price: seat.price,
+						categoryName: seat.categoryName
+					})),
+					movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
+				});
 			}
 
-			// Store selected seats in localStorage as backup
-			localStorage.setItem('selectedSeats', JSON.stringify(newSeats));
-
-			// Add to cart
-			cart.addItem({
-				screeningId: screening.id,
-				movieTitle: movie.title,
-				screeningTime: screening.start_time,
-				tickets: newSeats.map((seat) => ({
-					seatId: seat.seatId,
-					row: seat.row,
-					col: seat.col,
-					label: seat.label,
-					price: seat.price,
-					categoryName: seat.categoryName
-				})),
-				movieImageUrl: movie.poster_url || '/fallback-movie-poster.jpg'
-			});
-
-			// Navigate to cart
+			// Navigate to cart regardless of whether we added new seats or not
 			window.location.href = '/cart';
 		} catch (error) {
 			console.error('Add to cart error:', error);
@@ -466,6 +497,20 @@
 			<h1 class="error-message">{error}</h1>
 		</div>
 	{/if}
+	{#if showLoginModal}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div class="modal-overlay" on:click|self={() => (showLoginModal = false)}>
+			<div class="modal-content">
+				<div class="empty-content">
+					<Icon icon="mdi:account-lock" width="64" height="64" />
+					<h2>Authentication Required</h2>
+					<p>Please log in to select seats and make reservations.</p>
+					<button class="auth-button" on:click={goToLogin}> Go to Login </button>
+				</div>
+			</div>
+		</div>
+	{/if}
 </main>
 
 <style>
@@ -575,6 +620,72 @@
 		width: 2rem;
 		text-align: right;
 		font-weight: bold;
+	}
+
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+	}
+
+	.modal-content {
+		background: white;
+		padding: 2rem;
+		border-radius: 1rem;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		max-width: 400px;
+		width: 90%;
+	}
+
+	.empty-content {
+		text-align: center;
+	}
+
+	.empty-content :global(svg) {
+		color: #6b7280;
+		margin-bottom: 1.5rem;
+	}
+
+	.empty-content h2 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 0.75rem;
+	}
+
+	.empty-content p {
+		color: #666;
+		margin-bottom: 1.5rem;
+	}
+
+	.auth-button {
+		padding: 0.75rem 1.5rem;
+		background-color: transparent;
+		color: #2563eb;
+		border: 2px solid #2563eb;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin: 0 auto;
+	}
+
+	.auth-button:hover {
+		background-color: rgba(37, 99, 235, 0.1);
+	}
+
+	@media (max-width: 640px) {
+		.modal-content {
+			margin: 0 1rem;
+			padding: 1.5rem;
+		}
 	}
 
 	.seat-button {
