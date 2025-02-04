@@ -47,7 +47,7 @@
 				<thead>
 					<tr>
 						<th>Ticket ID</th>
-						<th>Ticket Code</th>
+						 <th class="ticket-code">Ticket Code</th>
 						<th>Benutzer</th>
 						<th>Film</th>
 						<th>Vorstellung</th>
@@ -63,7 +63,7 @@
 					{#each filteredReservations as reservation}
 						<tr class="clickable-row" on:click={() => navigateToDetails(reservation.ticket_id)}>
 							<td>{reservation.ticket_id}</td>
-							<td>{reservation.ticket_code}</td>
+							 <td class="ticket-code">{reservation.ticket_code}</td>
 							<td>{reservation.username}</td>
 							<td>{reservation.movie_title}</td>
 							<td>{new Date(reservation.start_time).toLocaleString()}</td>
@@ -292,4 +292,53 @@
 			font-size: 0.7rem;
 		}
 	}
+
+	/* Column-specific widths */
+	.ticket-column {
+		width: 120px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.user-column {
+		width: 150px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.movie-column {
+		width: 200px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.date-column {
+		width: 150px;
+		white-space: nowrap;
+	}
+
+	.price-column {
+		width: 100px;
+		white-space: nowrap;
+	}
+
+	.status-column {
+		width: 120px;
+		white-space: nowrap;
+	}
+
+	.actions-column {
+		width: 100px;
+		white-space: nowrap;
+	}
+
+	.ticket-code {
+        word-wrap: break-word;
+        word-break: break-word;
+        min-width: 120px;
+        white-space: normal;
+    }
 </style>
