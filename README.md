@@ -1,4 +1,9 @@
 # Kinoticketreservierungssystem
+<div align="center">
+![test](https://github.com/kinoticketing/ui/actions/workflows/test.yml/badge.svg)
+</div>
+
+Eine leichtgewichtige Dokumentation dieses Projekts ist in unserem [Wiki](https://github.com/kinoticketing/ui/wiki) zu finden!
 
 ## 🎬 Über das Projekt
 Ein modernes Ticketreservierungssystem für Kinos, entwickelt mit SvelteKit. Das System ermöglicht Benutzern die Online-Reservierung von Kinositzen, Verwaltung von Buchungen und bietet ein umfassendes Admin-Interface.
