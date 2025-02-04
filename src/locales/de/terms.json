@@ -1,0 +1,46 @@
+{
+    "terms": {
+        "title": "Nutzungsbedingungen",
+        "section1": {
+            "title": "1. Einführung",
+            "text": "Willkommen bei [Dein Firmenname]! Diese Nutzungsbedingungen regeln die Nutzung unserer Kinoticketreservierungsplattform. Indem Sie unsere Dienste nutzen, stimmen Sie diesen Bedingungen zu."
+        },
+        "section2": {
+            "title": "2. Nutzung der Dienste",
+            "text": "Sie dürfen unsere Dienste nur für legale Zwecke und in Übereinstimmung mit diesen Nutzungsbedingungen verwenden.",
+            "list": [
+                "Reservierung und Kauf von Kinotickets",
+                "Verwaltung Ihrer Buchungen",
+                "Kommunikation mit dem Kundensupport"
+            ]
+        },
+        "section3": {
+            "title": "3. Kontoregisterung",
+            "text": "Um bestimmte Funktionen zu nutzen, müssen Sie ein Konto erstellen. Sie sind verantwortlich für die Geheimhaltung Ihrer Kontoinformationen und für alle Aktivitäten, die unter Ihrem Konto stattfinden."
+        },
+        "section4": {
+            "title": "4. Zahlungsbedingungen",
+            "text": "Alle Zahlungen für Tickets werden sicher über unsere Zahlungsanbieter verarbeitet. Wir speichern keine vollständigen Zahlungsinformationen."
+        },
+        "section5": {
+            "title": "5. Rückerstattungen und Stornierungen",
+            "text": "Rückerstattungen und Stornierungen unterliegen unseren Rückerstattungsrichtlinien, die auf unserer <a href=\"/refund-policy\">Rückerstattungsseite</a> beschrieben sind."
+        },
+        "section6": {
+            "title": "6. Geistiges Eigentum",
+            "text": "Alle Inhalte auf unserer Plattform, einschließlich Texte, Grafiken und Logos, sind Eigentum von [Dein Firmenname] und durch Urheberrechtsgesetze geschützt."
+        },
+        "section7": {
+            "title": "7. Haftungsbeschränkung",
+            "text": "[Dein Firmenname] haftet nicht für indirekte, zufällige oder Folgeschäden, die aus der Nutzung unserer Dienste entstehen."
+        },
+        "section8": {
+            "title": "8. Änderungen der Nutzungsbedingungen",
+            "text": "Wir behalten uns das Recht vor, diese Nutzungsbedingungen jederzeit zu ändern. Änderungen werden auf dieser Seite veröffentlicht und treten sofort in Kraft."
+        },
+        "section9": {
+            "title": "9. Kontaktinformationen",
+            "text": "Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns bitte unter <a href=\"mailto:support@deinedomain.com\">support@deinedomain.com</a>."
+        }
+    }
+}

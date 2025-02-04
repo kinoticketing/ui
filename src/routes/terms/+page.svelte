@@ -1,91 +1,62 @@
 <script>
-	// Falls du dynamische Inhalte oder weitere Logik hinzufügen möchtest, kannst du das hier tun.
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 </script>
 
 <main>
 	<div class="container">
 		<!-- Header -->
-		<h1 class="title">Nutzungsbedingungen</h1>
+		<h1 class="title">{$t('terms.title')}</h1>
 
 		<div class="content">
 			<section>
-				<h2>1. Einführung</h2>
-				<p>
-					Willkommen bei [Dein Firmenname]! Diese Nutzungsbedingungen regeln die Nutzung unserer
-					Kinoticketreservierungsplattform. Indem Sie unsere Dienste nutzen, stimmen Sie diesen
-					Bedingungen zu.
-				</p>
+				<h2>{$t('terms.section1.title')}</h2>
+				<p>{$t('terms.section1.text')}</p>
 			</section>
 
 			<section>
-				<h2>2. Nutzung der Dienste</h2>
-				<p>
-					Sie dürfen unsere Dienste nur für legale Zwecke und in Übereinstimmung mit diesen
-					Nutzungsbedingungen verwenden.
-				</p>
+				<h2>{$t('terms.section2.title')}</h2>
+				<p>{$t('terms.section2.text')}</p>
 				<ul>
-					<li>Reservierung und Kauf von Kinotickets</li>
-					<li>Verwaltung Ihrer Buchungen</li>
-					<li>Kommunikation mit dem Kundensupport</li>
+					{#each $t('terms.section2.list') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
 			</section>
 
 			<section>
-				<h2>3. Kontoregisterung</h2>
-				<p>
-					Um bestimmte Funktionen zu nutzen, müssen Sie ein Konto erstellen. Sie sind verantwortlich
-					für die Geheimhaltung Ihrer Kontoinformationen und für alle Aktivitäten, die unter Ihrem
-					Konto stattfinden.
-				</p>
+				<h2>{$t('terms.section3.title')}</h2>
+				<p>{$t('terms.section3.text')}</p>
 			</section>
 
 			<section>
-				<h2>4. Zahlungsbedingungen</h2>
-				<p>
-					Alle Zahlungen für Tickets werden sicher über unsere Zahlungsanbieter verarbeitet. Wir
-					speichern keine vollständigen Zahlungsinformationen.
-				</p>
+				<h2>{$t('terms.section4.title')}</h2>
+				<p>{$t('terms.section4.text')}</p>
 			</section>
 
 			<section>
-				<h2>5. Rückerstattungen und Stornierungen</h2>
-				<p>
-					Rückerstattungen und Stornierungen unterliegen unseren Rückerstattungsrichtlinien, die auf
-					unserer <a href="/refund-policy">Rückerstattungsseite</a> beschrieben sind.
-				</p>
+				<h2>{$t('terms.section5.title')}</h2>
+				<p>{@html $t('terms.section5.text')}</p>
 			</section>
 
 			<section>
-				<h2>6. Geistiges Eigentum</h2>
-				<p>
-					Alle Inhalte auf unserer Plattform, einschließlich Texte, Grafiken und Logos, sind
-					Eigentum von [Dein Firmenname] und durch Urheberrechtsgesetze geschützt.
-				</p>
+				<h2>{$t('terms.section6.title')}</h2>
+				<p>{$t('terms.section6.text')}</p>
 			</section>
 
 			<section>
-				<h2>7. Haftungsbeschränkung</h2>
-				<p>
-					[Dein Firmenname] haftet nicht für indirekte, zufällige oder Folgeschäden, die aus der
-					Nutzung unserer Dienste entstehen.
-				</p>
+				<h2>{$t('terms.section7.title')}</h2>
+				<p>{$t('terms.section7.text')}</p>
 			</section>
 
 			<section>
-				<h2>8. Änderungen der Nutzungsbedingungen</h2>
-				<p>
-					Wir behalten uns das Recht vor, diese Nutzungsbedingungen jederzeit zu ändern. Änderungen
-					werden auf dieser Seite veröffentlicht und treten sofort in Kraft.
-				</p>
+				<h2>{$t('terms.section8.title')}</h2>
+				<p>{$t('terms.section8.text')}</p>
 			</section>
 
 			<section>
-				<h2>9. Kontaktinformationen</h2>
-				<p>
-					Bei Fragen zu diesen Nutzungsbedingungen kontaktieren Sie uns bitte unter <a
-						href="mailto:support@deinedomain.com">support@deinedomain.com</a
-					>.
-				</p>
+				<h2>{$t('terms.section9.title')}</h2>
+				<p>{@html $t('terms.section9.text')}</p>
 			</section>
 		</div>
 	</div>

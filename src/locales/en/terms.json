@@ -1,0 +1,46 @@
+{
+    "terms": {
+        "title": "Terms of Use",
+        "section1": {
+            "title": "1. Introduction",
+            "text": "Welcome to [Your Company Name]! These Terms of Use govern the use of our cinema ticket reservation platform. By using our services, you agree to these terms."
+        },
+        "section2": {
+            "title": "2. Use of Services",
+            "text": "You may only use our services for lawful purposes and in accordance with these Terms of Use.",
+            "list": [
+                "Reservation and purchase of cinema tickets",
+                "Management of your bookings",
+                "Communication with customer support"
+            ]
+        },
+        "section3": {
+            "title": "3. Account Registration",
+            "text": "To use certain features, you must create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account."
+        },
+        "section4": {
+            "title": "4. Payment Terms",
+            "text": "All ticket payments are processed securely through our payment providers. We do not store complete payment information."
+        },
+        "section5": {
+            "title": "5. Refunds and Cancellations",
+            "text": "Refunds and cancellations are subject to our refund policies, which are described on our <a href=\"/refund-policy\">refund policy page</a>."
+        },
+        "section6": {
+            "title": "6. Intellectual Property",
+            "text": "All content on our platform, including text, graphics, and logos, is the property of [Your Company Name] and is protected by copyright laws."
+        },
+        "section7": {
+            "title": "7. Limitation of Liability",
+            "text": "[Your Company Name] is not liable for indirect, incidental, or consequential damages arising from the use of our services."
+        },
+        "section8": {
+            "title": "8. Changes to the Terms of Use",
+            "text": "We reserve the right to change these Terms of Use at any time. Changes will be published on this page and take effect immediately."
+        },
+        "section9": {
+            "title": "9. Contact Information",
+            "text": "If you have any questions about these Terms of Use, please contact us at <a href=\"mailto:support@deinedomain.com\">support@deinedomain.com</a>."
+        }
+    }
+}
