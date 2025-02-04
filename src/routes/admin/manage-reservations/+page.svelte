@@ -138,9 +138,10 @@
 	}
 
 	.container {
-		max-width: 1200px;
+		width: 100%;
+		max-width: 1400px; /* Increased from default */
 		margin: 0 auto;
-		position: relative;
+		padding: 1rem;
 	}
 
 	h1 {
@@ -162,17 +163,20 @@
 	}
 
 	.table-container {
+		margin: 1rem 0;
 		background: white;
 		border-radius: 1rem;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+		width: 100%;
 		overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
 	}
 
 	table {
 		width: 100%;
-		border-collapse: separate;
-		border-spacing: 0;
+		min-width: 1200px;
+		border-collapse: collapse;
+		font-size: 0.875rem;
+		table-layout: fixed; /* Added for consistent column widths */
 	}
 
 	th,
@@ -180,14 +184,30 @@
 		padding: 1rem;
 		text-align: left;
 		border-bottom: 1px solid #e5e7eb;
+		width: auto; /* Let columns take natural width */
 	}
 
 	th {
-		background-color: #f3f4f6;
+		position: sticky;
+		top: 0;
+		background: #f8fafc;
+		color: #64748b;
 		font-weight: 600;
-		color: #374151;
 		text-transform: uppercase;
-		font-size: 0.875rem;
+		letter-spacing: 0.05em;
+		padding: 1rem;
+		border-bottom: 2px solid #e2e8f0;
+	}
+
+	td {
+		padding: 1rem;
+		border-bottom: 1px solid #e2e8f0;
+		color: #334155;
+	}
+
+	tr:hover {
+		background-color: #f8fafc;
+		transition: background-color 0.2s ease;
 	}
 
 	tr:last-child td {
@@ -195,11 +215,12 @@
 	}
 
 	.status {
-		display: inline-block;
-		padding: 0.25rem 0.5rem;
+		display: inline-flex;
+		align-items: center;
+		padding: 0.375rem 0.75rem;
 		border-radius: 9999px;
-		font-size: 0.875rem;
 		font-weight: 500;
+		font-size: 0.75rem;
 	}
 
 	.status.pending {
@@ -208,8 +229,8 @@
 	}
 
 	.status.confirmed {
-		background-color: #d1fae5;
-		color: #047857;
+		background-color: #dcfce7;
+		color: #15803d;
 	}
 
 	.status.cancelled {
@@ -232,7 +253,25 @@
 		background-color: #dc2626;
 	}
 
-	@media (max-width: 1024px) {
+	/* Custom scrollbar for better UX */
+	.table-container::-webkit-scrollbar {
+		height: 6px;
+	}
+
+	.table-container::-webkit-scrollbar-track {
+		background: #f1f5f9;
+	}
+
+	.table-container::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 3px;
+	}
+
+	.table-container::-webkit-scrollbar-thumb:hover {
+		background: #94a3b8;
+	}
+
+	@media (max-width: 1400px) {
 		.table-container {
 			overflow-x: auto;
 		}
@@ -246,6 +285,11 @@
 		th,
 		td {
 			padding: 0.75rem;
+		}
+
+		.status {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.7rem;
 		}
 	}
 </style>
