@@ -4,45 +4,16 @@
 	import type { PageData } from './types';
 	import Icon from '@iconify/svelte';
 	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: PageData;
 	const { payment, tickets, movie, screening } = data;
 
-	function goBackToBooking() {
-		// Store current tickets in localStorage before navigating back
-		const selectedSeats = tickets.map((ticket) => ({
-			key: `${ticket.row - 1}-${ticket.column - 1}`,
-			row: ticket.row,
-			col: ticket.column,
-			label: ticket.seat_label,
-			seatId: ticket.id,
-			price: ticket.price
-		}));
+	// ... other imports
 
-		localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-		window.location.href = `/movies/${movie.imdb_id}/${screening.id}`;
-	}
-	let loading = false;
 	let error = '';
-
-	onMount(async () => {
-		try {
-			const script = document.createElement('script');
-			script.src = `https://www.paypal.com/sdk/js?client-id=${PUBLIC_PAYPAL_CLIENT_ID}&currency=EUR`;
-			script.async = true;
-
-			await new Promise<void>((resolve, reject) => {
-				script.onload = () => resolve();
-				script.onerror = () => reject(new Error('Failed to load PayPal SDK'));
-				document.body.appendChild(script);
-			});
-
-			await initializePayPalButtons();
-		} catch (err) {
-			console.error('PayPal initialization error:', err);
-			error = 'Failed to load payment system. Please refresh the page or try again later.';
-		}
-	});
+	let loading = false;
 
 	async function initializePayPalButtons() {
 		try {
@@ -61,9 +32,7 @@
 						try {
 							const response = await fetch(`/api/payments/${payment.id}/paypal/create`, {
 								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
+								headers: { 'Content-Type': 'application/json' },
 								body: JSON.stringify({
 									amount: payment.amount
 								})
@@ -71,14 +40,15 @@
 
 							if (!response.ok) {
 								const errorData = await response.json();
-								throw new Error(errorData.error || 'Failed to create PayPal order');
+								// Use translation key if server doesn't provide a custom error
+								throw new Error(errorData.error || $t('checkout.failCreatePayPalOrder'));
 							}
 
 							const orderData = await response.json();
 							return orderData.id;
 						} catch (err) {
-							error = 'Failed to create order. Please try again.';
-							console.error('Error creating order:', err);
+							error = $t('checkout.failCreateOrderPleaseTry');
+							console.error($t('checkout.errorCreatingOrderPrefix'), err);
 							throw err;
 						} finally {
 							loading = false;
@@ -91,9 +61,7 @@
 						try {
 							const response = await fetch(`/api/payments/${payment.id}/paypal/capture`, {
 								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
+								headers: { 'Content-Type': 'application/json' },
 								body: JSON.stringify({
 									orderId: data.orderID
 								})
@@ -101,20 +69,20 @@
 
 							if (!response.ok) {
 								const errorData = await response.json();
-								throw new Error(errorData.error || 'Payment capture failed');
+								throw new Error(errorData.error || $t('checkout.paymentCaptureFailed'));
 							}
 
 							window.location.href = `/checkout/${payment.id}/success`;
 						} catch (err) {
-							error = 'Payment failed. Please try again.';
-							console.error('Error capturing payment:', err);
+							error = $t('checkout.paymentFailedPleaseTry');
+							console.error($t('checkout.errorCreatingOrderPrefix'), err);
 						} finally {
 							loading = false;
 						}
 					},
 					onError: (err: Error) => {
-						error = 'Payment system error. Please try again.';
-						console.error('PayPal error:', err);
+						error = $t('checkout.paymentSystemErrorTryAgain');
+						console.error($t('checkout.paypalInitializationErrorPrefix'), err);
 						loading = false;
 					},
 					onCancel: () => {
@@ -124,10 +92,34 @@
 				})
 				.render('#paypal-button-container');
 		} catch (err) {
-			error = 'Failed to initialize PayPal. Please refresh the page.';
-			console.error('PayPal initialization error:', err);
+			error = $t('checkout.failInitPayPalRefresh');
+			console.error($t('checkout.paypalInitializationErrorPrefix'), err);
 		}
 	}
+	let timeLeft = 900; // 15 minutes in seconds
+	let timer: ReturnType<typeof setInterval>;
+
+	onMount(async () => {
+		try {
+			const script = document.createElement('script');
+			script.src = `https://www.paypal.com/sdk/js?client-id=${PUBLIC_PAYPAL_CLIENT_ID}&currency=EUR`;
+			script.async = true;
+
+			await new Promise<void>((resolve, reject) => {
+				script.onload = () => resolve();
+				script.onerror = () => reject(new Error($t('checkout.failLoadPayPalSdk')));
+				document.body.appendChild(script);
+			});
+
+			await initializePayPalButtons();
+		} catch (err) {
+			console.error($t('checkout.paypalInitializationErrorPrefix'), err);
+			error = $t('checkout.failLoadPaymentSystemRefresh');
+		}
+	});
+
+	$: minutes = Math.floor(timeLeft / 60);
+	$: seconds = timeLeft % 60;
 
 	function formatDateTime(date: string) {
 		return new Date(date).toLocaleString();
@@ -137,53 +129,63 @@
 		return price.toFixed(2);
 	}
 
+	function goBackToBooking() {
+		// Store current tickets in localStorage before navigating back
+		const selectedSeats = tickets.map((ticket) => ({
+			key: `${ticket.row - 1}-${ticket.column - 1}`,
+			row: ticket.row,
+			col: ticket.column,
+			label: ticket.seat_label,
+			seatId: ticket.id,
+			price: ticket.price
+		}));
+
+		localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+		window.location.href = `/movies/${movie.imdb_id}/${screening.id}`;
+	}
+
 	// Countdown timer
-	let timeLeft = 900; // 15 minutes in seconds
-	let timer: ReturnType<typeof setInterval>;
-
-	onMount(() => {
-		timer = setInterval(() => {
-			timeLeft--;
-			if (timeLeft <= 0) {
-				clearInterval(timer);
-				window.location.href = '/expired';
-			}
-		}, 1000);
-
-		return () => clearInterval(timer);
-	});
-
-	$: minutes = Math.floor(timeLeft / 60);
-	$: seconds = timeLeft % 60;
 </script>
 
 <main>
 	<div class="container">
 		<button class="back-button" on:click={goBackToBooking}>
 			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Back to Booking
+			{$t('checkout.backToBooking')}
 		</button>
+
 		<h1 class="movie-title">{movie.title}</h1>
-		<p class="showtime-info">Showtime: {formatDateTime(screening.start_time)}</p>
+		<p class="showtime-info">
+			{$t('checkout.showtime')}
+			{formatDateTime(screening.start_time)}
+		</p>
 
 		<div class="timer-container">
 			<p class="timer-text">
-				Your seats are reserved for {minutes}:{seconds.toString().padStart(2, '0')}
+				{$t('checkout.reservedSeats')}
+				{minutes}:{seconds.toString().padStart(2, '0')}
 			</p>
 		</div>
 
 		<div class="checkout-container">
-			<!-- Left side - Order Summary -->
+			<!-- Order Summary -->
 			<div class="summary-section">
 				<div class="summary-container">
-					<h2 class="summary-title">Order Summary</h2>
+					<h2 class="summary-title">{$t('checkout.orderSummary')}</h2>
 
 					<div class="tickets-container">
 						{#each tickets as ticket}
 							<div class="ticket-item">
 								<div class="ticket-info">
-									<p class="seat-label">Seat {ticket.seat_label}</p>
-									<p class="seat-details">Row {ticket.row}, Column {ticket.column}</p>
+									<p class="seat-label">
+										{$t('checkout.seat')}
+										{ticket.seat_label}
+									</p>
+									<p class="seat-details">
+										{$t('checkout.row')}
+										{ticket.row}, {$t('checkout.column')}
+										{ticket.column}
+									</p>
 									<p class="ticket-price">${formatPrice(ticket.price)}</p>
 								</div>
 							</div>
@@ -192,17 +194,17 @@
 
 					<div class="summary-footer">
 						<div class="total-price">
-							<span>Total:</span>
+							<span>{$t('checkout.total')}</span>
 							<span>${formatPrice(payment.amount)}</span>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Right side - Payment -->
+			<!-- Payment Method -->
 			<div class="payment-section">
 				<div class="payment-container">
-					<h2 class="payment-title">Payment Method</h2>
+					<h2 class="payment-title">{$t('checkout.paymentMethod')}</h2>
 
 					{#if error}
 						<div class="error-message">

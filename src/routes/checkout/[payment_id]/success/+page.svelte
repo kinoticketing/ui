@@ -2,6 +2,8 @@
 	import { generateTicketQRCode, type TicketInfo } from '$lib/utils/qrCode';
 	import type { PageData } from './$types';
 	import Icon from '@iconify/svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: PageData;
 	const { payment } = data;
@@ -29,29 +31,39 @@
 				<div class="success-icon">
 					<Icon icon="mdi:check-circle" class="text-green-500 w-16 h-16" />
 				</div>
-				<h1>Payment Successful!</h1>
-				<p class="confirmation-text">Thank you for your purchase</p>
+				<!-- Was: <h1>Payment Successful!</h1> -->
+				<h1>{$t('checkout_success.paymentSuccessful')}</h1>
+
+				<!-- Was: <p class="confirmation-text">Thank you for your purchase</p> -->
+				<p class="confirmation-text">{$t('checkout_success.thankYouForYourPurchase')}</p>
 			</div>
 
 			<div class="booking-details">
-				<h2>Booking Details</h2>
+				<!-- Was: <h2>Booking Details</h2> -->
+				<h2>{$t('checkout_success.bookingDetails')}</h2>
+
 				<div class="details-grid">
 					<div class="detail-item">
-						<span class="label">Movie:</span>
+						<!-- Was: <span class="label">Movie:</span> -->
+						<span class="label">{$t('checkout_success.movieColon')}</span>
 						<span class="value">{payment.movie_title}</span>
 					</div>
 					<div class="detail-item">
-						<span class="label">Screening:</span>
+						<!-- Was: <span class="label">Screening:</span> -->
+						<span class="label">{$t('checkout_success.screeningColon')}</span>
 						<span class="value">{formatDateTime(payment.screening_time)}</span>
 					</div>
 					<div class="detail-item">
-						<span class="label">Amount Paid:</span>
+						<!-- Was: <span class="label">Amount Paid:</span> -->
+						<span class="label">{$t('checkout_success.amountPaidColon')}</span>
 						<span class="value">${formatPrice(payment.amount)}</span>
 					</div>
 				</div>
 
 				<div class="tickets-section">
-					<h3>Your Tickets</h3>
+					<!-- Was: <h3>Your Tickets</h3> -->
+					<h3>{$t('checkout_success.yourTickets')}</h3>
+
 					<div class="tickets-grid">
 						{#each payment.tickets as ticket}
 							<div class="ticket-item">
@@ -62,11 +74,13 @@
 									Code: {ticket.ticket_code}
 								</div>
 								{#await generateTicketQRCode(createTicketInfo(ticket))}
-									<p>Generating QR Code...</p>
+									<!-- Was: <p>Generating QR Code...</p> -->
+									<p>{$t('checkout_success.generatingQrCode')}</p>
 								{:then qrCodeDataUrl}
 									<img src={qrCodeDataUrl} alt="Ticket QR Code" class="qr-code" />
 								{:catch error}
-									<p>Error generating QR Code: {error.message}</p>
+									<!-- Was: <p>Error generating QR Code: {error.message}</p> -->
+									<p>{$t('checkout_success.errorGeneratingQrCode')} {error.message}</p>
 								{/await}
 							</div>
 						{/each}
@@ -75,7 +89,8 @@
 			</div>
 
 			<div class="actions">
-				<a href="/" class="home-button">Return to Home</a>
+				<!-- Was: <a href="/" class="home-button">Return to Home</a> -->
+				<a href="/" class="home-button">{$t('checkout_success.returnToHome')}</a>
 			</div>
 		</div>
 	</div>

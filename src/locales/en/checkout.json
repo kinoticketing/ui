@@ -1,0 +1,35 @@
+{
+    "checkout": {
+        "backToBooking": "Back to Booking",
+        "showtime": "Showtime:",
+        "reservedSeats": "Your seats are reserved for",
+        "orderSummary": "Order Summary",
+        "seat": "Seat",
+        "row": "Row",
+        "column": "Column",
+        "total": "Total:",
+        "paymentMethod": "Payment Method",
+        "failCreatePayPalOrder": "Failed to create PayPal order",
+        "failCreateOrderPleaseTry": "Failed to create order. Please try again.",
+        "errorCreatingOrderPrefix": "Error creating order:",
+        "paymentCaptureFailed": "Payment capture failed",
+        "paymentFailedPleaseTry": "Payment failed. Please try again.",
+        "paymentSystemErrorTryAgain": "Payment system error. Please try again.",
+        "failInitPayPalRefresh": "Failed to initialize PayPal. Please refresh the page.",
+        "paypalInitializationErrorPrefix": "PayPal initialization error:",
+        "failLoadPayPalSdk": "Failed to load PayPal SDK",
+        "failLoadPaymentSystemRefresh": "Failed to load payment system. Please refresh the page or try again later."
+    },
+    "checkout_success": {
+        "paymentSuccessful": "Payment Successful!",
+        "thankYouForYourPurchase": "Thank you for your purchase",
+        "bookingDetails": "Booking Details",
+        "movieColon": "Movie:",
+        "screeningColon": "Screening:",
+        "amountPaidColon": "Amount Paid:",
+        "yourTickets": "Your Tickets",
+        "generatingQrCode": "Generating QR Code...",
+        "errorGeneratingQrCode": "Error generating QR Code:",
+        "returnToHome": "Return to Home"
+    }
+}
