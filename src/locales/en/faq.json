@@ -1,0 +1,19 @@
+{
+    "faq": {
+        "title": "Frequently Asked Questions (FAQ)",
+        "question1": "How do I book a ticket?",
+        "answer1": "<p>To book a ticket, first select the movie and showtime you want. Then pick available seats and complete your reservation.</p>",
+        "question2": "Which payment methods are accepted?",
+        "answer2": "<p>We accept a variety of payment methods, including credit cards (Visa, MasterCard, American Express), PayPal, and instant bank transfer (Sofort).</p>",
+        "question3": "Can I cancel my booking?",
+        "answer3": "<p>Yes, you can cancel your booking up to 24 hours before the showtime at no cost.</p>",
+        "question4": "Are there discounts for students or seniors?",
+        "answer4": "<p>Yes, we offer discounts for students, seniors, and children. Please present a valid ID when booking.</p>",
+        "question5": "How do I get my tickets?",
+        "answer5": "<p>After booking, you can receive your tickets via email or pick them up directly at the cinema. Choose your preferred option during the booking process.</p>",
+        "question6": "Do you offer group rates?",
+        "answer6": "<p>Yes, we provide special rates for groups of 10 or more. Please contact our <a href=\"/contact\">customer support</a> for more information.</p>",
+        "question7": "How can I contact customer support?",
+        "answer7": "<p>You can reach our customer support via the <a href=\"/contact\">contact form</a>, by email at <a href=\"mailto:support@deinedomain.com\">support@deinedomain.com</a>, or by phone at +49 123 456 7890.</p>"
+    }
+}

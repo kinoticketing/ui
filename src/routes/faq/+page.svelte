@@ -1,78 +1,64 @@
-<script>
-	// Definition der FAQ-Daten
-	const faqs = [
-		{
-			question: 'Wie buche ich ein Ticket?',
-			answer: `
-  <p>Um ein Ticket zu buchen, wählen Sie zuerst den gewünschten Film und die gewünschte Vorstellung aus. Anschließend können Sie die verfügbaren Plätze auswählen und Ihre Reservierung abschließen.</p>
-  `
-		},
-		{
-			question: 'Welche Zahlungsmethoden werden akzeptiert?',
-			answer: `
-  <p>Wir akzeptieren verschiedene Zahlungsmethoden, darunter Kreditkarten (Visa, MasterCard, American Express), PayPal und Sofortüberweisung.</p>
-  `
-		},
-		{
-			question: 'Kann ich meine Buchung stornieren?',
-			answer: `
-  <p>Ja, Sie können Ihre Buchung bis zu 24 Stunden vor der Vorstellung kostenfrei stornieren.</p>
-  `
-		},
-		{
-			question: 'Gibt es Ermäßigungen für Studenten oder Senioren?',
-			answer: `
-  <p>Ja, wir bieten Ermäßigungen für Studenten, Senioren und Kinder an. Bitte legen Sie bei der Buchung einen gültigen Ausweis vor.</p>
-  `
-		},
-		{
-			question: 'Wie erhalte ich meine Tickets?',
-			answer: `
-  <p>Nach der Buchung können Sie Ihre Tickets entweder per E-Mail erhalten oder direkt am Kinosaal abholen. Wählen Sie die bevorzugte Option während des Buchungsvorgangs aus.</p>
-  `
-		},
-		{
-			question: 'Bietet ihr Gruppentarife an?',
-			answer: `
-  <p>Ja, wir bieten spezielle Tarife für Gruppen ab 10 Personen an. Bitte kontaktieren Sie unseren <a href="/contact">Kundensupport</a> für weitere Informationen.</p>
-  `
-		},
-		{
-			question: 'Wie kontaktiere ich den Kundensupport?',
-			answer: `
-  <p>Sie können unseren Kundensupport über das <a href="/contact">Kontaktformular</a>, per E-Mail an <a href="mailto:support@deinedomain.com">support@deinedomain.com</a> oder telefonisch unter +49 123 456 7890 erreichen.</p>
-  `
-		}
-		// Weitere FAQs können hier hinzugefügt werden
-	];
+<script lang="ts">
+	import { t } from 'svelte-i18n';
 
-	// Zustandsverwaltung für das aktive Accordion
-	// @ts-ignore
-	/**
-	 * @type {number | null}
-	 */
-	let activeIndex = null;
-
-	// @ts-ignore
-	function toggle(index) {
-		// @ts-ignore
+	let activeIndex: number | null = null;
+	function toggle(index: number): void {
 		activeIndex = activeIndex === index ? null : index;
 	}
+
+	type FAQItem = {
+		question: string;
+		answer: string;
+	};
+
+	$: faqs = [
+		{
+			question: $t('faq.question1'),
+			answer: $t('faq.answer1')
+		},
+		{
+			question: $t('faq.question2'),
+			answer: $t('faq.answer2')
+		},
+		{
+			question: $t('faq.question3'),
+			answer: $t('faq.answer3')
+		},
+		{
+			question: $t('faq.question4'),
+			answer: $t('faq.answer4')
+		},
+		{
+			question: $t('faq.question5'),
+			answer: $t('faq.answer5')
+		},
+		{
+			question: $t('faq.question6'),
+			answer: $t('faq.answer6')
+		},
+		{
+			question: $t('faq.question7'),
+			answer: $t('faq.answer7')
+		}
+	] as FAQItem[];
 </script>
 
 <main>
 	<div class="container">
-		<h1 class="title">Häufig gestellte Fragen (FAQ)</h1>
-
+		<h1 class="title">{$t('faq.title')}</h1>
 		<div class="content">
 			{#each faqs as faq, index}
 				<div class="faq-item">
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div class="faq-question" on:click={() => toggle(index)}>
+					<button
+						class="faq-question"
+						on:click={() => toggle(index)}
+						on:keydown={(e) => e.key === 'Enter' && toggle(index)}
+						aria-expanded={activeIndex === index}
+						aria-controls="faq-answer-{index}"
+					>
 						<span>{faq.question}</span>
 						<span class="arrow {activeIndex === index ? 'up' : ''}">▼</span>
-					</div>
+					</button>
 					<div class="faq-answer {activeIndex === index ? 'active' : ''}">
 						{@html faq.answer}
 					</div>
@@ -112,9 +98,9 @@
 		border-bottom: 1px solid #ddd;
 	}
 	.faq-question {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		width: 100%;
+		display: block;
+		text-align: left;
 		cursor: pointer;
 		padding: 1rem;
 		background-color: #2c3e50;

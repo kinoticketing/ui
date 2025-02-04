@@ -1,0 +1,19 @@
+{
+    "faq": {
+        "title": "Häufig gestellte Fragen (FAQ)",
+        "question1": "Wie buche ich ein Ticket?",
+        "answer1": "<p>Um ein Ticket zu buchen, wählen Sie zuerst den gewünschten Film und die gewünschte Vorstellung aus. Anschließend können Sie die verfügbaren Plätze auswählen und Ihre Reservierung abschließen.</p>",
+        "question2": "Welche Zahlungsmethoden werden akzeptiert?",
+        "answer2": "<p>Wir akzeptieren verschiedene Zahlungsmethoden, darunter Kreditkarten (Visa, MasterCard, American Express), PayPal und Sofortüberweisung.</p>",
+        "question3": "Kann ich meine Buchung stornieren?",
+        "answer3": "<p>Ja, Sie können Ihre Buchung bis zu 24 Stunden vor der Vorstellung kostenfrei stornieren.</p>",
+        "question4": "Gibt es Ermäßigungen für Studenten oder Senioren?",
+        "answer4": "<p>Ja, wir bieten Ermäßigungen für Studenten, Senioren und Kinder an. Bitte legen Sie bei der Buchung einen gültigen Ausweis vor.</p>",
+        "question5": "Wie erhalte ich meine Tickets?",
+        "answer5": "<p>Nach der Buchung können Sie Ihre Tickets entweder per E-Mail erhalten oder direkt am Kinosaal abholen. Wählen Sie die bevorzugte Option während des Buchungsvorgangs aus.</p>",
+        "question6": "Bietet ihr Gruppentarife an?",
+        "answer6": "<p>Ja, wir bieten spezielle Tarife für Gruppen ab 10 Personen an. Bitte kontaktieren Sie unseren <a href=\"/contact\">Kundensupport</a> für weitere Informationen.</p>",
+        "question7": "Wie kontaktiere ich den Kundensupport?",
+        "answer7": "<p>Sie können unseren Kundensupport über das <a href=\"/contact\">Kontaktformular</a>, per E-Mail an <a href=\"mailto:support@deinedomain.com\">support@deinedomain.com</a> oder telefonisch unter +49 123 456 7890 erreichen.</p>"
+    }
+}
