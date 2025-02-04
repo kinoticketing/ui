@@ -19,9 +19,7 @@
         },
         "buttons": {
             "save": "Speichern",
-            "delete_all": "Alles löschen",
-            "add_column": "+",
-            "remove_column": "-"
+            "delete_all": "Alles löschen"
         },
         "seat_grid": {
             "seat_label": "Sitzplatz",
