@@ -1,7 +1,6 @@
 # Kinoticketreservierungssystem
-<div align="center">
-![test](https://github.com/kinoticketing/ui/actions/workflows/test.yml/badge.svg)
-</div>
+
+![Test Status](https://github.com/kinoticketing/ui/actions/workflows/test.yml/badge.svg)
 
 Eine leichtgewichtige Dokumentation dieses Projekts ist in unserem [Wiki](https://github.com/kinoticketing/ui/wiki) zu finden!
 
