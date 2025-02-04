@@ -2,7 +2,7 @@
 	import { generateTicketQRCode, type TicketInfo } from '$lib/utils/qrCode';
 	import type { PageData } from './$types';
 	import Icon from '@iconify/svelte';
-	import '../../../i18n.js';
+	import '../../../../i18n.js';
 	import { t } from 'svelte-i18n';
 
 	export let data: PageData;

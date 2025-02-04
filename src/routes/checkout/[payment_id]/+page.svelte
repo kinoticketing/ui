@@ -4,7 +4,7 @@
 	import type { PageData } from './types';
 	import Icon from '@iconify/svelte';
 	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
-	import '../../i18n.js';
+	import '../../../i18n.js';
 	import { t } from 'svelte-i18n';
 
 	export let data: PageData;
