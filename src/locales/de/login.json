@@ -8,6 +8,8 @@
         "passwordPlaceholder": "Passwort",
         "loginButton": "Anmelden",
         "forgotPassword": "Passwort vergessen?",
-        "createAccount": "Noch kein Konto? Jetzt registrieren"
+        "createAccount": "Noch kein Konto? Jetzt registrieren",
+        "loginAttempted": "Anmeldeversuch",
+        "loginSuccess": "Erfolgreich angemeldet."
     }
 }

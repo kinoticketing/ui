@@ -27,7 +27,7 @@
 	}
 
 	function handleLogin() {
-		console.log('Login attempted', { email, password });
+		console.log($t('login.loginAttempted'), { email, password });
 	}
 
 	function togglePasswordVisibility() {
@@ -36,7 +36,7 @@
 
 	onMount(() => {
 		if (browser && $page.data.session?.user) {
-			toast.success('Successfully logged in!', {
+			toast.success($t('login.loginSuccess'), {
 				icon: '✅',
 				duration: 3000,
 				style: 'border-radius: 10px; background: #333; color: #fff;'

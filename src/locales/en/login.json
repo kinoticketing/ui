@@ -8,6 +8,8 @@
         "passwordPlaceholder": "Password",
         "loginButton": "Login",
         "forgotPassword": "Forgot password?",
-        "createAccount": "Don't have an account? Create one"
+        "createAccount": "Don't have an account? Create one",
+        "loginAttempted": "Login attempted",
+        "loginSuccess": "Successfully logged in!"
     }
 }
