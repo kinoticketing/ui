@@ -5,5 +5,23 @@
         "searchPlaceholder": "Nach Titel, Genre oder Regisseur suchen...",
         "noResults": "Keine Filme gefunden",
         "nextScreeningLabel": "Nächste Vorführung:"
+    },
+    "movies_id": {
+        "backToMovies": "Back to Movies",
+        "yearLabel": "Jahr:",
+        "genreLabel": "Genre:",
+        "directorLabel": "Regisseur:",
+        "actorsLabel": "Darsteller:",
+        "plotLabel": "Handlung:",
+        "imdbRatingLabel": "IMDb-Bewertung:",
+        "showtimesTitle": "Vorstellungen",
+        "noShowtimes": "Keine Vorstellungen vorhanden.",
+        "timeSuffix": "Uhr",
+        "hallLabel": "Saal:",
+        "durationLabel": "Dauer:",
+        "trailerTitle": "Filmtrailer",
+        "trailerIframeTitle": "Filmtrailer",
+        "trailerLoading": "Trailer wird geladen...",
+        "trailerLoadingError": "Trailer konnte nicht geladen werden"
     }
 }
