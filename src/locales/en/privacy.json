@@ -1,0 +1,78 @@
+{
+    "privacyPolicy": {
+        "title": "Privacy Policy",
+        "section1": {
+            "title": "1. Introduction",
+            "text": "Welcome to [Your Company Name]! The protection of your personal data is very important to us. In this privacy policy, we inform you about which data we collect, how we use it, and your rights regarding your data."
+        },
+        "section2": {
+            "title": "2. Responsible Entity",
+            "text": "The entity responsible for data processing on this website is:",
+            "companyInfo": "[Your Company Name]\n[Street and Number]\n[Postal Code and City]\nEmail: datenschutz@deinedomain.com"
+        },
+        "section3": {
+            "title": "3. Collection and Storage of Personal Data",
+            "intro": "We collect and store personal data when you use our services, for example:",
+            "list1": [
+                "Registration and account management",
+                "Reservation and purchase of cinema tickets",
+                "Contacting customer support"
+            ],
+            "text2": "The collected data includes, among others:",
+            "list2": [
+                "Name",
+                "Email address",
+                "Payment information (via secure payment providers)",
+                "Contact details"
+            ]
+        },
+        "section4": {
+            "title": "4. Use of Data",
+            "intro": "We use your data for the following purposes:",
+            "list": [
+                "Provision and improvement of our services",
+                "Processing of transactions and payments",
+                "Communication with you, e.g. in case of support inquiries",
+                "Sending marketing materials (only with your consent)"
+            ]
+        },
+        "section5": {
+            "title": "5. Disclosure of Data to Third Parties",
+            "intro": "We only share your personal data with third parties if this is necessary for the provision of our services or if you have explicitly consented. This includes:",
+            "list": [
+                "Payment service providers",
+                "Technical service providers for hosting and maintenance",
+                "Legal and tax advisors"
+            ]
+        },
+        "section6": {
+            "title": "6. Use of Cookies",
+            "text": "Our website uses cookies to enhance user experience. Cookies are small text files stored on your device. You can disable the use of cookies in your browser settings, but please note that some functions of our website may not work properly if you do so."
+        },
+        "section7": {
+            "title": "7. Your Rights",
+            "intro": "You have the right to:",
+            "list": [
+                "Obtain information about the data we have stored",
+                "Request correction of incorrect data",
+                "Request deletion of your data",
+                "Request restriction of the processing of your data",
+                "Object to the processing of your data",
+                "Receive your data in a structured, commonly used, and machine-readable format"
+            ],
+            "text": "To exercise your rights, please contact us at datenschutz@deinedomain.com."
+        },
+        "section8": {
+            "title": "8. Data Security",
+            "text": "We implement technical and organizational security measures to protect your data from loss, destruction, unauthorized access, alteration, or dissemination."
+        },
+        "section9": {
+            "title": "9. Changes to the Privacy Policy",
+            "text": "We reserve the right to change this privacy policy at any time. Changes will be published on this page and take effect immediately."
+        },
+        "section10": {
+            "title": "10. Contact",
+            "text": "If you have any questions or concerns about this privacy policy, you can contact us at datenschutz@deinedomain.com."
+        }
+    }
+}

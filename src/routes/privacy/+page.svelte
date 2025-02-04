@@ -1,132 +1,90 @@
 <script>
-	// Falls du dynamische Inhalte oder weitere Logik hinzufügen möchtest, kannst du das hier tun.
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 </script>
 
 <main>
 	<div class="container">
 		<!-- Header -->
-		<h1 class="title">Datenschutzerklärung</h1>
+		<h1 class="title">{$t('privacyPolicy.title')}</h1>
 
 		<div class="content">
 			<section>
-				<h2>1. Einleitung</h2>
-				<p>
-					Willkommen bei [Dein Firmenname]! Der Schutz Ihrer persönlichen Daten ist uns ein
-					wichtiges Anliegen. In dieser Datenschutzerklärung informieren wir Sie darüber, welche
-					Daten wir erheben, wie wir sie verwenden und welche Rechte Sie in Bezug auf Ihre Daten
-					haben.
-				</p>
+				<h2>{$t('privacyPolicy.section1.title')}</h2>
+				<p>{$t('privacyPolicy.section1.text')}</p>
 			</section>
 
 			<section>
-				<h2>2. Verantwortliche Stelle</h2>
-				<p>Verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
-				<p>
-					[Dein Firmenname]<br />
-					[Straße und Hausnummer]<br />
-					[PLZ und Ort]<br />
-					E-Mail: <a href="mailto:datenschutz@deinedomain.com">datenschutz@deinedomain.com</a>
-				</p>
+				<h2>{$t('privacyPolicy.section2.title')}</h2>
+				<p>{$t('privacyPolicy.section2.text')}</p>
+				<p>{$t('privacyPolicy.section2.companyInfo')}</p>
 			</section>
 
 			<section>
-				<h2>3. Erhebung und Speicherung personenbezogener Daten</h2>
-				<p>
-					Wir erheben und speichern personenbezogene Daten, wenn Sie unsere Dienste nutzen, z.B.:
-				</p>
+				<h2>{$t('privacyPolicy.section3.title')}</h2>
+				<p>{$t('privacyPolicy.section3.intro')}</p>
 				<ul>
-					<li>Registrierung und Kontoverwaltung</li>
-					<li>Reservierung und Kauf von Kinotickets</li>
-					<li>Kontaktaufnahme mit dem Kundensupport</li>
+					{#each $t('privacyPolicy.section3.list1') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
-				<p>Die erhobenen Daten umfassen unter anderem:</p>
+				<p>{$t('privacyPolicy.section3.text2')}</p>
 				<ul>
-					<li>Name</li>
-					<li>E-Mail-Adresse</li>
-					<li>Zahlungsinformationen (über sichere Zahlungsanbieter)</li>
-					<li>Kontaktdaten</li>
+					{#each $t('privacyPolicy.section3.list2') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
 			</section>
 
 			<section>
-				<h2>4. Verwendung der Daten</h2>
-				<p>Wir verwenden Ihre Daten für folgende Zwecke:</p>
+				<h2>{$t('privacyPolicy.section4.title')}</h2>
+				<p>{$t('privacyPolicy.section4.intro')}</p>
 				<ul>
-					<li>Bereitstellung und Verbesserung unserer Dienste</li>
-					<li>Abwicklung von Transaktionen und Zahlungen</li>
-					<li>Kommunikation mit Ihnen, z.B. bei Supportanfragen</li>
-					<li>Versand von Marketingmaterialien (nur mit Ihrer Zustimmung)</li>
+					{#each $t('privacyPolicy.section4.list') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
 			</section>
 
 			<section>
-				<h2>5. Weitergabe von Daten an Dritte</h2>
-				<p>
-					Wir geben Ihre personenbezogenen Daten nur dann an Dritte weiter, wenn dies zur Erfüllung
-					unserer Dienstleistungen notwendig ist oder Sie ausdrücklich eingewilligt haben. Dazu
-					gehören:
-				</p>
+				<h2>{$t('privacyPolicy.section5.title')}</h2>
+				<p>{$t('privacyPolicy.section5.intro')}</p>
 				<ul>
-					<li>Zahlungsdienstleister</li>
-					<li>Technische Dienstleister für Hosting und Wartung</li>
-					<li>Rechts- und Steuerberater</li>
+					{#each $t('privacyPolicy.section5.list') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
 			</section>
 
 			<section>
-				<h2>6. Verwendung von Cookies</h2>
-				<p>
-					Unsere Website verwendet Cookies, um die Benutzererfahrung zu verbessern. Cookies sind
-					kleine Textdateien, die auf Ihrem Gerät gespeichert werden. Sie können die Verwendung von
-					Cookies in den Einstellungen Ihres Browsers deaktivieren, beachten Sie jedoch, dass einige
-					Funktionen unserer Website dann möglicherweise nicht mehr voll funktionsfähig sind.
-				</p>
+				<h2>{$t('privacyPolicy.section6.title')}</h2>
+				<p>{$t('privacyPolicy.section6.text')}</p>
 			</section>
 
 			<section>
-				<h2>7. Ihre Rechte</h2>
-				<p>Sie haben das Recht:</p>
+				<h2>{$t('privacyPolicy.section7.title')}</h2>
+				<p>{$t('privacyPolicy.section7.intro')}</p>
 				<ul>
-					<li>Auskunft über die von uns gespeicherten Daten zu erhalten</li>
-					<li>Berichtigung unrichtiger Daten zu verlangen</li>
-					<li>Die Löschung Ihrer Daten zu verlangen</li>
-					<li>Die Einschränkung der Verarbeitung Ihrer Daten zu verlangen</li>
-					<li>Widerspruch gegen die Verarbeitung Ihrer Daten einzulegen</li>
-					<li>
-						Ihre Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten
-					</li>
+					{#each $t('privacyPolicy.section7.list') as item}
+						<li>{item}</li>
+					{/each}
 				</ul>
-				<p>
-					Zur Ausübung Ihrer Rechte kontaktieren Sie uns bitte unter <a
-						href="mailto:datenschutz@deinedomain.com">datenschutz@deinedomain.com</a
-					>.
-				</p>
+				<p>{$t('privacyPolicy.section7.text')}</p>
 			</section>
 
 			<section>
-				<h2>8. Datensicherheit</h2>
-				<p>
-					Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Daten vor
-					Verlust, Zerstörung, Zugriff, Veränderung oder Verbreitung durch unbefugte Personen zu
-					schützen.
-				</p>
+				<h2>{$t('privacyPolicy.section8.title')}</h2>
+				<p>{$t('privacyPolicy.section8.text')}</p>
 			</section>
 
 			<section>
-				<h2>9. Änderungen der Datenschutzerklärung</h2>
-				<p>
-					Wir behalten uns das Recht vor, diese Datenschutzerklärung jederzeit zu ändern. Änderungen
-					werden auf dieser Seite veröffentlicht und treten sofort in Kraft.
-				</p>
+				<h2>{$t('privacyPolicy.section9.title')}</h2>
+				<p>{$t('privacyPolicy.section9.text')}</p>
 			</section>
 
 			<section>
-				<h2>10. Kontakt</h2>
-				<p>
-					Bei Fragen oder Anliegen zu dieser Datenschutzerklärung können Sie uns jederzeit unter <a
-						href="mailto:datenschutz@deinedomain.com">datenschutz@deinedomain.com</a
-					> kontaktieren.
-				</p>
+				<h2>{$t('privacyPolicy.section10.title')}</h2>
+				<p>{$t('privacyPolicy.section10.text')}</p>
 			</section>
 		</div>
 	</div>
