@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: {
 		showtimes: {
@@ -24,7 +26,7 @@
 
 	// Delete screening
 	async function deleteShowtime(showtime_id: number) {
-		if (confirm('Sind Sie sicher, dass Sie diese Vorstellung löschen möchten?')) {
+		if (confirm($t('admin_manageScreenings.deleteConfirmation'))) {
 			const response = await fetch(`/admin/manage-screenings/${showtime_id}`, {
 				method: 'DELETE'
 			});
@@ -32,7 +34,7 @@
 			if (response.ok) {
 				location.reload();
 			} else {
-				alert('Fehler beim Löschen der Vorstellung.');
+				alert($t('admin_manageScreenings.deleteError'));
 			}
 		}
 	}
@@ -53,7 +55,7 @@
 </script>
 
 <svelte:head>
-	<title>Vorstellungen verwalten</title>
+	<title>{$t('admin_manageScreenings.pageTitle')}</title>
 </svelte:head>
 
 <main>
@@ -61,9 +63,9 @@
 		<div class="page-header">
 			<button class="back-btn" on:click={goBack}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-				Zurück
+				{$t('admin_manageScreenings.backBtn')}
 			</button>
-			<h1 class="page-title">Alle Vorstellungen</h1>
+			<h1 class="page-title">{$t('admin_manageScreenings.allScreenings')}</h1>
 		</div>
 
 		{#if data.showtimes.length > 0}
@@ -84,17 +86,30 @@
 						<div class="tile-content">
 							<div class="movie-info">
 								<div>
-									<p><strong>Film:</strong> {showtime.movie_title}</p>
-									<p><strong>Startzeit:</strong> {formatDateTime(showtime.showtime)}</p>
-									<p><strong>Endzeit:</strong> {formatDateTime(showtime.end_time)}</p>
 									<p>
-										<strong>Auslastung:</strong>
+										<strong>{$t('admin_manageScreenings.film')}</strong>
+										{showtime.movie_title}
+									</p>
+									<p>
+										<strong>{$t('admin_manageScreenings.startTime')}</strong>
+										{formatDateTime(showtime.showtime)}
+									</p>
+									<p>
+										<strong>{$t('admin_manageScreenings.endTime')}</strong>
+										{formatDateTime(showtime.end_time)}
+									</p>
+									<p>
+										<strong>{$t('admin_manageScreenings.occupancy')}</strong>
 										{showtime.reserved_seats}/{showtime.total_seats}
 										({showtime.occupancy_percentage}%)
 									</p>
 								</div>
 								{#if showtime.movie_poster_url}
-									<img src={showtime.movie_poster_url} alt="Movie Poster" class="movie-poster" />
+									<img
+										src={showtime.movie_poster_url}
+										alt={$t('admin_manageScreenings.moviePosterAlt')}
+										class="movie-poster"
+									/>
 								{/if}
 							</div>
 						</div>
@@ -102,12 +117,12 @@
 				{/each}
 			</div>
 		{:else}
-			<p>Keine Vorstellungen vorhanden.</p>
+			<p>{$t('admin_manageScreenings.noScreenings')}</p>
 		{/if}
 
 		<button class="create-showtime-btn" on:click={goToCreateScreening}>
 			<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-add" />
-			Neue Vorstellung erstellen
+			{$t('admin_manageScreenings.createShowtimeBtn')}
 		</button>
 	</div>
 </main>

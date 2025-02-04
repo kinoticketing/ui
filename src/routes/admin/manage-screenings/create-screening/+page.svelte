@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: { halls: { id: number; name: string }[] };
 
@@ -30,14 +32,19 @@
 			if (response.ok) {
 				const result = await response.json();
 				searchResults = result.movies;
-				searchError = result.movies.length === 0 ? 'Keine Filme gefunden.' : null;
+				// If no movies are found, show a translation
+				searchError =
+					result.movies.length === 0
+						? $t('admin_manageScreenings.createScreening.noMoviesFound')
+						: null;
 			} else {
 				const error = await response.json();
-				searchError = error.message || 'Fehler bei der Filmsuche.';
+				// Fallback if there's no message from the server
+				searchError = error.message || $t('admin_manageScreenings.createScreening.searchError');
 			}
 		} catch (error) {
 			console.error('Netzwerkfehler:', error);
-			searchError = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+			searchError = $t('admin_manageScreenings.createScreening.genericError');
 		}
 	}
 
@@ -52,7 +59,7 @@
 		saveMessage = null;
 
 		if (!selectedMovie || !hall_id || !start_time) {
-			saveMessage = 'Bitte füllen Sie alle Felder aus.';
+			saveMessage = $t('admin_manageScreenings.createScreening.fillAllFields');
 			return;
 		}
 
@@ -71,7 +78,7 @@
 
 			if (!movieResponse.ok) {
 				const error = await movieResponse.json();
-				saveMessage = error.message || 'Fehler beim Speichern des Films.';
+				saveMessage = error.message || $t('admin_manageScreenings.createScreening.saveMovieError');
 				return;
 			}
 
@@ -88,7 +95,9 @@
 
 			if (response.ok) {
 				const result = await response.json();
-				saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
+				// Fallback if there's no message from the server
+				saveMessage =
+					result.message || $t('admin_manageScreenings.createScreening.createScreeningSuccess');
 				// Reset form
 				selectedMovie = null;
 				hall_id = null;
@@ -96,11 +105,12 @@
 				movieQuery = '';
 			} else {
 				const error = await response.json();
-				saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
+				saveMessage =
+					error.message || $t('admin_manageScreenings.createScreening.createScreeningError');
 			}
 		} catch (error) {
-			console.error('Fehler:', error);
-			saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
+			console.error('Error:', error);
+			saveMessage = $t('admin_manageScreenings.createScreening.unexpectedError');
 		}
 	}
 
@@ -111,7 +121,7 @@
 </script>
 
 <svelte:head>
-	<title>Neue Vorstellung erstellen</title>
+	<title>{$t('admin_manageScreenings.createScreening.pageTitle')}</title>
 </svelte:head>
 
 <main>
@@ -119,23 +129,27 @@
 		<div class="page-header">
 			<button class="back-btn" on:click={goBack}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-				Zurück
+				{$t('admin_manageScreenings.createScreening.backBtn')}
 			</button>
-			<h1 class="page-title">Neue Vorstellung erstellen</h1>
+			<h1 class="page-title">
+				{$t('admin_manageScreenings.createScreening.heading')}
+			</h1>
 		</div>
 
 		{#if saveMessage}
-			<p class="feedback">{saveMessage}</p>
+			<p class="feedback {saveMessage.toLowerCase().includes('error') ? 'error' : 'success'}">
+				{saveMessage}
+			</p>
 		{/if}
 
 		<form on:submit={submitForm} class="form">
 			<div class="form-group">
 				<label>
-					Film suchen:
+					{$t('admin_manageScreenings.createScreening.filmSearchLabel')}
 					<input
 						type="text"
 						bind:value={movieQuery}
-						placeholder="Film suchen..."
+						placeholder={$t('admin_manageScreenings.createScreening.filmSearchPlaceholder')}
 						on:input={fetchMovies}
 					/>
 				</label>
@@ -157,15 +171,20 @@
 				{/if}
 
 				{#if selectedMovie}
-					<p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
+					<p>
+						<strong>{$t('admin_manageScreenings.createScreening.selectedMovieLabel')}</strong>
+						{selectedMovie.title}
+					</p>
 				{/if}
 			</div>
 
 			<div class="form-group">
 				<label>
-					Saal:
+					{$t('admin_manageScreenings.createScreening.hallLabel')}
 					<select name="hall_id" bind:value={hall_id}>
-						<option value="" disabled selected>Saal auswählen</option>
+						<option value="" disabled selected>
+							{$t('admin_manageScreenings.createScreening.hallLabel')}
+						</option>
 						{#each data.halls as hall}
 							<option value={hall.id}>{hall.name}</option>
 						{/each}
@@ -175,14 +194,14 @@
 
 			<div class="form-group">
 				<label>
-					Datum und Uhrzeit:
+					{$t('admin_manageScreenings.createScreening.dateTimeLabel')}
 					<input type="datetime-local" name="start_time" bind:value={start_time} />
 				</label>
 			</div>
 
 			<button type="submit" class="submit-btn">
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-add" />
-				Vorstellung erstellen
+				{$t('admin_manageScreenings.createScreening.createScreeningBtn')}
 			</button>
 		</form>
 	</div>
@@ -302,8 +321,15 @@
 	.feedback {
 		text-align: center;
 		font-size: 1rem;
-		color: #28a745;
 		margin-bottom: 1rem;
+	}
+
+	.feedback.error {
+		color: #dc3545;
+	}
+
+	.feedback.success {
+		color: #28a745;
 	}
 
 	.submit-btn {

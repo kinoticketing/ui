@@ -1,0 +1,55 @@
+{
+    "admin_manageScreenings": {
+        "pageTitle": "Vorstellungen verwalten",
+        "backBtn": "Zurück",
+        "allScreenings": "Alle Vorstellungen",
+        "film": "Film:",
+        "startTime": "Startzeit:",
+        "endTime": "Endzeit:",
+        "occupancy": "Auslastung:",
+        "noScreenings": "Keine Vorstellungen vorhanden.",
+        "createShowtimeBtn": "Neue Vorstellung erstellen",
+        "moviePosterAlt": "Filmplakat",
+        "deleteConfirmation": "Sind Sie sicher, dass Sie diese Vorstellung löschen möchten?",
+        "deleteError": "Fehler beim Löschen der Vorstellung.",
+        "hallID": {
+            "pageTitle": "Sitzplan für Vorstellung ",
+            "noScreeningFound": "Keine Vorstellung gefunden.",
+            "backBtn": "Zurück",
+            "pageHeading": "Vorstellung ",
+            "filmLabel": "Film:",
+            "hallLabel": "Saal:",
+            "capacityLabel": "Kapazität:",
+            "startTimeLabel": "Startzeit:",
+            "endTimeLabel": "Endzeit:",
+            "screenLabel": "Leinwand",
+            "saveSeatingBtn": "Sitzplan speichern",
+            "seatPlanUpdated": "Sitzplan erfolgreich aktualisiert!"
+        },
+        "seatTypes": {
+            "vip": "VIP",
+            "premium": "Premium",
+            "regular": "Standard",
+            "disabled": "Behindert"
+        },
+        "createScreening": {
+            "pageTitle": "Neue Vorstellung erstellen",
+            "backBtn": "Zurück",
+            "heading": "Neue Vorstellung erstellen",
+            "filmSearchLabel": "Film suchen:",
+            "filmSearchPlaceholder": "Film suchen...",
+            "noMoviesFound": "Keine Filme gefunden.",
+            "searchError": "Fehler bei der Filmsuche.",
+            "genericError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+            "fillAllFields": "Error: Bitte füllen Sie alle Felder aus.",
+            "saveMovieError": "Error: Fehler beim Speichern des Films.",
+            "createScreeningSuccess": "Vorstellung erfolgreich erstellt!",
+            "createScreeningError": "Error: Fehler beim Erstellen der Vorstellung.",
+            "unexpectedError": "Error: Ein unerwarteter Fehler ist aufgetreten.",
+            "selectedMovieLabel": "Ausgewählter Film:",
+            "hallLabel": "Saal:",
+            "dateTimeLabel": "Datum und Uhrzeit:",
+            "createScreeningBtn": "Vorstellung erstellen"
+        }
+    }
+}

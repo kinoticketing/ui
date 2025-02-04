@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data;
 	const { screening } = data;
@@ -54,9 +56,9 @@
 		});
 		const result = await response.json();
 		if (result.success) {
-			alert('Sitzplan erfolgreich aktualisiert!');
+			alert($t('admin_manageScreenings.hallID.seatPlanUpdated'));
 		} else {
-			alert('Fehler: ' + result.error);
+			alert('Error: ' + result.error);
 		}
 	}
 
@@ -66,41 +68,51 @@
 </script>
 
 <svelte:head>
-	<title>Sitzplan für Vorstellung {screening?.screening_id || ''}</title>
+	<!-- Title: "Sitzplan für Vorstellung " + screening id -->
+	<title>
+		{$t('admin_manageScreenings.hallID.pageTitle')}{screening?.screening_id || ''}
+	</title>
 </svelte:head>
 
 <main>
 	{#if !screening}
-		<div class="error-message">Keine Vorstellung gefunden.</div>
+		<div class="error-message">
+			{$t('admin_manageScreenings.hallID.noScreeningFound')}
+		</div>
 	{:else}
 		<div class="container">
 			<div class="page-header">
 				<button class="back-btn" on:click={goBack}>
 					<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-					Zurück
+					{$t('admin_manageScreenings.hallID.backBtn')}
 				</button>
-				<h1 class="page-title">Vorstellung {screening.screening_id}</h1>
+				<h1 class="page-title">
+					<!-- "Vorstellung " + screening id -->
+					{$t('admin_manageScreenings.hallID.pageHeading')}{screening.screening_id}
+				</h1>
 			</div>
 
 			<div class="info-card">
 				<div class="info-item">
-					<span class="label">Film:</span>
+					<span class="label">{$t('admin_manageScreenings.hallID.filmLabel')}</span>
 					<span class="value">{screening.movie_title}</span>
 				</div>
 				<div class="info-item">
-					<span class="label">Saal:</span>
-					<span class="value">{screening.hall_name} (ID: {screening.hall_id})</span>
+					<span class="label">{$t('admin_manageScreenings.hallID.hallLabel')}</span>
+					<span class="value">
+						{screening.hall_name} (ID: {screening.hall_id})
+					</span>
 				</div>
 				<div class="info-item">
-					<span class="label">Kapazität:</span>
+					<span class="label">{$t('admin_manageScreenings.hallID.capacityLabel')}</span>
 					<span class="value">{screening.capacity}</span>
 				</div>
 				<div class="info-item">
-					<span class="label">Startzeit:</span>
+					<span class="label">{$t('admin_manageScreenings.hallID.startTimeLabel')}</span>
 					<span class="value">{screening.start_time}</span>
 				</div>
 				<div class="info-item">
-					<span class="label">Endzeit:</span>
+					<span class="label">{$t('admin_manageScreenings.hallID.endTimeLabel')}</span>
 					<span class="value">{screening.end_time}</span>
 				</div>
 			</div>
@@ -108,17 +120,21 @@
 			<div class="seating-section">
 				<div class="screen-container">
 					<div class="screen" />
-					<p class="screen-label">Leinwand</p>
+					<p class="screen-label">
+						{$t('admin_manageScreenings.hallID.screenLabel')}
+					</p>
 				</div>
 
 				<div class="seat-plan">
 					{#each seatPlan as row, rowIndex}
 						<div class="seat-row">
-							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
+							<div class="row-label">
+								{String.fromCharCode(65 + rowIndex)}
+							</div>
 							{#each row.filter((seat) => seat !== null) as seat, colIndex}
 								<button
 									class="seat {getSeatClass(seat)}"
-									title={`${seat.label} (${seat.category})`}
+									title={`${seat.label} ${$t(`admin_manageScreenings.seatTypes.${seat.category.toLowerCase()}`)}`}
 									on:click={() => handleSeatClick(rowIndex, colIndex)}
 								>
 									{seat.label}
@@ -132,8 +148,12 @@
 					{#each Object.entries(seatTypes) as [type, data]}
 						<div class="legend-item">
 							<div class="legend-box {data.class}" />
-							<span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-							<span class="modifier">({data.modifier}x)</span>
+							<span>
+								{type.charAt(0).toUpperCase() + type.slice(1)}
+							</span>
+							<span class="modifier">
+								({data.modifier}x)
+							</span>
 						</div>
 					{/each}
 				</div>
@@ -141,7 +161,7 @@
 
 			<button class="save-button" on:click={updateSeatPlan}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-save" />
-				Sitzplan speichern
+				{$t('admin_manageScreenings.hallID.saveSeatingBtn')}
 			</button>
 		</div>
 	{/if}

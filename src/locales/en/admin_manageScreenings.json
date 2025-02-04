@@ -1,0 +1,55 @@
+{
+    "admin_manageScreenings": {
+        "pageTitle": "Manage Screenings",
+        "backBtn": "Back",
+        "allScreenings": "All Screenings",
+        "film": "Film:",
+        "startTime": "Start Time:",
+        "endTime": "End Time:",
+        "occupancy": "Occupancy:",
+        "noScreenings": "No screenings available.",
+        "createShowtimeBtn": "Create New Screening",
+        "moviePosterAlt": "Movie Poster",
+        "deleteConfirmation": "Are you sure you want to delete this screening?",
+        "deleteError": "Error while deleting the screening.",
+        "hallID": {
+            "pageTitle": "Seating Plan for Screening ",
+            "noScreeningFound": "No screening found.",
+            "backBtn": "Back",
+            "pageHeading": "Screening ",
+            "filmLabel": "Film:",
+            "hallLabel": "Hall:",
+            "capacityLabel": "Capacity:",
+            "startTimeLabel": "Start Time:",
+            "endTimeLabel": "End Time:",
+            "screenLabel": "Screen",
+            "saveSeatingBtn": "Save Seating Plan",
+            "seatPlanUpdated": "Seating plan updated successfully."
+        },
+        "seatTypes": {
+            "vip": "VIP",
+            "premium": "Premium",
+            "regular": "Regular",
+            "disabled": "Disabled"
+        },
+        "createScreening": {
+            "pageTitle": "Create New Screening",
+            "backBtn": "Back",
+            "heading": "Create New Screening",
+            "filmSearchLabel": "Search Film:",
+            "filmSearchPlaceholder": "Search film...",
+            "noMoviesFound": "No movies found.",
+            "searchError": "Error while searching for films.",
+            "genericError": "An error occurred. Please try again later.",
+            "fillAllFields": "Error: Please fill in all fields.",
+            "saveMovieError": "Error while saving the movie.",
+            "createScreeningSuccess": "Screening created successfully!",
+            "createScreeningError": "Error while creating the screening.",
+            "unexpectedError": "An unexpected error occurred.",
+            "selectedMovieLabel": "Selected Movie:",
+            "hallLabel": "Hall:",
+            "dateTimeLabel": "Date and Time:",
+            "createScreeningBtn": "Create Screening"
+        }
+    }
+}
