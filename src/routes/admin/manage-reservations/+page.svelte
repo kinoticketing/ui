@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
 	export let data;
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	let searchTerm = '';
 	$: filteredReservations = data.reservations.filter(
@@ -23,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>Reservierungen verwalten</title>
+	<title>{$t(`admin_manageReservations.pageTitle`)}</title>
 </svelte:head>
 
 <main>
@@ -31,14 +33,14 @@
 		<h1 class="page-title">
 			<button class="back-btn" on:click={goBack}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-				Zurück
+				{$t(`admin_manageReservations.backBtn`)}
 			</button>
-			<span>Reservierungen verwalten</span>
+			<span>{$t(`admin_manageReservations.manageReservations`)}</span>
 		</h1>
 
 		<input
 			type="text"
-			placeholder="Suche nach Benutzer, Film oder Ticket-ID"
+			placeholder={$t(`admin_manageReservations.searchPlaceholder`)}
 			bind:value={searchTerm}
 		/>
 
@@ -46,17 +48,17 @@
 			<table>
 				<thead>
 					<tr>
-						<th>Ticket ID</th>
-						<th>Ticket Code</th>
-						<th>Benutzer</th>
-						<th>Film</th>
-						<th>Vorstellung</th>
-						<th>Saal</th>
-						<th>Sitz</th>
-						<th class="price-column">Preis</th>
-						<th>Status</th>
-						<th>Erstellt am</th>
-						<th>Aktionen</th>
+						<th>{$t(`admin_manageReservations.ticketId`)}</th>
+						<th>{$t(`admin_manageReservations.ticketCode`)}</th>
+						<th>{$t(`admin_manageReservations.username`)}</th>
+						<th>{$t(`admin_manageReservations.movieTitle`)}</th>
+						<th>{$t(`admin_manageReservations.show`)}</th>
+						<th>{$t(`admin_manageReservations.hall`)}</th>
+						<th>{$t(`admin_manageReservations.seat`)}</th>
+						<th class="price-column">{$t(`admin_manageReservations.price`)}</th>
+						<th>{$t(`admin_manageReservations.status`)}</th>
+						<th>{$t(`admin_manageReservations.createdAt`)}</th>
+						<th>{$t(`admin_manageReservations.actions`)}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -70,7 +72,11 @@
 							<td>{reservation.hall_name}</td>
 							<td>{reservation.seat_label}</td>
 							<td class="price-column">{reservation.price} €</td>
-							<td><span class="status {reservation.status}">{reservation.status}</span></td>
+							<td
+								><span class="status {reservation.status}"
+									>{$t(`admin_manageReservations.reservationStatus.${reservation.status}`)}</span
+								></td
+							>
 							<td>{new Date(reservation.created_at).toLocaleString()}</td>
 							<td>
 								{#if reservation.status !== 'cancelled'}
@@ -78,7 +84,9 @@
 									<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 									<form method="POST" action="?/cancel" use:enhance on:click|stopPropagation>
 										<input type="hidden" name="ticketId" value={reservation.ticket_id} />
-										<button type="submit" class="cancel-btn"> Stornieren </button>
+										<button type="submit" class="cancel-btn">
+											{$t(`admin_manageReservations.cancel`)}
+										</button>
 									</form>
 								{/if}
 							</td>

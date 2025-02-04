@@ -1,0 +1,48 @@
+{
+    "admin_manageReservations": {
+        "pageTitle": "Reservierungen verwalten",
+        "backBtn": "Zurück",
+        "manageReservations": "Reservierungen verwalten",
+        "searchPlaceholder": "Suche nach Benutzer, Film oder Ticket-ID",
+        "ticketId": "Ticket ID",
+        "ticketCode": "Ticket Code",
+        "username": "Benutzer",
+        "movieTitle": "Film",
+        "show": "Vorstellung",
+        "hall": "Saal",
+        "seat": "Sitz",
+        "price": "Preis",
+        "status": "Status",
+        "createdAt": "Erstellt am",
+        "actions": "Aktionen",
+        "cancel": "Stornieren",
+        "reservationStatus": {
+            "pending": "ausstehend",
+            "confirmed": "bestätigt",
+            "cancelled": "storniert"
+        },
+        "reservation_details": {
+            "pageTitle": "Reservierungsdetails - ",
+            "backButton": "Zurück zur Übersicht",
+            "reservationDetails": "Reservierungsdetails",
+            "ticketIdLabel": "Ticket ID:",
+            "ticketCodeLabel": "Ticket Code:",
+            "ticketStatusLabel": "Status:",
+            "priceLabel": "Preis:",
+            "createdAtLabel": "Erstellt am:",
+            "ticketInfo": "Ticketinformationen",
+            "userInfo": "Benutzerinformationen",
+            "usernameLabel": "Benutzername:",
+            "emailLabel": "E-Mail:",
+            "filmInfo": "Filminformationen",
+            "movieTitleLabel": "Filmtitel:",
+            "durationLabel": "Dauer:",
+            "startTimeLabel": "Vorstellungsbeginn:",
+            "endTimeLabel": "Vorstellungsende:",
+            "hallInfo": "Saalinformationen",
+            "hallNameLabel": "Saalname:",
+            "seatLabel": "Sitzplatz:",
+            "cancelReservation": "Reservierung stornieren"
+        }
+    }
+}

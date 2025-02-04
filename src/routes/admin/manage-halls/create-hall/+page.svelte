@@ -196,12 +196,8 @@
 						</div>
 					{/each}
 					<div class="row-controls">
-						<button on:click={() => addColumn(rowIndex)}
-							>{$t('admin_manageHalls_createHall.buttons.add_column')}</button
-						>
-						<button on:click={() => removeColumn(rowIndex)}
-							>{$t('admin_manageHalls_createHall.buttons.remove_column')}</button
-						>
+						<button on:click={() => addColumn(rowIndex)}>+</button>
+						<button on:click={() => removeColumn(rowIndex)}>-</button>
 					</div>
 				</div>
 			{/each}

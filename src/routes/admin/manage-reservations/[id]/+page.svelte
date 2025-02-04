@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data;
 	const { reservation } = data;
@@ -33,61 +35,99 @@
 </script>
 
 <svelte:head>
-	<title>Reservierungsdetails - {reservation.ticket_id}</title>
+	<title
+		>{$t('admin_manageReservations.reservation_details.pageTitle')}{reservation.ticket_id}</title
+	>
 </svelte:head>
 
 <main>
 	<div class="container">
 		<a href="/admin/manage-reservations" class="back-button">
 			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Zurück zur Übersicht
+			{$t('admin_manageReservations.reservation_details.backButton')}
 		</a>
 
-		<h1>Reservierungsdetails</h1>
+		<h1>{$t('admin_manageReservations.reservation_details.reservationDetails')}</h1>
 
 		<div class="detail-container">
 			<div class="ticket-header">
 				<div class="ticket-id">
-					<span class="label">Ticket ID:</span>
+					<span class="label"
+						>{$t('admin_manageReservations.reservation_details.ticketIdLabel')}</span
+					>
 					<span class="value">{reservation.ticket_id}</span>
 				</div>
 				<div class="ticket-code">
-					<span class="label">Ticket Code:</span>
+					<span class="label"
+						>{$t('admin_manageReservations.reservation_details.ticketCodeLabel')}</span
+					>
 					<span class="value">{reservation.ticket_code}</span>
 				</div>
 				<div class="ticket-status">
-					<span class="label">Status:</span>
-					<span class="status {reservation.status}">{reservation.status}</span>
+					<span class="label"
+						>{$t('admin_manageReservations.reservation_details.ticketStatusLabel')}</span
+					>
+					<span class="status {reservation.status}"
+						>{$t(`admin_manageReservations.reservationStatus.${reservation.status}`)}</span
+					>
 				</div>
 			</div>
 
 			<div class="detail-grid">
 				<div class="detail-section">
-					<h2>Ticketinformationen</h2>
-					<p><strong>Preis:</strong> {reservation.price} €</p>
-					<p><strong>Erstellt am:</strong> {formatDateTime(reservation.created_at)}</p>
-				</div>
-
-				<div class="detail-section">
-					<h2>Benutzerinformationen</h2>
-					<p><strong>Benutzername:</strong> {reservation.username}</p>
-					<p><strong>E-Mail:</strong> {reservation.email}</p>
-				</div>
-
-				<div class="detail-section">
-					<h2>Filminformationen</h2>
-					<p><strong>Filmtitel:</strong> {reservation.movie_title}</p>
-					<p><strong>Dauer:</strong> {formatDuration(reservation.duration)}</p>
-					<p><strong>Vorstellungsbeginn:</strong> {formatDateTime(reservation.start_time)}</p>
-					<p><strong>Vorstellungsende:</strong> {formatDateTime(reservation.end_time)}</p>
-				</div>
-
-				<div class="detail-section">
-					<h2>Saalinformationen</h2>
-					<p><strong>Saalname:</strong> {reservation.hall_name}</p>
+					<h2>{$t('admin_manageReservations.reservation_details.ticketInfo')}</h2>
 					<p>
-						<strong>Sitzplatz:</strong>
-						{reservation.seat_label} (Reihe {reservation.row_number}, Spalte {reservation.column_number})
+						<strong>{$t('admin_manageReservations.reservation_details.priceLabel')}</strong>
+						{reservation.price} €
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.createdAtLabel')}</strong>
+						{formatDateTime(reservation.created_at)}
+					</p>
+				</div>
+
+				<div class="detail-section">
+					<h2>{$t('admin_manageReservations.reservation_details.userInfo')}</h2>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.usernameLabel')}</strong>
+						{reservation.username}
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.emailLabel')}</strong>
+						{reservation.email}
+					</p>
+				</div>
+
+				<div class="detail-section">
+					<h2>{$t('admin_manageReservations.reservation_details.filmInfo')}</h2>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.movieTitleLabel')}</strong>
+						{reservation.movie_title}
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.durationLabel')}</strong>
+						{formatDuration(reservation.duration)}
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.startTimeLabel')}</strong>
+						{formatDateTime(reservation.start_time)}
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.endTimeLabel')}</strong>
+						{formatDateTime(reservation.end_time)}
+					</p>
+				</div>
+
+				<div class="detail-section">
+					<h2>{$t('admin_manageReservations.reservation_details.hallInfo')}</h2>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.hallNameLabel')}</strong>
+						{reservation.hall_name}
+					</p>
+					<p>
+						<strong>{$t('admin_manageReservations.reservation_details.seatLabel')}</strong>
+						{reservation.seat_label}
+						(Reihe {reservation.row_number}, Spalte {reservation.column_number})
 					</p>
 				</div>
 			</div>
@@ -95,7 +135,9 @@
 
 		{#if reservation.status !== 'cancelled'}
 			<form method="POST" action="?/cancel" use:enhance={handleCancel} class="cancel-form">
-				<button type="submit" class="cancel-btn">Reservierung stornieren</button>
+				<button type="submit" class="cancel-btn">
+					{$t('admin_manageReservations.reservation_details.cancelReservation')}
+				</button>
 			</form>
 		{/if}
 	</div>
