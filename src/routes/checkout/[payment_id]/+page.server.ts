@@ -18,6 +18,7 @@ const pool = new Pool({
 export const load = (async ({ params, locals }) => {
 	const session = await locals.getSession();
 	if (!session?.user?.id) {
+		console.log('No valid session found');
 		throw redirect(302, '/auth/login');
 	}
 
@@ -25,6 +26,7 @@ export const load = (async ({ params, locals }) => {
 	try {
 		const paymentId = parseInt(params.payment_id);
 		if (isNaN(paymentId)) {
+			console.log('Invalid payment ID');
 			throw error(400, 'Invalid payment ID');
 		}
 
@@ -37,6 +39,7 @@ export const load = (async ({ params, locals }) => {
 		);
 
 		if (paymentCheck.rows.length === 0) {
+			console.log('No payment checks');
 			throw redirect(302, '/cart');
 		}
 
@@ -44,6 +47,7 @@ export const load = (async ({ params, locals }) => {
 
 		// Check if payment is cancelled or expired
 		if (payment.status === 'cancelled') {
+			console.log('Payment is already cancelled');
 			throw redirect(302, '/cart');
 		}
 
@@ -56,6 +60,7 @@ export const load = (async ({ params, locals }) => {
                  WHERE id = $1`,
 				[paymentId]
 			);
+			console.log('Payment expireddddd');
 			throw redirect(302, '/cart');
 		}
 
@@ -87,12 +92,13 @@ export const load = (async ({ params, locals }) => {
 
 		// Check if any seats have expired reservations
 		const expiredReservations = await client.query(
-			`SELECT 1 
-             FROM seat_reservations sr
-             JOIN tickets t ON t.seat_id = sr.seat_id
-             WHERE t.payment_id = $1
-             AND sr.expiration_time < NOW()
-             LIMIT 1`,
+			`SELECT sr.* 
+			 FROM seat_reservations sr
+			 JOIN tickets t ON t.seat_id = sr.seat_id AND t.screening_id = sr.screening_id
+			 WHERE t.payment_id = $1
+			 AND sr.expiration_time < NOW()
+			 AND sr.status = 'active'  -- Only check active reservations
+			 LIMIT 1`,
 			[paymentId]
 		);
 
@@ -103,6 +109,7 @@ export const load = (async ({ params, locals }) => {
                  WHERE id = $1`,
 				[paymentId]
 			);
+			console.log('Seat have expired reservations');
 			throw redirect(302, '/cart');
 		}
 
