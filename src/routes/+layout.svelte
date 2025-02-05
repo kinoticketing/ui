@@ -12,16 +12,21 @@
 	import { i18nReady } from '../i18n.js';
 	import { cart } from '$lib/stores/cart';
 
+	let selectedLang = getLocaleFromNavigator()?.substring(0, 2);
+
 	let loaded = false;
 	onMount(async () => {
 		await i18nReady;
+
+		if (selectedLang !== 'de' && selectedLang !== 'en') {
+			selectedLang = 'en';
+		}
 		loaded = true;
 	});
 
 	const currentYear = new Date().getFullYear();
 	let showMenu = false;
 	let isScrolled = false;
-	let selectedLang = getLocaleFromNavigator();
 
 	function setLanguage(lang: string) {
 		selectedLang = lang;
@@ -48,6 +53,7 @@
 	}
 
 	// Add scroll listener for header transparency
+
 	onMount(() => {
 		window.addEventListener('scroll', () => {
 			isScrolled = window.scrollY > 20;
@@ -127,7 +133,7 @@
 										</button>
 										<button
 											class="language-btn"
-											class:active={selectedLang === 'en'}
+											class:active={selectedLang === 'en' || selectedLang == null}
 											on:click={() => setLanguage('en')}
 										>
 											EN
