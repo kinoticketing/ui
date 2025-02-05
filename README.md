@@ -1,30 +1,44 @@
-# Kinoticketreservervierungssystem
-## Collaborating (kleiner git-guide)
-Hier ein kurzer guide mit den wichtigsten git Befehlen, um effektiv zusammenzuarbeiten. Und ein paar good practices, an die wir uns alle halten sollten.
+# Kinoticketreservierungssystem
 
-Dieses Repository klont man mit folgendem Befehl:
-- `git clone https://github.com/kinoticketing/ui`
+![Test Status](https://github.com/kinoticketing/ui/actions/workflows/test.yml/badge.svg)
 
-Um Änderungen, die bereits auf das Repository gepusht wurden, lokal "herunterzuladen", verwende folgenden Befehl:
-- `git pull`
+Eine leichtgewichtige Dokumentation dieses Projekts ist in unserem [Wiki](https://github.com/kinoticketing/ui/wiki) zu finden!
 
-> [!CAUTION] 
-> Niemals auf main pushen!
-> 
-> Wir arbeiten mit Branches. So ist sichergestellt, dass der main-Branch immer heil bleibt.
->
-> Wenn ihr an etwas arbeitet, erstellt einen Branch, auf dem ihr entwickelt.
->
-> - `git branch [NAME]`
-> - `git checkout [NAME]`
-> - `git commit -m "FEAT: implemented checkout button"` 
->   - **"FEAT" für feature-Entwicklung benutzen**
->   - **"FIX" für Entwicklung rund um Fehlerbehebung benutzen**
-> - `git push -u origin [NAME]`
->
-> Sofern das Feature fertig entwickelt ist, muss eine pull request angelegt werden, die den Feature Branch mit dem main Branch merged.
-> 
-> Sobald alle Änderungen auf den Branch gepusht wurden, könnt ihr in dem Repository auf GitHub auf euren Branch navigieren und unter "Contribute" auf "Open pull request" drücken.
-> 
-> Dann evtl nen Titel und eine kurze Beschreibung hinzufügen und einen reviewer. Schließlich dann auf Create pull request und dann schauen wir ob der bereit zum mergen ist.
-  
+## 🎬 Über das Projekt
+Ein modernes Ticketreservierungssystem für Kinos, entwickelt mit SvelteKit. Das System ermöglicht Benutzern die Online-Reservierung von Kinositzen, Verwaltung von Buchungen und bietet ein umfassendes Admin-Interface.
+
+## ✨ Features
+- [x] 🎟️ Online Ticketbuchung
+- [x] 🪑 Interaktive Sitzplatzauswahl
+- [x] 👤 Benutzerkonten & Authentifizierung
+- [x] 📱 Responsive Design
+- [x] 🎫 QR-Code Tickets
+- [x] 💳 PayPal Integration
+- [x] 👨‍💼 Admin Dashboard
+
+## 🛠️ Tech Stack
+- **Frontend/Backend:** SvelteKit, TypeScript
+- **Database:** PostgreSQL (Neon)
+- **Hosting:** Vercel
+- **Testing:** Vitest
+- **APIs:** OMDB, PayPal
+
+## 🚀 Quickstart
+
+### Voraussetzungen
+- Node.js (v16+)
+- npm
+- Git
+
+### Installation
+```bash
+# Repository klonen
+git clone https://github.com/kinoticketing/ui
+cd ui
+
+# Dependencies installieren
+npm install
+
+# Entwicklungsserver starten
+npm run dev
+```
