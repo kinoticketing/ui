@@ -12,15 +12,19 @@
 	import { i18nReady } from '../i18n.js';
 	import { cart } from '$lib/stores/cart';
 
-	let selectedLang = getLocaleFromNavigator()?.substring(0, 2);
-
+	let selectedLang: string;
 	let loaded = false;
+
 	onMount(async () => {
 		await i18nReady;
+		let storedLang = localStorage.getItem('selectedLanguage')?.substring(0, 2);
+
+		selectedLang = storedLang ?? 'en';
 
 		if (selectedLang !== 'de' && selectedLang !== 'en') {
 			selectedLang = 'en';
 		}
+		setLanguage(selectedLang);
 		loaded = true;
 	});
 
@@ -31,6 +35,7 @@
 	function setLanguage(lang: string) {
 		selectedLang = lang;
 		locale.set(selectedLang);
+		localStorage.setItem('selectedLanguage', selectedLang);
 	}
 
 	function toggleMenu() {
