@@ -24,7 +24,11 @@
             "endTimeLabel": "End Time:",
             "screenLabel": "Screen",
             "saveSeatingBtn": "Save Seating Plan",
-            "seatPlanUpdated": "Seating plan updated successfully."
+            "seatPlanUpdated": "Seating plan updated successfully.",
+            "searchLabel": "Search for a movie:",
+            "searchPlaceholder": "Search for a movie...",
+            "selectedMovieLabel": "Selected movie:",
+            "saveChangesButton": "Save changes"
         },
         "seatTypes": {
             "vip": "VIP",

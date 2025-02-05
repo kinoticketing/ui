@@ -24,7 +24,11 @@
             "endTimeLabel": "Endzeit:",
             "screenLabel": "Leinwand",
             "saveSeatingBtn": "Sitzplan speichern",
-            "seatPlanUpdated": "Sitzplan erfolgreich aktualisiert!"
+            "seatPlanUpdated": "Sitzplan erfolgreich aktualisiert!",
+            "searchLabel": "Film suchen:",
+            "searchPlaceholder": "Film suchen...",
+            "selectedMovieLabel": "Ausgewählter Film:",
+            "saveChangesButton": "Änderungen speichern"
         },
         "seatTypes": {
             "vip": "VIP",

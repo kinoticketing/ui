@@ -191,11 +191,11 @@
 					<form on:submit|preventDefault={handleEdit} class="edit-form">
 						<div class="form-group">
 							<label>
-								Film suchen:
+								{$t('admin_manageScreenings.hallID.searchLabel')}
 								<input
 									type="text"
 									bind:value={movieQuery}
-									placeholder="Film suchen..."
+									placeholder={$t('admin_manageScreenings.hallID.searchPlaceholder')}
 									on:input={fetchMovies}
 								/>
 							</label>
@@ -217,12 +217,15 @@
 							{/if}
 
 							{#if selectedMovie}
-								<p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
+								<p>
+									<strong>{$t('admin_manageScreenings.hallID.selectedMovieLabel')}</strong>
+									{selectedMovie.title}
+								</p>
 							{/if}
 						</div>
 
 						<div class="form-group">
-							<label for="hall_id">Saal:</label>
+							<label for="hall_id">{$t('admin_manageScreenings.hallID.hallLabel')}</label>
 							<select id="hall_id" bind:value={editForm.hall_id} required>
 								{#each halls as hall}
 									<option value={hall.id}>{hall.name}</option>
@@ -231,7 +234,7 @@
 						</div>
 
 						<div class="form-group">
-							<label for="start_time">Startzeit:</label>
+							<label for="start_time">{$t('admin_manageScreenings.hallID.startTimeLabel')}</label>
 							<input
 								type="datetime-local"
 								id="start_time"
@@ -242,7 +245,7 @@
 
 						<button type="submit" class="save-changes-btn">
 							<Icon icon="ic:baseline-save" />
-							Änderungen speichern
+							{$t('admin_manageScreenings.hallID.saveChangesButton')}
 						</button>
 					</form>
 				{:else}
