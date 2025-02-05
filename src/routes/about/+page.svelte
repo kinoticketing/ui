@@ -51,8 +51,6 @@
 			<div class="values">
 				<h2>{$t('about.coreValuesTitle')}</h2>
 				<div class="value-grid">
-					<!-- If your version of svelte-i18n supports objects/arrays directly, 
-					     $t('about.coreValues') will be an array. -->
 					{#each coreValues as value (value.title)}
 						<div class="value-card">
 							<div class="icon">{value.icon}</div>
