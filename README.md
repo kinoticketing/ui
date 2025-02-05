@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/logo.png" alt="Kino Logo">
+  <img src="static/logo.png" alt="Kino Logo" width="200">
 </p>
 
 # Kinoticketreservierungssystem
