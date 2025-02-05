@@ -19,7 +19,7 @@
 		await i18nReady;
 		let storedLang = localStorage.getItem('selectedLanguage')?.substring(0, 2);
 
-		selectedLang = storedLang ?? 'en';
+		selectedLang = storedLang ?? getLocaleFromNavigator() ?? 'en';
 
 		if (selectedLang !== 'de' && selectedLang !== 'en') {
 			selectedLang = 'en';
