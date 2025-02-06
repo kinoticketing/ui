@@ -79,7 +79,18 @@
 			}
 
 			// Then proceed with creating the screening
+			handleSubmit();
+		} catch (error) {
+			console.error('Fehler:', error);
+			saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
+		}
+	}
+
+	async function handleSubmit() {
+		try {
 			const formData = new FormData();
+			if (!selectedMovie) throw new Error('No movie selected');
+			if (!start_time) throw new Error('No start time selected');
 			formData.append('movie_id', selectedMovie.movie_id);
 			formData.append('hall_id', String(hall_id));
 			formData.append('start_time', start_time);
@@ -92,11 +103,17 @@
 			if (response.ok) {
 				const result = await response.json();
 				saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
-				// Reset form
+				// Reset form and state
 				selectedMovie = null;
 				hall_id = null;
 				start_time = null;
 				movieQuery = '';
+				currentStep = 1;
+				
+				// Optional: Show success message temporarily
+				setTimeout(() => {
+					saveMessage = null;
+				}, 3000);
 			} else {
 				const error = await response.json();
 				saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
