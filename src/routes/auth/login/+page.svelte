@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { signIn, signOut } from '@auth/sveltekit/client';
+	import { signIn } from '@auth/sveltekit/client';
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
@@ -9,6 +9,7 @@
 	let email = '';
 	let password = '';
 	let showPassword = false;
+	let isLoading = false;
 
 	function handleGithubLogin() {
 		signIn('github', {
@@ -16,8 +17,28 @@
 		});
 	}
 
-	function handleLogin() {
-		console.log('Login attempted', { email, password });
+	async function handleLogin(event: Event) {
+		event.preventDefault();
+		isLoading = true;
+
+		try {
+			const result = await signIn('credentials', {
+				email,
+				password,
+				redirect: false
+			});
+
+			if (result && 'error' in result) {
+				toast.error('Invalid email or password');
+			} else if (result?.ok) {
+				window.location.href = '/auth/login-success';
+			}
+		} catch (error) {
+			console.error('Login error:', error);
+			toast.error('An error occurred during login');
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	function togglePasswordVisibility() {
@@ -26,11 +47,7 @@
 
 	onMount(() => {
 		if (browser && $page.data.session?.user) {
-			toast.success('Successfully logged in!', {
-				icon: '✅',
-				duration: 3000,
-				style: 'border-radius: 10px; background: #333; color: #fff;'
-			});
+			toast.success('Successfully logged in!');
 		}
 	});
 
@@ -63,19 +80,28 @@
 							<span>or continue with email</span>
 						</div>
 
-						<form on:submit|preventDefault={handleLogin}>
+						<form on:submit={handleLogin}>
 							<div class="input-group">
-								<input type="text" bind:value={email} placeholder="Email or Username" required />
+								<input name="email" type="email" bind:value={email} placeholder="Email" required />
 							</div>
 
-							<div class="input-group">
-								<input type={showPassword ? 'text' : 'password'} placeholder="Password" required />
+							<div class="input-group password-container">
+								<input
+									name="password"
+									type="password"
+									bind:value={password}
+									placeholder="Password"
+									required
+									class="password-input"
+								/>
 								<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
 									<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
 								</button>
 							</div>
 
-							<button type="submit" class="submit-button"> Login </button>
+							<button type="submit" class="submit-button" disabled={isLoading}>
+								{isLoading ? 'Logging in...' : 'Login'}
+							</button>
 						</form>
 
 						<div class="links-container">
@@ -101,6 +127,17 @@
 		margin: 0 auto;
 		position: relative;
 	}
+
+	/* .error-message {
+		background-color: #fee2e2;
+		border: 1px solid #fecaca;
+		color: #dc2626;
+		padding: 0.75rem;
+		border-radius: 0.5rem;
+		margin-bottom: 1rem;
+		text-align: center;
+		font-size: 0.875rem;
+	} */
 
 	.back-button {
 		position: absolute;
@@ -195,9 +232,11 @@
 	}
 
 	.input-group {
-		position: relative;
 		margin-bottom: 1rem;
-		padding-right: 2rem;
+	}
+
+	.password-container {
+		position: relative;
 	}
 
 	input {
@@ -212,6 +251,10 @@
 	input:focus {
 		outline: none;
 		border-color: #2563eb;
+	}
+
+	.password-input {
+		padding-right: 2.5rem;
 	}
 
 	.toggle-password {
@@ -240,6 +283,11 @@
 
 	.submit-button:hover {
 		background-color: #1d4ed8;
+	}
+
+	.submit-button:disabled {
+		background-color: #93c5fd;
+		cursor: not-allowed;
 	}
 
 	.links-container {
