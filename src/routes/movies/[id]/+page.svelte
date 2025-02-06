@@ -139,7 +139,8 @@
 					<div class="trailer-wrapper">
 						{#if trailerError}
 							<div class="trailer-error">
-								{trailerError}
+								<Icon icon="mdi:alert-circle-outline" width="24" />
+								<p>{trailerError}</p>
 							</div>
 						{:else if trailerId}
 							<iframe
@@ -362,7 +363,26 @@
 	}
 
 	.trailer-error {
-		color: #ef4444;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1.5rem;
+		background-color: #fef2f2;
+		border: 1px solid #fee2e2;
+		border-radius: 0.5rem;
+		color: #991b1b;
+		width: 88%;
+		height: 65%;
+		margin: 1rem 0;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		animation: slideIn 0.3s ease-out;
+	}
+
+
+	.trailer-error :global(svg) {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
 	}
 
 	@media (max-width: 1024px) {
