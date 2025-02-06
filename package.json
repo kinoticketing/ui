@@ -15,7 +15,7 @@
 		"test:unit": "vitest"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.28.1",
+		"@playwright/test": "^1.50.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-vercel": "^5.4.4",
 		"@sveltejs/kit": "^2.0.0",
@@ -27,6 +27,7 @@
 		"@types/pg": "^8.11.10",
 		"@types/qrcode": "^1.5.5",
 		"@vitest/coverage-v8": "^2.1.8",
+		"dotenv": "^16.4.7",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
@@ -53,7 +54,6 @@
 		"@types/google.maps": "3.58.1",
 		"@vercel/postgres": "^0.10.0",
 		"bcrypt": "^5.1.1",
-		"dotenv": "^16.4.7",
 		"neon": "^2.0.0",
 		"pg": "^8.13.1",
 		"qrcode": "^1.5.4",
