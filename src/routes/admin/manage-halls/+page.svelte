@@ -59,7 +59,7 @@
 		if (response.ok) {
 			location.reload();
 		} else {
-			alert('Fehler beim Löschen des Saals.');
+			alert('Fehler beim Löschen des Saals. Es existieren Tickets für Vorstellungen in diesem Saal!');
 		}
 	}
 

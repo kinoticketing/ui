@@ -454,4 +454,9 @@
 		background: #f8d7da;
 		color: #842029;
 	}
+
+	.seat.premium {
+		background: #ffdbd9;
+		border-color: #e63946;
+	}
 </style>
