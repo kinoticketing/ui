@@ -6,6 +6,8 @@
 	import { cart } from '$lib/stores/cart';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { t } from 'svelte-i18n';
+	import '../../../../i18n.js';
 	export let data: PageData;
 
 	const { movie, screening, error } = data;
@@ -350,17 +352,20 @@
 		<div class="container">
 			<button class="back-button" on:click={goBackToMovie}>
 				<Icon icon="mdi:arrow-left" width="20" height="20" />
-				Back to Movie
+				{$t('movies_id.backToMovie')}
 			</button>
 			<h1 class="movie-title">{movie.title}</h1>
-			<p class="showtime-info">Showtime: {formatDateTime(screening.start_time)}</p>
+			<p class="showtime-info">
+				{$t('movies_id.showtime')}
+				{formatDateTime(screening.start_time)}
+			</p>
 
 			<div class="booking-container">
 				<!-- Left side - Seating Plan -->
 				<div class="seating-section">
 					<div class="screen-container">
 						<div class="screen"></div>
-						<p class="screen-label">Screen</p>
+						<p class="screen-label">{$t('movies_id.screenLabel')}</p>
 					</div>
 
 					<div class="seat-plan">
@@ -391,18 +396,20 @@
 																		$page.data.session?.user?.id
 																? '#9ca3af'
 																: getCategoryColor(seat.category?.name)
-												}; opacity: ${
-													seatStatuses.get(seat.id)?.is_locked &&
-													seatStatuses.get(seat.id)?.locked_by !== $page.data.session?.user?.id
-														? '0.6'
-														: '1'
-												}; color: ${
-													selectedSeats.some(
-														(s) => s.row === rowIndex + 1 && s.col === seat.column_number
-													)
-														? '#ffffff'
-														: getCategoryTextColor(seat.category?.name)
-												}`
+												};
+											   opacity: ${
+														seatStatuses.get(seat.id)?.is_locked &&
+														seatStatuses.get(seat.id)?.locked_by !== $page.data.session?.user?.id
+															? '0.6'
+															: '1'
+													};
+											   color: ${
+														selectedSeats.some(
+															(s) => s.row === rowIndex + 1 && s.col === seat.column_number
+														)
+															? '#ffffff'
+															: getCategoryTextColor(seat.category?.name)
+													}`
 											: ''}
 										disabled={!seat ||
 											seatStatuses.get(seat?.id)?.is_booked ||
@@ -420,27 +427,31 @@
 
 					<div class="seat-legend">
 						<div class="legend-section">
-							<span class="legend-section-title">Seat Categories</span>
+							<span class="legend-section-title">
+								{$t('movies_id.seatCategories')}
+							</span>
 							{#each Object.entries(seatCategories) as [type, data]}
 								<div class="legend-item">
 									<div class="legend-box" style="background-color: {getCategoryColor(type)}"></div>
-									<span>{type}</span>
+									<span>{$t(`movies_id.seatTypes.${type.toLowerCase()}`)}</span>
 								</div>
 							{/each}
 						</div>
 						<div class="legend-section">
-							<span class="legend-section-title">Seat Status</span>
+							<span class="legend-section-title">
+								{$t('movies_id.seatStatus')}
+							</span>
 							<div class="legend-item">
 								<div class="legend-box selected"></div>
-								<span>Selected</span>
+								<span>{$t('movies_id.selected')}</span>
 							</div>
 							<div class="legend-item">
 								<div class="legend-box booked"></div>
-								<span>Booked</span>
+								<span>{$t('movies_id.booked')}</span>
 							</div>
 							<div class="legend-item">
 								<div class="legend-box locked"></div>
-								<span>Locked</span>
+								<span>{$t('movies_id.locked')}</span>
 							</div>
 						</div>
 					</div>
@@ -449,23 +460,37 @@
 				<!-- Right side - Cart -->
 				<div class="cart-section">
 					<div class="cart-container">
-						<h2 class="cart-title">Selected Tickets</h2>
+						<h2 class="cart-title">{$t('movies_id.selectedTickets')}</h2>
 
 						<div class="tickets-container">
 							{#if selectedSeats.length === 0}
-								<p class="no-tickets">No seats selected</p>
+								<p class="no-tickets">
+									{$t('movies_id.noSeatsSelected')}
+								</p>
 							{:else}
 								{#each selectedSeats as seat (seat.key)}
 									<div class="ticket-item">
 										<div class="ticket-info">
-											<p class="seat-label">Seat {seat.label} ({seat.categoryName})</p>
-											<p class="seat-details">Row {seat.row}, Column {seat.col}</p>
-											<p class="ticket-price">${formatPrice(seat.price)}</p>
+											<p class="seat-label">
+												{$t('movies_id.seat')}
+												{seat.label} ({$t(
+													`movies_id.seatTypes.${seat.categoryName.toLowerCase()}`
+												)})
+											</p>
+											<p class="seat-details">
+												{$t('movies_id.row')}
+												{seat.row},
+												{$t('movies_id.column')}
+												{seat.col}
+											</p>
+											<p class="ticket-price">
+												${formatPrice(seat.price)}
+											</p>
 										</div>
 										<button
 											class="remove-button"
 											on:click={() => removeSeat(seat.key)}
-											aria-label="Remove ticket"
+											aria-label={$t('movies_id.removeTicket')}
 										>
 											×
 										</button>
@@ -476,7 +501,7 @@
 
 						<div class="cart-footer">
 							<div class="total-price">
-								<span>Total:</span>
+								<span>{$t('movies_id.total')}</span>
 								<span>${formatPrice(totalPrice)}</span>
 							</div>
 
@@ -485,7 +510,7 @@
 								disabled={selectedSeats.length === 0}
 								on:click={handleCheckout}
 							>
-								Add to Cart
+								{$t('movies_id.addToCart')}
 							</button>
 						</div>
 					</div>
@@ -497,6 +522,7 @@
 			<h1 class="error-message">{error}</h1>
 		</div>
 	{/if}
+
 	{#if showLoginModal}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -504,9 +530,11 @@
 			<div class="modal-content">
 				<div class="empty-content">
 					<Icon icon="mdi:account-lock" width="64" height="64" />
-					<h2>Authentication Required</h2>
-					<p>Please log in to select seats and make reservations.</p>
-					<button class="auth-button" on:click={goToLogin}> Go to Login </button>
+					<h2>{$t('movies_id.authenticationRequired')}</h2>
+					<p>{$t('movies_id.pleaseLogIn')}</p>
+					<button class="auth-button" on:click={goToLogin}>
+						{$t('movies_id.goToLogin')}
+					</button>
 				</div>
 			</div>
 		</div>

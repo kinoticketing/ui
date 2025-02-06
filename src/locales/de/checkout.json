@@ -1,8 +1,10 @@
 {
     "checkout": {
         "backToBooking": "Zurück zur Buchung",
+        "backToCart": "Zurück zum Warenkorb",
         "showtime": "Vorstellungszeit:",
         "reservedSeats": "Ihre Sitze sind reserviert für",
+        "checkout": "Kasse",
         "orderSummary": "Bestellübersicht",
         "seat": "Sitz",
         "row": "Reihe",

@@ -1,9 +1,11 @@
 {
     "checkout": {
         "backToBooking": "Back to Booking",
+        "backToCart": "Back to Cart",
         "showtime": "Showtime:",
         "reservedSeats": "Your seats are reserved for",
         "orderSummary": "Order Summary",
+        "checkout": "Checkout",
         "seat": "Seat",
         "row": "Row",
         "column": "Column",

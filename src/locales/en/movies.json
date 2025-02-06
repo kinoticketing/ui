@@ -22,6 +22,33 @@
         "trailerTitle": "Trailer",
         "trailerIframeTitle": "Trailer",
         "trailerLoading": "Trailer is loading...",
-        "trailerLoadingError": "Trailer could not be loaded."
+        "trailerLoadingError": "Trailer could not be loaded.",
+        "seatsReleasedError": "Some of your selected seats have expired and been released.",
+        "backToMovie": "Back to Movie",
+        "showtime": "Showtime:",
+        "screen": "Screen",
+        "screenLabel": "Screen",
+        "seatCategories": "Seat Categories",
+        "seatStatus": "Seat Status",
+        "selected": "Selected",
+        "booked": "Booked",
+        "locked": "Locked",
+        "selectedTickets": "Selected Tickets",
+        "noSeatsSelected": "No seats selected",
+        "seat": "Seat",
+        "row": "Row",
+        "column": "Column",
+        "removeTicket": "Remove ticket",
+        "total": "Total:",
+        "addToCart": "Add to Cart",
+        "authenticationRequired": "Authentication Required",
+        "pleaseLogIn": "Please log in to select seats and make reservations.",
+        "goToLogin": "Go to Login",
+        "seatTypes": {
+            "vip": "VIP",
+            "premium": "Premium",
+            "regular": "Regular",
+            "disabled": "Disabled"
+        }
     }
 }

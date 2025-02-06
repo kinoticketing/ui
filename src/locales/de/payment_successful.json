@@ -1,0 +1,13 @@
+{
+    "payment_successful": {
+        "paymentSuccessful": "Zahlung erfolgreich!",
+        "thankYou": "Vielen Dank für Ihren Einkauf",
+        "totalAmountPaid": "Gezahlter Gesamtbetrag:",
+        "screeningLabel": "Vorführung:",
+        "seatLabel": "Sitz",
+        "codeLabel": "Code:",
+        "returnToHome": "Zurück zur Startseite",
+        "generatingQrCode": "QR-Code wird generiert...",
+        "errorGeneratingQrCode": "Fehler beim Erstellen des QR-Codes"
+    }
+}

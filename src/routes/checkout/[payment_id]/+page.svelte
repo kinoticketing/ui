@@ -83,6 +83,7 @@
 	}
 
 	let loading = false;
+	let error = '';
 
 	async function initializePayPalButtons() {
 		try {
@@ -198,21 +199,6 @@
 		return price.toFixed(2);
 	}
 
-	function goBackToBooking() {
-		// Store current tickets in localStorage before navigating back
-		const selectedSeats = tickets.map((ticket) => ({
-			key: `${ticket.row - 1}-${ticket.column - 1}`,
-			row: ticket.row,
-			col: ticket.column,
-			label: ticket.seat_label,
-			seatId: ticket.id,
-			price: ticket.price
-		}));
-
-		localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-		window.location.href = `/movies/${movie.imdb_id}/${screening.id}`;
-	}
-
 	// Countdown timer
 </script>
 
@@ -220,14 +206,9 @@
 	<div class="container">
 		<button class="back-button" on:click={goBackToCart}>
 			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			{$t('checkout.backToBooking')}
+			{$t('checkout.backToCart')}
 		</button>
-
-		<h1 class="movie-title">{movie.title}</h1>
-		<p class="showtime-info">
-			{$t('checkout.showtime')}
-			{formatDateTime(screening.start_time)}
-		</p>
+		<h1 class="page-title">Checkout</h1>
 
 		<div class="timer-container">
 			<p class="timer-text">

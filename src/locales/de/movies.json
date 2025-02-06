@@ -22,6 +22,33 @@
         "trailerTitle": "Filmtrailer",
         "trailerIframeTitle": "Filmtrailer",
         "trailerLoading": "Trailer wird geladen...",
-        "trailerLoadingError": "Trailer konnte nicht geladen werden"
+        "trailerLoadingError": "Trailer konnte nicht geladen werden",
+        "seatsReleasedError": "Einige Ihrer ausgewählten Plätze sind abgelaufen und wurden freigegeben.",
+        "backToMovie": "Zurück zum Film",
+        "showtime": "Vorführung:",
+        "screen": "Leinwand",
+        "screenLabel": "Leinwand",
+        "seatCategories": "Sitzkategorien",
+        "seatStatus": "Sitzstatus",
+        "selected": "Ausgewählt",
+        "booked": "Gebucht",
+        "locked": "Gesperrt",
+        "selectedTickets": "Ausgewählte Tickets",
+        "noSeatsSelected": "Keine Sitze ausgewählt",
+        "seat": "Sitz",
+        "row": "Reihe",
+        "column": "Spalte",
+        "removeTicket": "Ticket entfernen",
+        "total": "Gesamt:",
+        "addToCart": "In den Warenkorb",
+        "authenticationRequired": "Authentifizierung erforderlich",
+        "pleaseLogIn": "Bitte melden Sie sich an, um Sitze auszuwählen und Reservierungen vorzunehmen.",
+        "goToLogin": "Zum Login",
+        "seatTypes": {
+            "vip": "VIP",
+            "premium": "Premium",
+            "regular": "Standard",
+            "disabled": "Behindert"
+        }
     }
 }
