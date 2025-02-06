@@ -29,33 +29,30 @@
 
 		loading = true;
 		try {
-			// Process each screening in cart
-			for (const cartItem of $cart) {
-				const response = await fetch('/api/checkout', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						screeningId: cartItem.screeningId,
-						seats: cartItem.tickets.map((ticket) => ({
-							seatId: ticket.seatId,
-							price: ticket.price
-						}))
-					})
-				});
+			// Create a single request with all screenings
+			const screenings = $cart.map((item) => ({
+				screeningId: item.screeningId,
+				seats: item.tickets.map((ticket) => ({
+					seatId: ticket.seatId,
+					price: ticket.price
+				}))
+			}));
 
-				if (!response.ok) {
-					const errorData = await response.json();
-					// Use default error string if none is provided by the server
-					throw new Error(errorData.error || $t('cart.checkoutFailedDefault'));
-				}
+			const response = await fetch('/api/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ screenings })
+			});
 
-				const { checkoutUrl } = await response.json();
-				// Clear cart after successful checkout
-				cart.clear();
-				// Redirect to payment
-				window.location.href = checkoutUrl;
-				return;
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || $t('cart.checkoutFailedDefault'));
 			}
+
+			// Clear the entire cart and redirect to checkout
+			cart.clear();
+			window.location.href = data.checkoutUrl;
 		} catch (error) {
 			console.error($t('cart.checkoutErrorPrefix'), error);
 			alert(error instanceof Error ? error.message : $t('cart.checkoutGenericError'));
@@ -63,9 +60,11 @@
 			loading = false;
 		}
 	}
+	function handleScreeningClick(movieId: string, screeningId: number) {
+		window.location.href = `/movies/${movieId}/${screeningId}`;
+	}
 </script>
 
-// src/routes/cart/+page.svelte
 <main>
 	<div class="container">
 		<!-- Was: <h1 class="page-title">Shopping Cart</h1> -->
@@ -83,8 +82,13 @@
 						<a href="/movies" class="browse-movies">{$t('cart.browseMovies')}</a>
 					</div>
 				{:else}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					{#each $cart as item}
-						<div class="cart-item">
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							class="cart-item"
+							on:click={() => handleScreeningClick(item.movieId, item.screeningId)}
+						>
 							<img
 								src={item.movieImageUrl || '/fallback-movie-poster.jpg'}
 								alt={item.movieTitle}
@@ -120,9 +124,12 @@
 											item.tickets.reduce((sum, t) => sum + t.price, 0)
 										)}
 									</span>
+									<!-- Add stopPropagation to prevent triggering the parent click when removing -->
 
-									<!-- Was: <button class="remove-button" ...>Remove</button> -->
-									<button class="remove-button" on:click={() => cart.removeItem(item.screeningId)}>
+									<button
+										class="remove-button"
+										on:click|stopPropagation={() => cart.removeItem(item.screeningId)}
+									>
 										{$t('cart.remove')}
 									</button>
 								</div>
@@ -177,8 +184,6 @@
 </main>
 
 <style>
-	/* Your existing styles... */
-
 	.browse-movies {
 		display: inline-block;
 		margin-top: 1rem;

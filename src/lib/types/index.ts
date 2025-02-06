@@ -55,10 +55,12 @@ export interface CartTicket {
 
 export interface CartItem {
 	screeningId: number;
+	movieId: string;
 	movieTitle: string;
 	screeningTime: string;
 	tickets: CartTicket[];
 	movieImageUrl: string;
+	addedAt: number;
 }
 
 export interface PriceResponse {

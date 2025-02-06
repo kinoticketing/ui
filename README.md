@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/logo.png" alt="Kino Logo" width="200">
+</p>
+
 # Kinoticketreservierungssystem
 
 ![Test Status](https://github.com/kinoticketing/ui/actions/workflows/test.yml/badge.svg)

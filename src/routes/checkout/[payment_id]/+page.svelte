@@ -4,15 +4,84 @@
 	import type { PageData } from './types';
 	import Icon from '@iconify/svelte';
 	import { PUBLIC_PAYPAL_CLIENT_ID } from '$env/static/public';
+	import { cart } from '$lib/stores/cart';
+	import type { CartItem, CartTicket } from '$lib/types';
 	import '../../../i18n.js';
 	import { t } from 'svelte-i18n';
 
 	export let data: PageData;
-	const { payment, tickets, movie, screening } = data;
+	const { payment, screenings } = data;
 
-	// ... other imports
+	async function goBackToCart() {
+		try {
+			// 1. Cancel the payment
+			await fetch(`/api/payments/${payment.id}/cancel`, {
+				method: 'POST'
+			});
 
-	let error = '';
+			// 2. For each ticket, convert permanent reservation back to temporary lock
+			for (const screening of screenings) {
+				for (const ticket of screening.tickets) {
+					try {
+						// Release reservation
+						await fetch(`/api/seats/${ticket.seat_id}/release`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ screeningId: screening.id })
+						});
+
+						// Create new lock
+						await fetch(`/api/seats/${ticket.seat_id}/lock`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ screeningId: screening.id })
+						});
+					} catch (error) {
+						console.error('Error handling seat:', error);
+					}
+				}
+
+				// Store selected seats in localStorage for this screening
+				const selectedSeats = screening.tickets.map((ticket) => ({
+					key: `${ticket.row - 1}-${ticket.column - 1}`,
+					row: ticket.row,
+					col: ticket.column,
+					label: ticket.seat_label,
+					seatId: ticket.seat_id,
+					price: ticket.price,
+					categoryName: ticket.category_name
+				}));
+				localStorage.setItem(`selectedSeats_${screening.id}`, JSON.stringify(selectedSeats));
+			}
+
+			// 3. Restore cart items
+			cart.clear(); // Clear first to avoid duplicates
+			screenings.forEach((screening) => {
+				cart.addItem({
+					screeningId: screening.id,
+					movieId: screening.movie.imdb_id,
+					movieTitle: screening.movie.title,
+					movieImageUrl: screening.movie.poster_url,
+					screeningTime: screening.time,
+					tickets: screening.tickets.map((ticket) => ({
+						seatId: ticket.seat_id,
+						label: ticket.seat_label,
+						price: ticket.price,
+						row: ticket.row,
+						col: ticket.column,
+						categoryName: ticket.category_name
+					}))
+				});
+			});
+
+			window.location.href = '/cart';
+		} catch (error) {
+			console.error('Error navigating back:', error);
+			// Still redirect even if there's an error
+			window.location.href = '/cart';
+		}
+	}
+
 	let loading = false;
 
 	async function initializePayPalButtons() {
@@ -149,7 +218,7 @@
 
 <main>
 	<div class="container">
-		<button class="back-button" on:click={goBackToBooking}>
+		<button class="back-button" on:click={goBackToCart}>
 			<Icon icon="mdi:arrow-left" width="20" height="20" />
 			{$t('checkout.backToBooking')}
 		</button>
@@ -174,20 +243,27 @@
 					<h2 class="summary-title">{$t('checkout.orderSummary')}</h2>
 
 					<div class="tickets-container">
-						{#each tickets as ticket}
-							<div class="ticket-item">
-								<div class="ticket-info">
-									<p class="seat-label">
-										{$t('checkout.seat')}
-										{ticket.seat_label}
-									</p>
-									<p class="seat-details">
-										{$t('checkout.row')}
-										{ticket.row}, {$t('checkout.column')}
-										{ticket.column}
-									</p>
-									<p class="ticket-price">${formatPrice(ticket.price)}</p>
-								</div>
+						{#each screenings as screening}
+							<div class="screening-group">
+								<h3 class="screening-title">{screening.movie.title}</h3>
+								<p class="screening-time">Showtime: {formatDateTime(screening.time)}</p>
+
+								{#each screening.tickets as ticket}
+									<div class="ticket-item">
+										<div class="ticket-info">
+											<p class="seat-label">
+												{$t('checkout.seat')}
+												{ticket.seat_label}
+											</p>
+											<p class="seat-details">
+												{$t('checkout.row')}
+												{ticket.row}, {$t('checkout.column')}
+												{ticket.column}
+											</p>
+											<p class="ticket-price">${formatPrice(ticket.price)}</p>
+										</div>
+									</div>
+								{/each}
 							</div>
 						{/each}
 					</div>
@@ -254,18 +330,34 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.movie-title {
+	.page-title {
 		font-size: 2rem;
 		font-weight: 600;
 		color: #1a1a1a;
 		margin-bottom: 0.5rem;
 		text-align: center;
+		padding-top: 2rem;
 	}
 
-	.showtime-info {
-		text-align: center;
+	.screening-group {
+		background: white;
+		padding: 1.5rem;
+		border-radius: 0.5rem;
+		margin-bottom: 1.5rem;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.screening-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 0.5rem;
+	}
+
+	.screening-time {
 		color: #666;
 		margin-bottom: 1rem;
+		font-size: 0.875rem;
 	}
 
 	.timer-container {
@@ -417,10 +509,6 @@
 	}
 
 	@media (max-width: 640px) {
-		.movie-title {
-			font-size: 1.5rem;
-		}
-
 		.summary-title,
 		.payment-title {
 			font-size: 1.25rem;
