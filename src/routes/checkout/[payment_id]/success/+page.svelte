@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { generateTicketQRCode, type TicketInfo } from '$lib/utils/qrCode';
 	import type { PageData } from './$types';
+	import { enhance } from '$app/forms';
 	import Icon from '@iconify/svelte';
 
 	export let data: PageData;
 	const { payment } = data;
+
+	let sending = false;
+	let emailSent = false;
 
 	function formatDateTime(date: string) {
 		return new Date(date).toLocaleString();
@@ -74,7 +78,31 @@
 			{/each}
 
 			<div class="actions">
-				<a href="/" class="home-button">Return to Home</a>
+				<a href="/" class="button home-button">Return to Home</a>
+				<form
+					method="POST"
+					action="?/sendEmail"
+					use:enhance={() => {
+						sending = true;
+						return async ({ result }) => {
+							sending = false;
+							if (result.type === 'success') {
+								emailSent = true;
+							}
+						};
+					}}
+				>
+					<input type="hidden" name="paymentData" value={JSON.stringify(payment)} />
+					<button type="submit" class="button email-button" disabled={sending || emailSent}>
+						{#if sending}
+							Sending...
+						{:else if emailSent}
+							Email Sent ✓
+						{:else}
+							Send ticket information to Email
+						{/if}
+					</button>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -205,23 +233,41 @@
 	}
 
 	.actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
 		margin-top: 2rem;
-		text-align: center;
+	}
+
+	.button {
+		padding: 0.75rem 1.5rem;
+		border-radius: 4px;
+		text-decoration: none;
+		font-weight: 500;
+		border: none;
+		cursor: pointer;
+		transition: opacity 0.2s;
 	}
 
 	.home-button {
-		display: inline-block;
-		background-color: #2563eb;
+		background-color: #007bff;
+		height: 20px;
 		color: white;
-		padding: 0.875rem 1.5rem;
-		border-radius: 0.5rem;
-		font-weight: 500;
-		text-decoration: none;
-		transition: background-color 0.2s;
 	}
 
-	.home-button:hover {
-		background-color: #1d4ed8;
+	.email-button {
+		background-color: #28a745;
+		color: white;
+		height: 44px;
+	}
+
+	.button:hover {
+		opacity: 0.9;
+	}
+
+	.button:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
 	}
 
 	@media (max-width: 640px) {
