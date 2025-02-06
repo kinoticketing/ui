@@ -155,10 +155,6 @@
 										<Icon icon="mdi:account-circle-outline" width="20" height="20" />
 										<span>{$t('layout.account.myAccount')}</span>
 									</a>
-									<a href="/settings" class="dropdown-item">
-										<Icon icon="mdi:cog" width="20" height="20" />
-										<span>{$t('layout.account.settings')}</span>
-									</a>
 									<button class="dropdown-item logout" on:click={handleLogout}>
 										<Icon icon="mdi:logout" width="20" height="20" />
 										<span>{$t('layout.account.signOut')}</span>
