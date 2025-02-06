@@ -10,7 +10,7 @@
 	let saveMessage: string | null = null;
 
 	// Seat types matching our categories
-	let seatTypes = ['Regular', 'VIP', 'Disabled'];
+	let seatTypes = ['Regular', 'VIP', 'Premium', 'Disabled'];
 	let rows = writable<string[][]>([[]]);
 	let activeDropdown: { rowIndex: number; colIndex: number } | null = null;
 
@@ -440,5 +440,10 @@
 	.feedback.error {
 		background: #f8d7da;
 		color: #842029;
+	}
+
+	.seat.premium {
+		background: #ffdbd9;
+		border-color: #e63946;
 	}
 </style>
