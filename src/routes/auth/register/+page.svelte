@@ -12,6 +12,7 @@
 	let confirmPassword = '';
 	let showPassword = false;
 	let showConfirmPassword = false;
+	let isLoading = false;
 
 	function togglePasswordVisibility(field: 'password' | 'confirmPassword') {
 		if (field === 'password') {
@@ -20,78 +21,111 @@
 			showConfirmPassword = !showConfirmPassword;
 		}
 	}
+	function validateForm() {
+		if (password !== confirmPassword) {
+			return 'Passwords do not match';
+		}
+		return null;
+	}
+	async function handleSubmit() {
+		const error = validateForm();
+		if (error) {
+			return;
+		}
+		isLoading = true;
+		return async ({ result, update }: { result: any; update: any }) => {
+			if (result.type === 'success') {
+				window.location.href = '/auth/login';
+			}
+			await update();
+			isLoading = false;
+		};
+	}
+	function handleFormComplete() {
+		isLoading = false;
+	}
 </script>
 
-<div class="create-account-container">
-	<h2>Create Your Cinema Account</h2>
+<main>
+	<div class="create-account-container">
+		<h2>Create Your Cinema Account</h2>
 
-	<div class="auth-providers">
-		<button on:click={() => signIn('google')} class="provider-btn google">
-			<Icon icon="logos:google-icon" />
-			Sign up with Google
-		</button>
-
-		<button on:click={() => signIn('github')} class="provider-btn github">
-			<Icon icon="mdi:github" />
-			Sign up with GitHub
-		</button>
-	</div>
-
-	<div class="spacer">
-		<span>or</span>
-	</div>
-
-	<form method="POST" use:enhance>
-		<div class="input-group">
-			<input name="username" type="text" bind:value={username} placeholder="Username" required />
-		</div>
-
-		<div class="input-group">
-			<input name="email" type="email" bind:value={email} placeholder="Email" required />
-		</div>
-
-		<div class="input-group password-group">
-			<input
-				name="password"
-				type={showPassword ? 'text' : 'password'}
-				placeholder="Password"
-				required
-			/>
-			<button
-				type="button"
-				class="toggle-password"
-				on:click={() => togglePasswordVisibility('password')}
-			>
-				<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+		<div class="auth-providers">
+			<button on:click={() => signIn('github')} class="provider-btn github">
+				<Icon icon="mdi:github" />
+				Sign up with GitHub
 			</button>
 		</div>
 
-		<div class="input-group password-group">
-			<input
-				type={showConfirmPassword ? 'text' : 'password'}
-				placeholder="Confirm Password"
-				required
-			/>
-			<button
-				type="button"
-				class="toggle-password"
-				on:click={() => togglePasswordVisibility('confirmPassword')}
-			>
-				<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
-			</button>
+		<div class="spacer">
+			<span>or</span>
 		</div>
 
-		{#if form?.message}
-			<p class="error">{form.message}</p>
-		{/if}
+		<form
+			method="POST"
+			use:enhance={() => {
+				return handleSubmit();
+			}}
+			on:submit={() => {
+				const error = validateForm();
+				if (error) {
+					form = { message: error, username: undefined, email: undefined };
+					return false;
+				}
+			}}
+		>
+			<div class="input-group">
+				<input name="username" type="text" bind:value={username} placeholder="Username" required />
+			</div>
 
-		<button type="submit" class="create-btn">Create Account</button>
-	</form>
+			<div class="input-group">
+				<input name="email" type="email" bind:value={email} placeholder="Email" required />
+			</div>
 
-	<p class="login-link">
-		<a href="/auth/login">Already have an account? Log In</a>
-	</p>
-</div>
+			<div class="input-group password-group">
+				<input
+					name="password"
+					type={showPassword ? 'text' : 'password'}
+					placeholder="Password"
+					required
+				/>
+				<button
+					type="button"
+					class="toggle-password"
+					on:click={() => togglePasswordVisibility('password')}
+				>
+					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+				</button>
+			</div>
+
+			<div class="input-group password-group">
+				<input
+					name="confirmPassword"
+					type={showConfirmPassword ? 'text' : 'password'}
+					placeholder="Confirm Password"
+					required
+				/>
+				<button
+					type="button"
+					class="toggle-password"
+					on:click={() => togglePasswordVisibility('confirmPassword')}
+				>
+					<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+				</button>
+			</div>
+
+			{#if form?.message}
+				<p class="error">{form.message}</p>
+			{/if}
+
+			<button type="submit" class="create-btn">Create Account</button>
+		</form>
+
+		<p class="login-link">
+			<a href="/auth/login">Already have an account? Log In</a>
+		</p>
+	</div>
+</main>
 
 <style>
 	.create-account-container {
@@ -127,11 +161,6 @@
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.9rem;
-	}
-
-	.google {
-		background-color: #4285f4;
-		color: white;
 	}
 
 	.github {

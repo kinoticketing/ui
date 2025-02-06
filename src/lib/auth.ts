@@ -22,8 +22,6 @@ interface DatabaseUser extends User {
 	country?: string;
 }
 
-
-
 // const dev = process.env.NODE_ENV !== 'production';
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
@@ -57,18 +55,23 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 						'SELECT id, email, username, password_hash, street_address, city, state, postal_code, country FROM users WHERE email = $1',
 						[credentials.email]
 					);
+					console.log(client, result);
 					client.release();
 
 					if (result.rows.length === 0) {
+						console.error('User not found:', credentials.email);
 						return null;
 					}
 
 					const user = result.rows[0];
+					console.log('User found:', user);
 
 					if (!user.password_hash) {
+						console.error('User has no password hash:', user.email);
 						return null;
 					}
 					const psswrd = String(credentials.password);
+					console.log(psswrd);
 
 					const passwordMatch = await bcrypt.compare(psswrd, user.password_hash);
 

@@ -246,15 +246,21 @@
 		border-radius: 0.5rem;
 		font-size: 1rem;
 		transition: border-color 0.2s;
+		box-sizing: border-box;
+		max-width: 100%;
+		min-width: 0;
 	}
 
 	input:focus {
 		outline: none;
 		border-color: #2563eb;
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 	}
 
 	.password-input {
 		padding-right: 2.5rem;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.toggle-password {
