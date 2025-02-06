@@ -57,6 +57,7 @@
 		"neon": "^2.0.0",
 		"pg": "^8.13.1",
 		"qrcode": "^1.5.4",
+		"resend": "^4.1.2",
 		"svelte-french-toast": "^1.2.0",
 		"vercel": "^39.1.3"
 	}
