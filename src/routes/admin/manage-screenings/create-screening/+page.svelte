@@ -117,86 +117,92 @@
 	<title>Neue Vorstellung erstellen</title>
 </svelte:head>
 
-<main class="container">
-	<div class="header">
-		<h1>Create New Screening</h1>
-		<div class="steps">
-			<div class={`step ${currentStep >= 1 ? 'active' : ''}`}>
-				<span class="step-number">1</span>
-				<span class="step-text">Select Movie</span>
-			</div>
-			<div class={`step ${currentStep >= 2 ? 'active' : ''}`}>
-				<span class="step-number">2</span>
-				<span class="step-text">Choose Hall</span>
-			</div>
-			<div class={`step ${currentStep >= 3 ? 'active' : ''}`}>
-				<span class="step-number">3</span>
-				<span class="step-text">Set Time</span>
+<main>
+	<div class="container">
+		<div class="header">
+			<h1 class="page-title">Create New Screening</h1>
+			<div class="steps">
+				<div class={`step ${currentStep >= 1 ? 'active' : ''}`}>
+					<span class="step-number">1</span>
+					<span class="step-text">Select Movie</span>
+				</div>
+				<div class={`step ${currentStep >= 2 ? 'active' : ''}`}>
+					<span class="step-number">2</span>
+					<span class="step-text">Choose Hall</span>
+				</div>
+				<div class={`step ${currentStep >= 3 ? 'active' : ''}`}>
+					<span class="step-number">3</span>
+					<span class="step-text">Set Time</span>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="content">
-		{#if currentStep === 1}
-			<div class="search-section" transition:fade>
-				<div class="search-box">
-					<Icon icon="mdi:movie-search" width="24" />
-					<input
-						type="text"
-						bind:value={movieQuery}
-						placeholder="Search for movies..."
-						on:input={fetchMovies}
-					/>
+		<div class="content">
+			{#if currentStep === 1}
+				<div class="search-section" transition:fade>
+					<div class="search-box">
+						<Icon icon="mdi:movie-search" width="24" />
+						<input
+							type="text"
+							bind:value={movieQuery}
+							placeholder="Search for movies..."
+							on:input={fetchMovies}
+						/>
+					</div>
+
+					{#if searchResults.length > 0}
+						<div class="results" transition:slide>
+							{#each searchResults as result}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<!-- svelte-ignore a11y-no-static-element-interactions -->
+								<div
+									class="movie-card"
+									class:selected={selectedMovie?.movie_id === result.movie_id}
+									on:click={() => {
+										selectedMovie = result;
+										currentStep = 2;
+									}}
+								>
+									<h3>{result.title}</h3>
+									<Icon icon="mdi:chevron-right" width="24" />
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</div>
-
-				{#if searchResults.length > 0}
-					<div class="results" transition:slide>
-						{#each searchResults as result}
+			{:else if currentStep === 2}
+				<div class="hall-section" transition:fade>
+					<div class="halls-grid">
+						{#each data.halls as hall}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							<div
-								class="movie-card"
-								class:selected={selectedMovie?.movie_id === result.movie_id}
+								class="hall-card"
+								class:selected={hall_id === hall.id}
 								on:click={() => {
-									selectedMovie = result;
-									currentStep = 2;
+									hall_id = hall.id;
+									currentStep = 3;
 								}}
 							>
-								<h3>{result.title}</h3>
-								<Icon icon="mdi:chevron-right" width="24" />
+								<Icon icon="mdi:theater" width="32" />
+								<h3>{hall.name}</h3>
 							</div>
 						{/each}
 					</div>
-				{/if}
-			</div>
-		{:else if currentStep === 2}
-			<div class="hall-section" transition:fade>
-				<div class="halls-grid">
-					{#each data.halls as hall}
-						<div
-							class="hall-card"
-							class:selected={hall_id === hall.id}
-							on:click={() => {
-								hall_id = hall.id;
-								currentStep = 3;
-							}}
-						>
-							<Icon icon="mdi:theater" width="32" />
-							<h3>{hall.name}</h3>
-						</div>
-					{/each}
 				</div>
-			</div>
-		{:else}
-			<div class="time-section" transition:fade>
-				<input
-					type="datetime-local"
-					bind:value={start_time}
-					class="time-picker"
-				/>
-				<button class="submit-btn" on:click={submitForm}>
-					Create Screening
-				</button>
-			</div>
-		{/if}
+			{:else}
+				<div class="time-section" transition:fade>
+					<input
+						type="datetime-local"
+						bind:value={start_time}
+						class="time-picker"
+					/>
+					<button class="submit-btn" on:click={submitForm}>
+						Create Screening
+					</button>
+				</div>
+			{/if}
+		</div>
 	</div>
 </main>
 
@@ -218,7 +224,7 @@
 		margin-bottom: 3rem;
 	}
 
-	h1 {
+	.page-title {
 		font-size: 2.5rem;
 		color: #2c3e50;
 		margin-bottom: 2rem;
@@ -255,7 +261,7 @@
 	}
 
 	.step.active .step-number {
-		background: #3498db;
+		background: #2563eb;
 		color: white;
 	}
 
@@ -318,7 +324,7 @@
 	.submit-btn {
 		width: 100%;
 		padding: 1rem;
-		background: #3498db;
+		background: #2563eb;
 		color: white;
 		border: none;
 		border-radius: 8px;
@@ -328,6 +334,6 @@
 	}
 
 	.submit-btn:hover {
-		background: #2980b9;
+		background: #1d4ed8;
 	}
 </style>
