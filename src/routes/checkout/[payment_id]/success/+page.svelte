@@ -5,6 +5,7 @@
 
 	export let data: PageData;
 	const { payment } = data;
+
 	function formatDateTime(date: string) {
 		return new Date(date).toLocaleString();
 	}
@@ -13,9 +14,12 @@
 		return typeof price === 'string' ? parseFloat(price).toFixed(2) : price.toFixed(2);
 	}
 
-	function createTicketInfo(ticket: { ticket_code: string; seat_label: string }): TicketInfo {
+	function createTicketInfo(
+		ticket: { ticket_code: string; seat_label: string },
+		screeningTime: string
+	): TicketInfo {
 		return {
-			showtime: payment.screening_time,
+			showtime: screeningTime,
 			seats: [ticket.seat_label],
 			uniqueIdentifier: ticket.ticket_code
 		};
@@ -24,55 +28,50 @@
 
 <main>
 	<div class="container">
+		<h1 class="page-title">Payment Successful!</h1>
+
 		<div class="success-content">
 			<div class="success-header">
 				<div class="success-icon">
 					<Icon icon="mdi:check-circle" class="text-green-500 w-16 h-16" />
 				</div>
-				<h1>Payment Successful!</h1>
 				<p class="confirmation-text">Thank you for your purchase</p>
+				<div class="total-amount">
+					<span class="label">Total Amount Paid:</span>
+					<span class="value">${formatPrice(payment.amount)}</span>
+				</div>
 			</div>
 
-			<div class="booking-details">
-				<h2>Booking Details</h2>
-				<div class="details-grid">
-					<div class="detail-item">
-						<span class="label">Movie:</span>
-						<span class="value">{payment.movie_title}</span>
+			{#each payment.screenings as screening}
+				<div class="screening-details">
+					<div class="details-header">
+						<h2>{screening.movie_title}</h2>
+						<p class="screening-time">Screening: {formatDateTime(screening.screening_time)}</p>
 					</div>
-					<div class="detail-item">
-						<span class="label">Screening:</span>
-						<span class="value">{formatDateTime(payment.screening_time)}</span>
-					</div>
-					<div class="detail-item">
-						<span class="label">Amount Paid:</span>
-						<span class="value">${formatPrice(payment.amount)}</span>
-					</div>
-				</div>
 
-				<div class="tickets-section">
-					<h3>Your Tickets</h3>
 					<div class="tickets-grid">
-						{#each payment.tickets as ticket}
+						{#each screening.tickets as ticket}
 							<div class="ticket-item">
-								<div class="seat-info">
-									<span class="seat-label">Seat {ticket.seat_label}</span>
+								<div class="ticket-content">
+									<div class="seat-info">
+										<span class="seat-label">Seat {ticket.seat_label}</span>
+									</div>
+									<div class="ticket-code">
+										Code: {ticket.ticket_code}
+									</div>
+									{#await generateTicketQRCode(createTicketInfo(ticket, screening.screening_time))}
+										<p>Generating QR Code...</p>
+									{:then qrCodeDataUrl}
+										<img src={qrCodeDataUrl} alt="Ticket QR Code" class="qr-code" />
+									{:catch error}
+										<p>Error generating QR Code: {error.message}</p>
+									{/await}
 								</div>
-								<div class="ticket-code">
-									Code: {ticket.ticket_code}
-								</div>
-								{#await generateTicketQRCode(createTicketInfo(ticket))}
-									<p>Generating QR Code...</p>
-								{:then qrCodeDataUrl}
-									<img src={qrCodeDataUrl} alt="Ticket QR Code" class="qr-code" />
-								{:catch error}
-									<p>Error generating QR Code: {error.message}</p>
-								{/await}
 							</div>
 						{/each}
 					</div>
 				</div>
-			</div>
+			{/each}
 
 			<div class="actions">
 				<a href="/" class="home-button">Return to Home</a>
@@ -82,16 +81,29 @@
 </main>
 
 <style>
-	.container {
-		max-width: 800px;
-		margin: 0 auto;
+	main {
+		min-height: 100vh;
+		background-color: #f8f9fa;
 		padding: 2rem 1rem;
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		font-size: 2rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 2rem;
+		text-align: center;
 	}
 
 	.success-content {
 		background: white;
-		border-radius: 0.5rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		border-radius: 1rem;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		padding: 2rem;
 	}
 
@@ -106,90 +118,90 @@
 		justify-content: center;
 	}
 
-	h1 {
-		font-size: 1.875rem;
-		font-weight: 600;
-		color: #16a34a;
-		margin-bottom: 0.5rem;
-	}
-
 	.confirmation-text {
 		color: #4b5563;
 		font-size: 1.125rem;
+		margin-bottom: 1rem;
 	}
 
-	.booking-details {
-		margin-top: 2rem;
-		padding-top: 2rem;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	h2 {
-		font-size: 1.5rem;
+	.total-amount {
+		background-color: #f3f4f6;
+		padding: 1rem;
+		border-radius: 0.5rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		font-weight: 600;
+	}
+
+	.screening-details {
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 1rem;
+		padding: 1.5rem;
 		margin-bottom: 1.5rem;
 	}
 
-	.details-grid {
-		display: grid;
-		gap: 1rem;
-		margin-bottom: 2rem;
+	.details-header {
+		margin-bottom: 1.5rem;
 	}
 
-	.detail-item {
-		display: flex;
-		justify-content: space-between;
-		padding: 0.5rem 0;
-	}
-
-	.label {
-		color: #6b7280;
-		font-weight: 500;
-	}
-
-	.value {
-		font-weight: 600;
-	}
-
-	.tickets-section {
-		margin-top: 2rem;
-	}
-
-	h3 {
+	.details-header h2 {
 		font-size: 1.25rem;
 		font-weight: 600;
-		margin-bottom: 1rem;
+		color: #1a1a1a;
+		margin-bottom: 0.5rem;
+	}
+
+	.screening-time {
+		color: #6b7280;
 	}
 
 	.tickets-grid {
 		display: grid;
 		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 	}
 
 	.ticket-item {
 		background: #f9fafb;
-		padding: 1rem;
-		border-radius: 0.375rem;
 		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		transition: transform 0.2s ease;
+	}
+
+	.ticket-item:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+	}
+
+	.ticket-content {
+		padding: 1rem;
 	}
 
 	.seat-info {
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.seat-label {
 		font-weight: 600;
+		color: #1a1a1a;
 	}
 
 	.ticket-code {
 		font-family: monospace;
 		color: #4b5563;
+		margin-bottom: 1rem;
+		padding: 0.5rem;
+		background: #f3f4f6;
+		border-radius: 0.25rem;
 	}
 
 	.qr-code {
 		width: 150px;
 		height: 150px;
-		margin-top: 1rem;
+		margin: 0 auto;
+		display: block;
 	}
 
 	.actions {
@@ -201,8 +213,8 @@
 		display: inline-block;
 		background-color: #2563eb;
 		color: white;
-		padding: 0.75rem 1.5rem;
-		border-radius: 0.375rem;
+		padding: 0.875rem 1.5rem;
+		border-radius: 0.5rem;
 		font-weight: 500;
 		text-decoration: none;
 		transition: background-color 0.2s;
@@ -210,5 +222,15 @@
 
 	.home-button:hover {
 		background-color: #1d4ed8;
+	}
+
+	@media (max-width: 640px) {
+		.tickets-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.screening-details {
+			padding: 1rem;
+		}
 	}
 </style>

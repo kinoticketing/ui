@@ -28,27 +28,39 @@ export const load = (async ({ params, locals }) => {
 			throw error(400, 'Invalid payment ID');
 		}
 
-		// Get payment and ticket information
+		// Modified query to prevent duplicates
 		const result = await client.query(
 			`
-            SELECT 
-                p.id as payment_id,
-                p.amount,
-                p.status as payment_status,
-                m.title as movie_title,
-                sc.start_time as screening_time,
-                array_agg(json_build_object(
-                    'seat_label', s.seat_label,
-                    'ticket_code', t.ticket_code
-                )) as tickets
-            FROM payments p
-            JOIN tickets t ON t.payment_id = p.id
-            JOIN seats s ON s.id = t.seat_id
-            JOIN screenings sc ON sc.id = t.screening_id
-            JOIN movies m ON m.imdb_id = sc.movie_id
-            WHERE p.id = $1 AND p.user_id = $2 AND p.status = 'completed'
-            GROUP BY p.id, p.amount, p.status, m.title, sc.start_time
-        `,
+		SELECT 
+		  p.id as payment_id,
+		  p.amount,
+		  p.status as payment_status,
+		  array_agg(DISTINCT 
+			jsonb_build_object(
+			  'movie_title', m.title,
+			  'screening_time', sc.start_time,
+			  'screening_id', sc.id,
+			  'tickets', (
+				SELECT jsonb_agg(
+				  jsonb_build_object(
+					'seat_label', s2.seat_label,
+					'ticket_code', t2.ticket_code
+				  )
+				)
+				FROM tickets t2
+				JOIN seats s2 ON s2.id = t2.seat_id
+				WHERE t2.screening_id = sc.id AND t2.payment_id = p.id
+			  )
+			)
+		  ) as screenings
+		FROM payments p
+		JOIN tickets t ON t.payment_id = p.id
+		JOIN seats s ON s.id = t.seat_id
+		JOIN screenings sc ON sc.id = t.screening_id
+		JOIN movies m ON m.imdb_id = sc.movie_id
+		WHERE p.id = $1 AND p.user_id = $2 AND p.status = 'completed'
+		GROUP BY p.id, p.amount, p.status
+		`,
 			[paymentId, session.user.id]
 		);
 
