@@ -1,6 +1,9 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import Icon from '@iconify/svelte';
+	import '../i18n.js';
+	import { t } from 'svelte-i18n';
+
 	interface Movie {
 		Title: string;
 		Year: string;
@@ -21,10 +24,10 @@
 		<section class="hero">
 			<img src="/banner.png" alt="Cinema Banner" />
 			<div class="hero-content">
-				<h1>Willkommen in Ihrem Lieblingskino</h1>
-				<p>Erleben Sie die neuesten Blockbuster in unserem modernen Kinosaal</p>
+				<h1>{$t('home.hero.heading')}</h1>
+				<p>{$t('home.hero.description')}</p>
 				<a href="/movies" class="cta-button">
-					Alle Filme ansehen
+					{$t('home.hero.buttonText')}
 					<Icon icon="mdi:arrow-right" width="20" height="20" />
 				</a>
 			</div>
@@ -34,9 +37,9 @@
 		<section class="content-section">
 			<div class="details-container">
 				<div class="section-header">
-					<h2>Aktuelle Vorstellungen</h2>
+					<h2>{$t('home.nowPlaying.heading')}</h2>
 					<a href="/movies" class="view-all">
-						Alle anzeigen
+						{$t('home.nowPlaying.viewAll')}
 						<Icon icon="mdi:arrow-right" width="16" height="16" />
 					</a>
 				</div>
@@ -66,27 +69,27 @@
 		<!-- Features Section -->
 		<section class="content-section">
 			<div class="details-container">
-				<h2 class="features-title">Unser Kino-Erlebnis</h2>
+				<h2 class="features-title">{$t('home.features.heading')}</h2>
 				<div class="features-grid">
 					<div class="feature-card">
 						<Icon icon="mdi:theater" width="48" height="48" />
-						<h3>Modernste Technik</h3>
-						<p>Dolby Atmos Sound und 4K Laser-Projektion für ein einzigartiges Filmerlebnis</p>
+						<h3>{$t('home.features.modernTech.title')}</h3>
+						<p>{$t('home.features.modernTech.description')}</p>
 					</div>
 					<div class="feature-card">
 						<Icon icon="mdi:sofa" width="48" height="48" />
-						<h3>Premium Komfort</h3>
-						<p>Bequeme Sessel mit extra viel Beinfreiheit für maximalen Komfort</p>
+						<h3>{$t('home.features.premiumComfort.title')}</h3>
+						<p>{$t('home.features.premiumComfort.description')}</p>
 					</div>
 					<div class="feature-card">
 						<Icon icon="mdi:food" width="48" height="48" />
-						<h3>Snack-Bar</h3>
-						<p>Frisches Popcorn, Nachos und eine große Getränkeauswahl</p>
+						<h3>{$t('home.features.snackBar.title')}</h3>
+						<p>{$t('home.features.snackBar.description')}</p>
 					</div>
 					<div class="feature-card">
 						<Icon icon="mdi:ticket-percent" width="48" height="48" />
-						<h3>Attraktive Angebote</h3>
-						<p>Regelmäßige Sondervorstellungen und Rabattaktionen</p>
+						<h3>{$t('home.features.attractiveOffers.title')}</h3>
+						<p>{$t('home.features.attractiveOffers.description')}</p>
 					</div>
 				</div>
 			</div>
@@ -96,9 +99,9 @@
 		<section class="content-section">
 			<div class="details-container">
 				<div class="section-header">
-					<h2>Demnächst bei uns</h2>
+					<h2>{$t('home.comingSoon.heading')}</h2>
 					<a href="/movies" class="view-all">
-						Alle anzeigen
+						{$t('home.comingSoon.viewAll')}
 						<Icon icon="mdi:arrow-right" width="16" height="16" />
 					</a>
 				</div>
@@ -129,11 +132,11 @@
 		<section class="newsletter-section">
 			<div class="details-container">
 				<div class="newsletter-content">
-					<h2>Bleiben Sie informiert</h2>
-					<p>Abonnieren Sie unseren Newsletter für die neuesten Filmstarts und Sonderangebote</p>
+					<h2>{$t('home.newsletter.heading')}</h2>
+					<p>{$t('home.newsletter.description')}</p>
 					<form class="newsletter-form">
-						<input type="email" placeholder="Ihre E-Mail-Adresse" required />
-						<button type="submit">Abonnieren</button>
+						<input type="email" placeholder={$t('home.newsletter.emailPlaceholder')} required />
+						<button type="submit">{$t('home.newsletter.subscribeButton')}</button>
 					</form>
 				</div>
 			</div>

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data;
 	let { screening, halls } = data;
@@ -102,7 +104,7 @@
 					...screening,
 					...result.screening,
 					movie_title: selectedMovie?.title || screening.movie_title,
-					hall_name: halls.find(h => h.id === result.screening.hall_id)?.name
+					hall_name: halls.find((h) => h.id === result.screening.hall_id)?.name
 				};
 				selectedMovie = null;
 			} else {
@@ -135,26 +137,49 @@
 		);
 	}
 
+	async function updateSeatPlan() {
+		const formData = new FormData();
+		formData.append('new_seat_plan', JSON.stringify(seatPlan));
+		const response = await fetch('./updateSeatPlan', {
+			method: 'POST',
+			body: formData
+		});
+		const result = await response.json();
+		if (result.success) {
+			alert($t('admin_manageScreenings.hallID.seatPlanUpdated'));
+		} else {
+			alert('Error: ' + result.error);
+		}
+	}
+
 	function goBack() {
 		goto('/admin/manage-screenings');
 	}
 </script>
 
 <svelte:head>
-	<title>Sitzplan für Vorstellung {screening?.screening_id || ''}</title>
+	<!-- Title: "Sitzplan für Vorstellung " + screening id -->
+	<title>
+		{$t('admin_manageScreenings.hallID.pageTitle')}{screening?.screening_id || ''}
+	</title>
 </svelte:head>
 
 <main>
 	{#if !screening}
-		<div class="error-message">Keine Vorstellung gefunden.</div>
+		<div class="error-message">
+			{$t('admin_manageScreenings.hallID.noScreeningFound')}
+		</div>
 	{:else}
 		<div class="container">
 			<div class="page-header">
 				<button class="back-btn" on:click={goBack}>
 					<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-					Zurück
+					{$t('admin_manageScreenings.hallID.backBtn')}
 				</button>
-				<h1 class="page-title">Vorstellung {screening.screening_id}</h1>
+				<h1 class="page-title">
+					<!-- "Vorstellung " + screening id -->
+					{$t('admin_manageScreenings.hallID.pageHeading')}{screening.screening_id}
+				</h1>
 				<button class="edit-toggle-btn" on:click={() => (isEditMode = !isEditMode)}>
 					<Icon icon={isEditMode ? 'ic:baseline-close' : 'ic:baseline-edit'} />
 					{isEditMode ? 'Abbrechen' : 'Bearbeiten'}
@@ -165,39 +190,42 @@
 				{#if isEditMode}
 					<form on:submit|preventDefault={handleEdit} class="edit-form">
 						<div class="form-group">
-								<label>
-									Film suchen:
-									<input
-										type="text"
-										bind:value={movieQuery}
-										placeholder="Film suchen..."
-										on:input={fetchMovies}
-									/>
-								</label>
+							<label>
+								{$t('admin_manageScreenings.hallID.searchLabel')}
+								<input
+									type="text"
+									bind:value={movieQuery}
+									placeholder={$t('admin_manageScreenings.hallID.searchPlaceholder')}
+									on:input={fetchMovies}
+								/>
+							</label>
 
-								{#if searchError}
-									<p class="error">{searchError}</p>
-								{/if}
+							{#if searchError}
+								<p class="error">{searchError}</p>
+							{/if}
 
-								{#if searchResults.length > 0}
-									<ul class="search-results">
-										{#each searchResults as movie}
-											<!-- svelte-ignore a11y-click-events-have-key-events -->
-											<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-											<li on:click={() => selectMovie(movie)}>
-												{movie.title}
-											</li>
-										{/each}
-									</ul>
-								{/if}
+							{#if searchResults.length > 0}
+								<ul class="search-results">
+									{#each searchResults as movie}
+										<!-- svelte-ignore a11y-click-events-have-key-events -->
+										<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+										<li on:click={() => selectMovie(movie)}>
+											{movie.title}
+										</li>
+									{/each}
+								</ul>
+							{/if}
 
-								{#if selectedMovie}
-									<p><strong>Ausgewählter Film:</strong> {selectedMovie.title}</p>
-								{/if}
-							</div>
+							{#if selectedMovie}
+								<p>
+									<strong>{$t('admin_manageScreenings.hallID.selectedMovieLabel')}</strong>
+									{selectedMovie.title}
+								</p>
+							{/if}
+						</div>
 
 						<div class="form-group">
-							<label for="hall_id">Saal:</label>
+							<label for="hall_id">{$t('admin_manageScreenings.hallID.hallLabel')}</label>
 							<select id="hall_id" bind:value={editForm.hall_id} required>
 								{#each halls as hall}
 									<option value={hall.id}>{hall.name}</option>
@@ -206,7 +234,7 @@
 						</div>
 
 						<div class="form-group">
-							<label for="start_time">Startzeit:</label>
+							<label for="start_time">{$t('admin_manageScreenings.hallID.startTimeLabel')}</label>
 							<input
 								type="datetime-local"
 								id="start_time"
@@ -217,28 +245,30 @@
 
 						<button type="submit" class="save-changes-btn">
 							<Icon icon="ic:baseline-save" />
-							Änderungen speichern
+							{$t('admin_manageScreenings.hallID.saveChangesButton')}
 						</button>
 					</form>
 				{:else}
 					<div class="info-item">
-						<span class="label">Film:</span>
+						<span class="label">{$t('admin_manageScreenings.hallID.filmLabel')}</span>
 						<span class="value">{screening.movie_title}</span>
 					</div>
 					<div class="info-item">
-						<span class="label">Saal:</span>
-						<span class="value">{screening.hall_name} (ID: {screening.hall_id})</span>
+						<span class="label">{$t('admin_manageScreenings.hallID.hallLabel')}</span>
+						<span class="value">
+							{screening.hall_name} (ID: {screening.hall_id})
+						</span>
 					</div>
 					<div class="info-item">
-						<span class="label">Kapazität:</span>
+						<span class="label">{$t('admin_manageScreenings.hallID.capacityLabel')}</span>
 						<span class="value">{screening.capacity}</span>
 					</div>
 					<div class="info-item">
-						<span class="label">Startzeit:</span>
+						<span class="label">{$t('admin_manageScreenings.hallID.startTimeLabel')}</span>
 						<span class="value">{screening.start_time}</span>
 					</div>
 					<div class="info-item">
-						<span class="label">Endzeit:</span>
+						<span class="label">{$t('admin_manageScreenings.hallID.endTimeLabel')}</span>
 						<span class="value">{screening.end_time}</span>
 					</div>
 				{/if}
@@ -247,17 +277,21 @@
 			<div class="seating-section">
 				<div class="screen-container">
 					<div class="screen" />
-					<p class="screen-label">Leinwand</p>
+					<p class="screen-label">
+						{$t('admin_manageScreenings.hallID.screenLabel')}
+					</p>
 				</div>
 
 				<div class="seat-plan">
 					{#each seatPlan as row, rowIndex}
 						<div class="seat-row">
-							<div class="row-label">{String.fromCharCode(65 + rowIndex)}</div>
+							<div class="row-label">
+								{String.fromCharCode(65 + rowIndex)}
+							</div>
 							{#each row.filter((seat) => seat !== null) as seat, colIndex}
 								<button
 									class="seat {getSeatClass(seat)}"
-									title={`${seat.label} (${seat.category})`}
+									title={`${seat.label} ${$t(`admin_manageScreenings.seatTypes.${seat.category.toLowerCase()}`)}`}
 									on:click={() => handleSeatClick(rowIndex, colIndex)}
 								>
 									{seat.label}
@@ -271,8 +305,12 @@
 					{#each Object.entries(seatTypes) as [type, data]}
 						<div class="legend-item">
 							<div class="legend-box {data.class}" />
-							<span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-							<span class="modifier">({data.modifier}x)</span>
+							<span>
+								{type.charAt(0).toUpperCase() + type.slice(1)}
+							</span>
+							<span class="modifier">
+								({data.modifier}x)
+							</span>
 						</div>
 					{/each}
 				</div>

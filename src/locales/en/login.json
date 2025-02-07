@@ -1,0 +1,15 @@
+{
+    "login": {
+        "backToHome": "Back to Home",
+        "loginTitle": "Login to Cinema System",
+        "loginWithGithub": "Log in with GitHub",
+        "orContinueWithEmail": "or continue with email",
+        "emailPlaceholder": "Email or Username",
+        "passwordPlaceholder": "Password",
+        "loginButton": "Login",
+        "forgotPassword": "Forgot password?",
+        "createAccount": "Don't have an account? Create one",
+        "loginAttempted": "Login attempted",
+        "loginSuccess": "Successfully logged in!"
+    }
+}

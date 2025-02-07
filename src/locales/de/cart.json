@@ -1,0 +1,19 @@
+{
+    "cart": {
+        "shoppingCart": "Einkaufswagen",
+        "yourCartIsEmpty": "Ihr Einkaufswagen ist leer",
+        "browseMovies": "Filme durchsuchen",
+        "screeningColon": "Vorführung: ",
+        "seatsColon": "Sitze: ",
+        "totalColon": "Gesamt: ",
+        "remove": "Entfernen",
+        "orderSummary": "Bestellübersicht",
+        "subtotal": "Zwischensumme",
+        "bookingFee": "Buchungsgebühr",
+        "total": "Gesamt",
+        "proceedToCheckout": "Zur Kasse",
+        "checkoutFailedDefault": "Bezahlung fehlgeschlagen",
+        "checkoutErrorPrefix": "Fehler beim Bezahlvorgang:",
+        "checkoutGenericError": "Fehler bei der Abwicklung. Bitte versuchen Sie es erneut."
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "loginSuccess": {
+        "title": "Willkommen,",
+        "defaultName": "Benutzer",
+        "successMessage": "Sie haben sich erfolgreich angemeldet. Wohin möchten Sie gehen?",
+        "homePageTitle": "Startseite",
+        "homePageDescription": "Filme und Spielzeiten durchsuchen",
+        "myReservationsTitle": "Meine Reservierungen",
+        "myReservationsDescription": "Ihre Buchungshistorie anzeigen",
+        "accountSettingsTitle": "Kontoeinstellungen",
+        "accountSettingsDescription": "Profil und Einstellungen verwalten",
+        "logoutButton": "Abmelden"
+    }
+}

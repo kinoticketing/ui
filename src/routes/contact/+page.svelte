@@ -2,6 +2,8 @@
 	// @ts-ignore
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	// Zustandsverwaltung für das Formular
 	const name = writable('');
@@ -20,40 +22,38 @@
 		successMessage.set('');
 		errorMessage.set('');
 
-		// Formularvalidierung (einfaches Beispiel)
-		if (!$name || !$email || !$subject || !$message) {
-			errorMessage.set('Bitte füllen Sie alle Felder aus.');
+		// Simple validation
+		if (!name || !email || !subject || !message) {
+			errorMessage.set($t('contact.fillAllFields'));
 			isSubmitting.set(false);
 			return;
 		}
 
 		try {
-			// Beispiel: Senden der Daten an einen API-Endpunkt
 			const response = await fetch('/api/contact', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: $name, email: $email, subject: $subject, message: $message })
+				body: JSON.stringify({
+					name: name,
+					email: email,
+					subject: subject,
+					message: message
+				})
 			});
 
 			if (response.ok) {
-				successMessage.set(
-					'Ihre Nachricht wurde erfolgreich gesendet. Wir werden uns bald bei Ihnen melden.'
-				);
-				// Formular zurücksetzen
+				successMessage.set($t('contact.messageSentSuccess'));
+				// Reset form
 				name.set('');
 				email.set('');
 				subject.set('');
 				message.set('');
 			} else {
-				errorMessage.set(
-					'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.'
-				);
+				errorMessage.set($t('contact.messageSendError'));
 			}
-		} catch (error) {
-			errorMessage.set(
-				'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.'
-			);
-			console.error(error);
+		} catch (err) {
+			errorMessage.set($t('contact.messageSendError'));
+			console.error(err);
 		} finally {
 			isSubmitting.set(false);
 		}
@@ -62,73 +62,103 @@
 
 <main>
 	<div class="container">
-		<h1 class="title">Kontaktieren Sie uns</h1>
+		<!-- Was: <h1 class="title">Kontaktieren Sie uns</h1> -->
+		<h1 class="title">{$t('contact.contactUs')}</h1>
 
 		<div class="content">
 			<form on:submit={handleSubmit}>
 				<div class="messages">
 					{#if $successMessage}
-						<p class="success">{$successMessage}</p>
+						<!-- Was: <p class="success">{$successMessage}</p> -->
+						<p class="success">{$t('contact.successMessage')}</p>
 					{/if}
 					{#if $errorMessage}
-						<p class="error">{$errorMessage}</p>
+						<!-- Was: <p class="error">{$errorMessage}</p> -->
+						<p class="error">{$t('contact.errorMessage')}</p>
 					{/if}
 				</div>
 
 				<div class="form-group">
-					<label for="name">Name</label>
-					<input type="text" id="name" bind:value={$name} placeholder="Ihr Name" required />
+					<!-- Was: <label for="name">Name</label> -->
+					<label for="name">{$t('contact.nameLabel')}</label>
+					<!-- Was: placeholder="Ihr Name" -->
+					<input
+						type="text"
+						id="name"
+						bind:value={$name}
+						placeholder={$t('contact.namePlaceholder')}
+						required
+					/>
 				</div>
 
 				<div class="form-group">
-					<label for="email">E-Mail</label>
+					<!-- Was: <label for="email">E-Mail</label> -->
+					<label for="email">{$t('contact.emailLabel')}</label>
+					<!-- Was: placeholder="Ihre E-Mail-Adresse" -->
 					<input
 						type="email"
 						id="email"
 						bind:value={$email}
-						placeholder="Ihre E-Mail-Adresse"
+						placeholder={$t('contact.emailPlaceholder')}
 						required
 					/>
 				</div>
 
 				<div class="form-group">
-					<label for="subject">Betreff</label>
+					<!-- Was: <label for="subject">Betreff</label> -->
+					<label for="subject">{$t('contact.subjectLabel')}</label>
+					<!-- Was: placeholder="Betreff Ihrer Nachricht" -->
 					<input
 						type="text"
 						id="subject"
 						bind:value={$subject}
-						placeholder="Betreff Ihrer Nachricht"
+						placeholder={$t('contact.subjectPlaceholder')}
 						required
 					/>
 				</div>
 
 				<div class="form-group">
-					<label for="message">Nachricht</label>
+					<!-- Was: <label for="message">Nachricht</label> -->
+					<label for="message">{$t('contact.messageLabel')}</label>
+					<!-- Was: placeholder="Ihre Nachricht" -->
 					<textarea
 						id="message"
 						bind:value={$message}
-						placeholder="Ihre Nachricht"
+						placeholder={$t('contact.messagePlaceholder')}
 						rows="5"
 						required
 					></textarea>
 				</div>
 
+				<!-- Conditionally switch the button text -->
 				<button type="submit" disabled={$isSubmitting}>
 					{#if $isSubmitting}
-						Senden...
+						{$t('contact.sendingButton')}
 					{:else}
-						Senden
+						{$t('contact.sendButton')}
 					{/if}
 				</button>
 			</form>
 
 			<div class="contact-info">
-				<h2>Unsere Kontaktdaten</h2>
+				<!-- Was: <h2>Unsere Kontaktdaten</h2> -->
+				<h2>{$t('contact.ourContactDetails')}</h2>
+
 				<div class="contact-details">
-					<p><strong>Adresse:</strong> [Straße und Hausnummer], [PLZ und Ort]</p>
-					<p><strong>Telefon:</strong> <a href="tel:+491234567890">+49 123 456 7890</a></p>
+					<!-- Was: <p><strong>Adresse:</strong> [Straße und Hausnummer]... -->
 					<p>
-						<strong>E-Mail:</strong>
+						<strong>{$t('contact.addressColon')}</strong> [Straße und Hausnummer], [PLZ und Ort]
+					</p>
+
+					<!-- Was: <p><strong>Telefon:</strong> -->
+					<p>
+						<strong>{$t('contact.phoneColon')}</strong>
+						<a href="tel:+491234567890">+49 123 456 7890</a>
+					</p>
+
+					<!-- Was: <p><strong>E-Mail:</strong> -->
+					<p>
+						<strong>{$t('contact.emailColon')}</strong>
 						<a href="mailto:support@deinedomain.com">support@deinedomain.com</a>
 					</p>
 				</div>

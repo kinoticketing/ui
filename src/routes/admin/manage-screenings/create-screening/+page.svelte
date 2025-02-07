@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 	import { fade, slide } from 'svelte/transition';
 
 	export let data: { halls: { id: number; name: string }[] };
@@ -33,14 +35,19 @@
 			if (response.ok) {
 				const result = await response.json();
 				searchResults = result.movies;
-				searchError = result.movies.length === 0 ? 'Keine Filme gefunden.' : null;
+				// If no movies are found, show a translation
+				searchError =
+					result.movies.length === 0
+						? $t('admin_manageScreenings.createScreening.noMoviesFound')
+						: null;
 			} else {
 				const error = await response.json();
-				searchError = error.message || 'Fehler bei der Filmsuche.';
+				// Fallback if there's no message from the server
+				searchError = error.message || $t('admin_manageScreenings.createScreening.searchError');
 			}
 		} catch (error) {
 			console.error('Netzwerkfehler:', error);
-			searchError = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+			searchError = $t('admin_manageScreenings.createScreening.genericError');
 		}
 	}
 
@@ -55,7 +62,7 @@
 		saveMessage = null;
 
 		if (!selectedMovie || !hall_id || !start_time) {
-			saveMessage = 'Bitte füllen Sie alle Felder aus.';
+			saveMessage = $t('admin_manageScreenings.createScreening.fillAllFields');
 			return;
 		}
 
@@ -74,7 +81,7 @@
 
 			if (!movieResponse.ok) {
 				const error = await movieResponse.json();
-				saveMessage = error.message || 'Fehler beim Speichern des Films.';
+				saveMessage = error.message || $t('admin_manageScreenings.createScreening.saveMovieError');
 				return;
 			}
 
@@ -102,25 +109,28 @@
 
 			if (response.ok) {
 				const result = await response.json();
-				saveMessage = result.message || 'Vorstellung erfolgreich erstellt!';
+				// Fallback if there's no message from the server
+				saveMessage =
+					result.message || $t('admin_manageScreenings.createScreening.createScreeningSuccess');
 				// Reset form and state
 				selectedMovie = null;
 				hall_id = null;
 				start_time = null;
 				movieQuery = '';
 				currentStep = 1;
-				
+
 				// Optional: Show success message temporarily
 				setTimeout(() => {
 					saveMessage = null;
 				}, 3000);
 			} else {
 				const error = await response.json();
-				saveMessage = error.message || 'Fehler beim Erstellen der Vorstellung.';
+				saveMessage =
+					error.message || $t('admin_manageScreenings.createScreening.createScreeningError');
 			}
 		} catch (error) {
-			console.error('Fehler:', error);
-			saveMessage = 'Ein unerwarteter Fehler ist aufgetreten.';
+			console.error('Error:', error);
+			saveMessage = $t('admin_manageScreenings.createScreening.unexpectedError');
 		}
 	}
 
@@ -131,7 +141,7 @@
 </script>
 
 <svelte:head>
-	<title>Neue Vorstellung erstellen</title>
+	<title>{$t('admin_manageScreenings.createScreening.pageTitle')}</title>
 </svelte:head>
 
 <main>
@@ -209,14 +219,8 @@
 				</div>
 			{:else}
 				<div class="time-section" transition:fade>
-					<input
-						type="datetime-local"
-						bind:value={start_time}
-						class="time-picker"
-					/>
-					<button class="submit-btn" on:click={submitForm}>
-						Create Screening
-					</button>
+					<input type="datetime-local" bind:value={start_time} class="time-picker" />
+					<button class="submit-btn" on:click={submitForm}> Create Screening </button>
 				</div>
 			{/if}
 		</div>
@@ -289,7 +293,7 @@
 		background: white;
 		padding: 1rem;
 		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	input {
@@ -300,7 +304,8 @@
 		outline: none;
 	}
 
-	.movie-card, .hall-card {
+	.movie-card,
+	.hall-card {
 		background: white;
 		padding: 1.5rem;
 		border-radius: 8px;
@@ -310,12 +315,13 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
-	.movie-card:hover, .hall-card:hover {
+	.movie-card:hover,
+	.hall-card:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	.selected {
@@ -336,6 +342,14 @@
 		border: 2px solid #e0e0e0;
 		border-radius: 8px;
 		margin-bottom: 1.5rem;
+	}
+
+	.feedback.error {
+		color: #dc3545;
+	}
+
+	.feedback.success {
+		color: #28a745;
 	}
 
 	.submit-btn {

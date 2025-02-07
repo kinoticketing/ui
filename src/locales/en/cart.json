@@ -1,0 +1,19 @@
+{
+    "cart": {
+        "shoppingCart": "Shopping Cart",
+        "yourCartIsEmpty": "Your cart is empty",
+        "browseMovies": "Browse Movies",
+        "screeningColon": "Screening: ",
+        "seatsColon": "Seats: ",
+        "totalColon": "Total: ",
+        "remove": "Remove",
+        "orderSummary": "Order Summary",
+        "subtotal": "Subtotal",
+        "bookingFee": "Booking Fee",
+        "total": "Total",
+        "proceedToCheckout": "Proceed to Checkout",
+        "checkoutFailedDefault": "Checkout failed",
+        "checkoutErrorPrefix": "Checkout error:",
+        "checkoutGenericError": "Failed to process checkout. Please try again."
+    }
+}

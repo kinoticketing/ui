@@ -5,6 +5,16 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
+
 	export let data: PageData;
 
 	let showChangePassword = false;
@@ -100,216 +110,220 @@
 	}
 </script>
 
-<main>
-	<div class="container">
-		<button class="back-button" on:click={() => goto('/')}>
-			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Back to Home
-		</button>
+{#if loaded}
+	<main>
+		<div class="container">
+			<button class="back-button" on:click={() => goto('/')}>
+				<Icon icon="mdi:arrow-left" width="20" height="20" />
+				{$t('account.backToHome')}
+			</button>
 
-		<h1 class="account-title">Account Settings</h1>
+			<h1 class="account-title">{$t('account.title')}</h1>
 
-		{#if $page.data.session}
-			<div class="content-container">
-				<!-- Left side - User Info and Password -->
-				<div class="details-section">
-					<div class="details-container">
-						<div class="user-info">
-							<h2 class="section-title">Personal Information</h2>
-							{#if data.session && data.session.user}
-								<div class="info-grid">
-									<div class="info-column">
-										<div class="info-item">
-											<span class="info-label">Email</span>
-											<span class="info-value">{data.session.user.email}</span>
-										</div>
-										<div class="info-item">
-											<span class="info-label">Name</span>
-											<span class="info-value">{data.session.user.name || 'Not provided'}</span>
-										</div>
-									</div>
-
-									{#if !showEditAddress && $page.data.session?.user?.address}
+			{#if $page.data.session}
+				<div class="content-container">
+					<!-- Left Section: User Info and Password -->
+					<div class="details-section">
+						<div class="details-container">
+							<div class="user-info">
+								<h2 class="section-title">{$t('account.personalInfoTitle')}</h2>
+								{#if data.session && data.session.user}
+									<div class="info-grid">
 										<div class="info-column">
 											<div class="info-item">
-												<span class="info-label">Street Address</span>
+												<span class="info-label">{$t('account.emailLabel')}</span>
+												<span class="info-value">{data.session.user.email}</span>
+											</div>
+											<div class="info-item">
+												<span class="info-label">{$t('account.nameLabel')}</span>
 												<span class="info-value"
-													>{$page.data.session.user.address.street_address}</span
+													>{data.session.user.name || $t('account.notProvided')}</span
 												>
 											</div>
-
-											<div class="info-item">
-												<span class="info-label">City, State & ZIP</span>
-												<span class="info-value">
-													{$page.data.session.user.address.city}, {$page.data.session.user.address
-														.state}
-													{$page.data.session.user.address.postal_code}
-												</span>
-											</div>
-											<div class="info-item">
-												<span class="info-label">Country</span>
-												<span class="info-value">{$page.data.session.user.address.country}</span>
-											</div>
 										</div>
-									{/if}
-								</div>
-								<div class="actions-grid">
-									<button class="view-reservations-button" on:click={() => goto('/reservations')}>
-										<Icon icon="mdi:ticket-account" width="20" height="20" />
-										View My Reservations
-									</button>
-								</div>
-							{/if}
-						</div>
 
-						<div class="password-section">
-							<h2 class="section-title">Password Settings</h2>
-							{#if !$page.data.session?.user?.hasPassword}
-								{#if !showChangePassword}
+										{#if !showEditAddress && $page.data.session?.user?.address}
+											<div class="info-column">
+												<div class="info-item">
+													<span class="info-label">{$t('account.streetAddressLabel')}</span>
+													<span class="info-value"
+														>{$page.data.session.user.address.street_address}</span
+													>
+												</div>
+												<div class="info-item">
+													<span class="info-label">{$t('account.cityStateZipLabel')}</span>
+													<span class="info-value">
+														{$page.data.session.user.address.city}, {$page.data.session.user.address
+															.state}
+														{$page.data.session.user.address.postal_code}
+													</span>
+												</div>
+												<div class="info-item">
+													<span class="info-label">{$t('account.countryLabel')}</span>
+													<span class="info-value">{$page.data.session.user.address.country}</span>
+												</div>
+											</div>
+										{/if}
+									</div>
+
+									<div class="actions-grid">
+										<button class="view-reservations-button" on:click={() => goto('/reservations')}>
+											<Icon icon="mdi:ticket-account" width="20" height="20" />
+											{$t('account.viewReservationsButton')}
+										</button>
+									</div>
+								{/if}
+							</div>
+
+							<div class="password-section">
+								<h2 class="section-title">{$t('account.passwordSettingsTitle')}</h2>
+								{#if !$page.data.session?.user?.hasPassword}
+									{#if !showChangePassword}
+										<button class="action-button" on:click={() => (showChangePassword = true)}>
+											<Icon icon="mdi:key-plus" width="20" height="20" />
+											{$t('account.createPasswordButton')}
+										</button>
+									{/if}
+								{:else if !showChangePassword}
 									<button class="action-button" on:click={() => (showChangePassword = true)}>
-										<Icon icon="mdi:key-plus" width="20" height="20" />
-										Create Password
+										<Icon icon="mdi:key-change" width="20" height="20" />
+										{$t('account.changePasswordButton')}
 									</button>
 								{/if}
-							{:else if !showChangePassword}
-								<button class="action-button" on:click={() => (showChangePassword = true)}>
-									<Icon icon="mdi:key-change" width="20" height="20" />
-									Change Password
-								</button>
-							{/if}
 
-							{#if showChangePassword}
-								<form class="form-container" on:submit|preventDefault={handlePasswordSubmit}>
-									{#if $page.data.session?.user?.hasPassword}
+								{#if showChangePassword}
+									<form class="form-container" on:submit|preventDefault={handlePasswordSubmit}>
+										{#if $page.data.session?.user?.hasPassword}
+											<div class="form-group">
+												<label for="current-password">{$t('account.currentPasswordLabel')}</label>
+												<input
+													type="password"
+													id="current-password"
+													bind:value={currentPassword}
+													required
+												/>
+											</div>
+										{/if}
 										<div class="form-group">
-											<label for="current-password">Current Password</label>
+											<label for="new-password">{$t('account.newPasswordLabel')}</label>
+											<input type="password" id="new-password" bind:value={newPassword} required />
+										</div>
+										<div class="form-group">
+											<label for="confirm-password">{$t('account.confirmPasswordLabel')}</label>
 											<input
 												type="password"
-												id="current-password"
-												bind:value={currentPassword}
+												id="confirm-password"
+												bind:value={confirmPassword}
 												required
 											/>
 										</div>
-									{/if}
-									<div class="form-group">
-										<label for="new-password">New Password</label>
-										<input type="password" id="new-password" bind:value={newPassword} required />
-									</div>
-									<div class="form-group">
-										<label for="confirm-password">Confirm Password</label>
-										<input
-											type="password"
-											id="confirm-password"
-											bind:value={confirmPassword}
-											required
-										/>
-									</div>
 
-									{#if passwordError}
-										<div class="error-message">{passwordError}</div>
-									{/if}
-									{#if passwordSuccess}
-										<div class="success-message">{passwordSuccess}</div>
-									{/if}
+										{#if passwordError}
+											<div class="error-message">{passwordError}</div>
+										{/if}
+										{#if passwordSuccess}
+											<div class="success-message">{passwordSuccess}</div>
+										{/if}
 
-									<div class="button-group">
-										<button
-											type="button"
-											class="secondary-button"
-											on:click={() => (showChangePassword = false)}
-										>
-											Cancel
-										</button>
-										<button type="submit" class="primary-button" disabled={loadingPassword}>
-											{loadingPassword ? 'Loading...' : 'Update Password'}
-										</button>
+										<div class="button-group">
+											<button
+												type="button"
+												class="secondary-button"
+												on:click={() => (showChangePassword = false)}
+											>
+												{$t('account.cancelButton')}
+											</button>
+											<button type="submit" class="primary-button" disabled={loadingPassword}>
+												{loadingPassword
+													? $t('account.loadingButton')
+													: $t('account.updatePasswordButton')}
+											</button>
+										</div>
+									</form>
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					<!-- Right Section: Address -->
+					<div class="address-section">
+						<div class="address-container">
+							<h2 class="section-title">{$t('account.addressInfoTitle')}</h2>
+							{#if !showEditAddress && $page.data.session?.user?.address}
+								<div class="address-display">
+									<div class="info-item">
+										<span class="info-label">{$t('account.streetAddressLabel')}</span>
+										<span class="info-value">{$page.data.session.user.address.street_address}</span>
 									</div>
-								</form>
+									<div class="info-item">
+										<span class="info-label">{$t('account.cityStateZipLabel')}</span>
+										<span class="info-value">
+											{$page.data.session.user.address.city}, {$page.data.session.user.address
+												.state}
+											{$page.data.session.user.address.postal_code}
+										</span>
+									</div>
+									<div class="info-item">
+										<span class="info-label">{$t('account.countryLabel')}</span>
+										<span class="info-value">{$page.data.session.user.address.country}</span>
+									</div>
+									<button class="action-button mt-4" on:click={() => (showEditAddress = true)}>
+										<Icon icon="mdi:pencil" width="20" height="20" />
+										{$t('account.editAddressButton')}
+									</button>
+								</div>
+							{:else}
+								<div class="form-wrapper">
+									<form class="form-container" on:submit|preventDefault={handleUpdateAddress}>
+										<div class="form-group">
+											<label for="street">{$t('account.streetAddressLabel')}</label>
+											<input type="text" id="street" bind:value={address.street_address} required />
+										</div>
+										<div class="form-group">
+											<label for="city">{$t('account.cityLabel')}</label>
+											<input type="text" id="city" bind:value={address.city} required />
+										</div>
+										<div class="form-group">
+											<label for="state">{$t('account.stateLabel')}</label>
+											<input type="text" id="state" bind:value={address.state} required />
+										</div>
+										<div class="form-group">
+											<label for="postal">{$t('account.postalCodeLabel')}</label>
+											<input type="text" id="postal" bind:value={address.postal_code} required />
+										</div>
+										<div class="form-group">
+											<label for="country">{$t('account.countryLabel')}</label>
+											<input type="text" id="country" bind:value={address.country} required />
+										</div>
+										<div class="button-group">
+											<button
+												type="button"
+												class="secondary-button"
+												on:click={() => (showEditAddress = false)}
+											>
+												{$t('account.cancelButton')}
+											</button>
+											<button type="submit" class="primary-button">
+												{$t('account.updateAddressButton')}
+											</button>
+										</div>
+									</form>
+								</div>
 							{/if}
 						</div>
 					</div>
 				</div>
-
-				<!-- Right side - Address -->
-				<div class="address-section">
-					<div class="address-container">
-						<h2 class="section-title">Address Information</h2>
-						{#if !showEditAddress && $page.data.session?.user?.address}
-							<div class="address-display">
-								<div class="info-item">
-									<span class="info-label">Street Address</span>
-									<span class="info-value">{$page.data.session.user.address.street_address}</span>
-								</div>
-								<div class="info-item">
-									<span class="info-label">City</span>
-									<span class="info-value">{$page.data.session.user.address.city}</span>
-								</div>
-								<div class="info-item">
-									<span class="info-label">State</span>
-									<span class="info-value">{$page.data.session.user.address.state}</span>
-								</div>
-								<div class="info-item">
-									<span class="info-label">Postal Code</span>
-									<span class="info-value">{$page.data.session.user.address.postal_code}</span>
-								</div>
-								<div class="info-item">
-									<span class="info-label">Country</span>
-									<span class="info-value">{$page.data.session.user.address.country}</span>
-								</div>
-								<button class="action-button mt-4" on:click={() => (showEditAddress = true)}>
-									<Icon icon="mdi:pencil" width="20" height="20" />
-									Edit Address
-								</button>
-							</div>
-						{:else}
-							<div class="form-wrapper">
-								<form class="form-container" on:submit|preventDefault={handleUpdateAddress}>
-									<div class="form-group">
-										<label for="street">Street Address</label>
-										<input type="text" id="street" bind:value={address.street_address} required />
-									</div>
-									<div class="form-group">
-										<label for="city">City</label>
-										<input type="text" id="city" bind:value={address.city} required />
-									</div>
-									<div class="form-group">
-										<label for="state">State</label>
-										<input type="text" id="state" bind:value={address.state} required />
-									</div>
-									<div class="form-group">
-										<label for="postal">Postal Code</label>
-										<input type="text" id="postal" bind:value={address.postal_code} required />
-									</div>
-									<div class="form-group">
-										<label for="country">Country</label>
-										<input type="text" id="country" bind:value={address.country} required />
-									</div>
-									<div class="button-group">
-										<button
-											type="button"
-											class="secondary-button"
-											on:click={() => (showEditAddress = false)}
-										>
-											Cancel
-										</button>
-										<button type="submit" class="primary-button">Update Address</button>
-									</div>
-								</form>
-							</div>
-						{/if}
-					</div>
+			{:else}
+				<div class="login-prompt">
+					<p>{$t('account.loginPrompt')}</p>
+					<button type="button" class="primary-button" on:click={() => goto('/login')}>
+						{$t('account.loginButton')}
+					</button>
 				</div>
-			</div>
-		{:else}
-			<div class="login-prompt">
-				<p>Please log in to view your account information.</p>
-				<button type="button" class="primary-button" on:click={() => goto('/login')}>
-					Login
-				</button>
-			</div>
-		{/if}
-	</div>
-</main>
+			{/if}
+		</div>
+	</main>
+{/if}
 
 <style>
 	main {

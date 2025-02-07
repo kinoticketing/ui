@@ -4,7 +4,17 @@
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import toast from 'svelte-french-toast';
+
 	import { onMount } from 'svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
+	import { i18nReady } from '../../../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	let email = '';
 	let password = '';
@@ -47,7 +57,7 @@
 
 	onMount(() => {
 		if (browser && $page.data.session?.user) {
-			toast.success('Successfully logged in!');
+			toast.success($t('login.loginSuccess'));
 		}
 	});
 
@@ -56,64 +66,76 @@
 	}
 </script>
 
-<main>
-	<div class="container">
-		<button class="back-button" on:click={goBackToHome}>
-			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Back to Home
-		</button>
+{#if loaded}
+	<main>
+		<div class="container">
+			<button class="back-button" on:click={goBackToHome}>
+				<Icon icon="mdi:arrow-left" width="20" height="20" />
+				{$t('login.backToHome')}
+			</button>
 
-		{#if !$page.data.session?.user}
-			<h1 class="page-title">Login to Cinema System</h1>
+			{#if !$page.data.session?.user}
+				<h1 class="page-title">{$t('login.loginTitle')}</h1>
 
-			<div class="content-container">
-				<div class="login-section">
-					<div class="login-container">
-						<div class="auth-providers">
-							<button on:click={handleGithubLogin} class="provider-btn">
-								<Icon icon="mdi:github" width="24" height="24" />
-								Log in with GitHub
-							</button>
-						</div>
-
-						<div class="divider">
-							<span>or continue with email</span>
-						</div>
-
-						<form on:submit={handleLogin}>
-							<div class="input-group">
-								<input name="email" type="email" bind:value={email} placeholder="Email" required />
-							</div>
-
-							<div class="input-group password-container">
-								<input
-									name="password"
-									type="password"
-									bind:value={password}
-									placeholder="Password"
-									required
-									class="password-input"
-								/>
-								<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
-									<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
+				<div class="content-container">
+					<div class="login-section">
+						<div class="login-container">
+							<div class="auth-providers">
+								<button on:click={handleGithubLogin} class="provider-btn">
+									<Icon icon="mdi:github" width="24" height="24" />
+									{$t('login.loginWithGithub')}
 								</button>
 							</div>
 
-							<button type="submit" class="submit-button" disabled={isLoading}>
-								{isLoading ? 'Logging in...' : 'Login'}
-							</button>
-						</form>
+							<div class="divider">
+								<span>{$t('login.orContinueWithEmail')}</span>
+							</div>
 
-						<div class="links-container">
-							<a href="/auth/forgot-password" class="text-link"> Forgot password? </a>
-							<a href="/auth/register" class="text-link"> Don't have an account? Create one </a>
+							<form on:submit={handleLogin}>
+								<div class="input-group">
+									<input
+										name="email"
+										type="email"
+										bind:value={email}
+										placeholder="Email"
+										required
+									/>
+								</div>
+
+								<div class="input-group password-container">
+									<input
+										name="password"
+										type="password"
+										bind:value={password}
+										placeholder="Password"
+										required
+										class="password-input"
+									/>
+									<button type="button" class="toggle-password" on:click={togglePasswordVisibility}>
+										<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width="20" height="20" />
+									</button>
+								</div>
+
+								<button type="submit" class="submit-button" disabled={isLoading}>
+									{isLoading ? 'Logging in...' : 'Login'}
+								</button>
+							</form>
+
+							<div class="links-container">
+								<a href="/auth/forgot-password" class="text-link">
+									{$t('login.forgotPassword')}
+								</a>
+								<a href="/auth/register" class="text-link">
+									{$t('login.createAccount')}
+								</a>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		{/if}
-	</div>
-</main>
+			{/if}
+		</div>
+	</main>
+{/if}
 
 <style>
 	main {

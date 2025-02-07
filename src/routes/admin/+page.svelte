@@ -1,32 +1,35 @@
 <script>
 	import Icon from '@iconify/svelte';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 </script>
 
 <svelte:head>
-	<title>Admin Dashboard</title>
+	<title>{$t('admin.pageTitle')}</title>
 </svelte:head>
 
 <main>
 	<div class="container">
-		<h1 class="page-title">Willkommen, Herrscher!</h1>
-		<p>
-			Als allmächtiger Herrscher über Säle, Vorstellungen und Reservierungen liegt das Schicksal des Kinos in Deinen Händen. Mögest Du weise über Dein digitales Reich regieren!
-		</p>
+		<h1 class="page-title">{$t('admin.welcomeTitle')}</h1>
+		<p>{$t('admin.welcomeParagraph')}</p>
+
 		<div class="btn-group">
 			<button class="btn" on:click={() => (window.location.href = '/admin/manage-halls')}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-meeting-room" />
-				Säle verwalten
+				{$t('admin.manageHalls')}
 			</button>
+
 			<button class="btn" on:click={() => (window.location.href = '/admin/manage-screenings')}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-movie-creation" />
-				Vorstellungen verwalten
+				{$t('admin.manageScreenings')}
 			</button>
+
 			<button class="btn" on:click={() => (window.location.href = '/admin/manage-reservations')}>
 				<Icon
 					style="font-size: 1.25rem; margin-right: 0.5rem;"
 					icon="ic:outline-confirmation-number"
 				/>
-				Reservierungen verwalten
+				{$t('admin.manageReservations')}
 			</button>
 		</div>
 	</div>
@@ -42,7 +45,10 @@
 		margin-left: auto;
 		margin-right: auto;
 		text-align: center;
-		font-family: system-ui, -apple-system, sans-serif;
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
 	}
 
 	main {

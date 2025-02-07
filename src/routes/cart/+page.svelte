@@ -4,6 +4,8 @@
 	import { cart } from '$lib/stores/cart';
 	import { formatDateTime, formatPrice } from '$lib/utils';
 	import type { CartTicket } from '$lib/types';
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	let loading = false;
 
@@ -45,17 +47,15 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.error || 'Checkout failed');
+				throw new Error(data.error || $t('cart.checkoutFailedDefault'));
 			}
 
 			// Clear the entire cart and redirect to checkout
 			cart.clear();
 			window.location.href = data.checkoutUrl;
 		} catch (error) {
-			console.error('Checkout error:', error);
-			alert(
-				error instanceof Error ? error.message : 'Failed to process checkout. Please try again.'
-			);
+			console.error($t('cart.checkoutErrorPrefix'), error);
+			alert(error instanceof Error ? error.message : $t('cart.checkoutGenericError'));
 		} finally {
 			loading = false;
 		}
@@ -67,15 +67,19 @@
 
 <main>
 	<div class="container">
-		<h1 class="page-title">Shopping Cart</h1>
+		<!-- Was: <h1 class="page-title">Shopping Cart</h1> -->
+		<h1 class="page-title">{$t('cart.shoppingCart')}</h1>
 
 		<div class="cart-layout">
 			<!-- Cart Items -->
 			<div class="cart-items">
 				{#if $cart.length === 0}
 					<div class="empty-cart">
-						<p>Your cart is empty</p>
-						<a href="/movies" class="browse-movies">Browse Movies</a>
+						<!-- Was: <p>Your cart is empty</p> -->
+						<p>{$t('cart.yourCartIsEmpty')}</p>
+
+						<!-- Was: <a href="/movies" class="browse-movies">Browse Movies</a> -->
+						<a href="/movies" class="browse-movies">{$t('cart.browseMovies')}</a>
 					</div>
 				{:else}
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -91,13 +95,19 @@
 								class="movie-poster"
 							/>
 							<div class="item-details">
+								<!-- Was: <h3 class="movie-title">{item.movieTitle}</h3> -->
 								<h3 class="movie-title">{item.movieTitle}</h3>
+
+								<!-- Was: <p class="screening-time">Screening: {formatDateTime(item.screeningTime)}</p> -->
 								<p class="screening-time">
-									Screening: {formatDateTime(item.screeningTime)}
+									{$t('cart.screeningColon')}{formatDateTime(item.screeningTime)}
 								</p>
+
+								<!-- Was: <p class="seat-info">Seats: {getTicketLabels(item.tickets)}</p> -->
 								<p class="seat-info">
-									Seats: {getTicketLabels(item.tickets)}
+									{$t('cart.seatsColon')}{getTicketLabels(item.tickets)}
 								</p>
+
 								<div class="tickets-summary">
 									{#each item.tickets as ticket}
 										<div class="ticket-row">
@@ -106,16 +116,21 @@
 										</div>
 									{/each}
 								</div>
+
 								<div class="item-actions">
+									<!-- Was: <span class="price">Total: ${...}</span> -->
 									<span class="price">
-										Total: ${formatPrice(item.tickets.reduce((sum, t) => sum + t.price, 0))}
+										{$t('cart.totalColon')}${formatPrice(
+											item.tickets.reduce((sum, t) => sum + t.price, 0)
+										)}
 									</span>
 									<!-- Add stopPropagation to prevent triggering the parent click when removing -->
+
 									<button
 										class="remove-button"
 										on:click|stopPropagation={() => cart.removeItem(item.screeningId)}
 									>
-										Remove
+										{$t('cart.remove')}
 									</button>
 								</div>
 							</div>
@@ -127,26 +142,31 @@
 			<!-- Order Summary -->
 			<div class="order-summary">
 				<div class="summary-container">
-					<h2 class="summary-title">Order Summary</h2>
+					<!-- Was: <h2 class="summary-title">Order Summary</h2> -->
+					<h2 class="summary-title">{$t('cart.orderSummary')}</h2>
 
 					<div class="summary-details">
 						<div class="summary-row">
-							<span>Subtotal</span>
+							<!-- Was: <span>Subtotal</span> -->
+							<span>{$t('cart.subtotal')}</span>
 							<span>${formatPrice(subtotal)}</span>
 						</div>
 						{#if bookingFee > 0}
 							<div class="summary-row">
-								<span>Booking Fee</span>
+								<!-- Was: <span>Booking Fee</span> -->
+								<span>{$t('cart.bookingFee')}</span>
 								<span>${formatPrice(bookingFee)}</span>
 							</div>
 						{/if}
 					</div>
 
 					<div class="total-row">
-						<span>Total</span>
+						<!-- Was: <span>Total</span> -->
+						<span>{$t('cart.total')}</span>
 						<span>${formatPrice(total)}</span>
 					</div>
 
+					<!-- Was: <button ...>Proceed to Checkout</button> -->
 					<button
 						class="checkout-button"
 						disabled={$cart.length === 0 || loading}
@@ -155,7 +175,7 @@
 						{#if loading}
 							<span class="loading-spinner"></span>
 						{/if}
-						Proceed to Checkout
+						{$t('cart.proceedToCheckout')}
 					</button>
 				</div>
 			</div>

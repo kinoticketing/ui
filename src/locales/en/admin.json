@@ -1,0 +1,10 @@
+{
+    "admin": {
+        "pageTitle": "Admin Dashboard",
+        "welcomeTitle": "Welcome, Ruler!",
+        "welcomeParagraph": "As the almighty Ruler over halls, screenings, and reservations, the fate of the cinema rests in your hands. May you rule your digital realm wisely!",
+        "manageHalls": "Manage Halls",
+        "manageScreenings": "Manage Screenings",
+        "manageReservations": "Manage Reservations"
+    }
+}

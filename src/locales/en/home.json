@@ -1,0 +1,42 @@
+{
+    "home": {
+        "hero": {
+            "heading": "Welcome to Your Favorite Cinema",
+            "description": "Experience the latest blockbusters in our modern movie theater",
+            "buttonText": "View All Movies"
+        },
+        "nowPlaying": {
+            "heading": "Now Playing",
+            "viewAll": "View All"
+        },
+        "features": {
+            "heading": "Our Cinema Experience",
+            "modernTech": {
+                "title": "State-of-the-Art Technology",
+                "description": "Dolby Atmos sound and 4K laser projection for a unique movie experience"
+            },
+            "premiumComfort": {
+                "title": "Premium Comfort",
+                "description": "Comfy seats with plenty of legroom for maximum comfort"
+            },
+            "snackBar": {
+                "title": "Snack Bar",
+                "description": "Fresh popcorn, nachos, and a wide selection of drinks"
+            },
+            "attractiveOffers": {
+                "title": "Attractive Offers",
+                "description": "Regular special screenings and discount promotions"
+            }
+        },
+        "comingSoon": {
+            "heading": "Coming Soon",
+            "viewAll": "View All"
+        },
+        "newsletter": {
+            "heading": "Stay Informed",
+            "description": "Subscribe to our newsletter for the latest movie releases and special offers",
+            "emailPlaceholder": "Your Email Address",
+            "subscribeButton": "Subscribe"
+        }
+    }
+}

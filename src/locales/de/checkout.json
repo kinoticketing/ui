@@ -1,0 +1,37 @@
+{
+    "checkout": {
+        "backToBooking": "Zurück zur Buchung",
+        "backToCart": "Zurück zum Warenkorb",
+        "showtime": "Vorstellungszeit:",
+        "reservedSeats": "Ihre Sitze sind reserviert für",
+        "checkout": "Kasse",
+        "orderSummary": "Bestellübersicht",
+        "seat": "Sitz",
+        "row": "Reihe",
+        "column": "Spalte",
+        "total": "Gesamt:",
+        "paymentMethod": "Zahlungsmethode",
+        "failCreatePayPalOrder": "PayPal-Bestellung konnte nicht erstellt werden",
+        "failCreateOrderPleaseTry": "Bestellung konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "errorCreatingOrderPrefix": "Fehler beim Erstellen der Bestellung:",
+        "paymentCaptureFailed": "Die Zahlung konnte nicht abgeschlossen werden",
+        "paymentFailedPleaseTry": "Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "paymentSystemErrorTryAgain": "Fehler im Zahlungssystem. Bitte versuchen Sie es erneut.",
+        "failInitPayPalRefresh": "PayPal konnte nicht initialisiert werden. Bitte aktualisieren Sie die Seite.",
+        "paypalInitializationErrorPrefix": "Fehler bei der PayPal-Initialisierung:",
+        "failLoadPayPalSdk": "PayPal-SDK konnte nicht geladen werden",
+        "failLoadPaymentSystemRefresh": "Zahlungssystem konnte nicht geladen werden. Bitte aktualisieren Sie die Seite oder versuchen Sie es später erneut."
+    },
+    "checkout_success": {
+        "paymentSuccessful": "Bezahlung erfolgreich!",
+        "thankYouForYourPurchase": "Vielen Dank für Ihren Einkauf",
+        "bookingDetails": "Buchungsdetails",
+        "movieColon": "Film:",
+        "screeningColon": "Vorstellung:",
+        "amountPaidColon": "Bezahlter Betrag:",
+        "yourTickets": "Ihre Tickets",
+        "generatingQrCode": "QR-Code wird generiert...",
+        "errorGeneratingQrCode": "Fehler beim Generieren des QR-Codes:",
+        "returnToHome": "Zurück zur Startseite"
+    }
+}

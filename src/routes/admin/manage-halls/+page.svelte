@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: {
 		halls: {
@@ -72,7 +74,7 @@
 		const seatsByRow = hall.seat_plan.reduce((acc: any, seat: any) => {
 			const rowMatch = seat.seat_label.match(/^[A-Z]+/);
 			const row = rowMatch ? rowMatch[0] : '';
-			
+
 			if (!acc[row]) {
 				acc[row] = [];
 			}
@@ -93,7 +95,7 @@
 </script>
 
 <svelte:head>
-	<title>Säle verwalten</title>
+	<title>{$t('admin_manage_halls.title')}</title>
 </svelte:head>
 
 <main>
@@ -101,9 +103,9 @@
 		<div class="page-header">
 			<button class="back-btn" on:click={goBack}>
 				<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-arrow-back" />
-				Zurück
+				{$t('admin_manage_halls.back_button')}
 			</button>
-			<h1 class="page-title">Alle Säle</h1>
+			<h1 class="page-title">{$t('admin_manage_halls.page_header')}</h1>
 		</div>
 
 		{#if data.halls.length > 0}
@@ -113,7 +115,11 @@
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div class="hall-tile" on:click={() => goToDetail(hall.hall_id)}>
 						<h3>{hall.name}</h3>
-						<p><strong>Kapazität:</strong> {hall.capacity} Sitzplätze</p>
+						<p>
+							<strong>{$t('admin_manage_halls.capacity_label')}</strong>
+							{hall.capacity}
+							{$t('admin_manage_halls.capacity_unit')}
+						</p>
 
 						<div class="seat-plan-preview">
 							<div class="screen-preview"></div>
@@ -135,12 +141,12 @@
 				{/each}
 			</div>
 		{:else}
-			<p>Es sind keine Säle vorhanden.</p>
+			<p>{$t('admin_manage_halls.no_halls')}</p>
 		{/if}
 
 		<button class="create-hall-btn" on:click={goToCreateHall}>
 			<Icon style="font-size: 1.25rem; margin-right: 0.5rem;" icon="ic:outline-add" />
-			Neuen Saal erstellen
+			{$t('admin_manage_halls.create_hall_button')}
 		</button>
 	</div>
 </main>

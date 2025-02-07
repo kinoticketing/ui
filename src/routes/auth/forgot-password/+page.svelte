@@ -1,5 +1,15 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
+	import { onMount } from 'svelte';
+	import '../../../i18n.js';
+	import { t, locale } from 'svelte-i18n';
+	import { i18nReady } from '../../../i18n.js';
+
+	let loaded = false;
+	onMount(async () => {
+		await i18nReady;
+		loaded = true;
+	});
 
 	let email = '';
 	let newPassword = '';
@@ -20,21 +30,30 @@
 	}
 </script>
 
-<div class="reset-password-container">
-	<h2>Reset Your Password</h2>
+{#if loaded}
+	<main>
+		<div class="reset-password-container">
+			<h2>{$t('forgotPassword.resetPasswordTitle')}</h2>
 
-	<form on:submit|preventDefault={handleResetPassword}>
-		<div class="input-group">
-			<input type="email" bind:value={email} placeholder="Email" required />
+			<form on:submit|preventDefault={handleResetPassword}>
+				<div class="input-group">
+					<input
+						type="email"
+						bind:value={email}
+						placeholder={$t('forgotPassword.emailPlaceholder')}
+						required
+					/>
+				</div>
+
+				<button type="submit" class="reset-btn">{$t('forgotPassword.resetPasswordButton')}</button>
+			</form>
+
+			<p class="login-link">
+				<a href="/auth/login">{$t('forgotPassword.backToLogin')}</a>
+			</p>
 		</div>
-
-		<button type="submit" class="reset-btn">Reset Password</button>
-	</form>
-
-	<p class="login-link">
-		<a href="/auth/login">Back to Login</a>
-	</p>
-</div>
+	</main>
+{/if}
 
 <style>
 	.reset-password-container {

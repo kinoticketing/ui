@@ -1,0 +1,48 @@
+{
+    "admin_manageReservations": {
+        "pageTitle": "Manage reservations",
+        "backBtn": "Back",
+        "manageReservations": "Manage reservations",
+        "searchPlaceholder": "Search for user, movie or ticket ID",
+        "ticketId": "Ticket ID",
+        "ticketCode": "Ticket Code",
+        "username": "User",
+        "movieTitle": "Movie",
+        "show": "Show",
+        "hall": "Hall",
+        "seat": "Seat",
+        "price": "Price",
+        "status": "Status",
+        "createdAt": "Created at",
+        "actions": "Actions",
+        "cancel": "Cancel",
+        "reservationStatus": {
+            "pending": "pending",
+            "confirmed": "confirmed",
+            "cancelled": "cancelled"
+        },
+        "reservation_details": {
+            "pageTitle": "Reservation Details - ",
+            "backButton": "Back to Overview",
+            "reservationDetails": "Reservation Details",
+            "ticketIdLabel": "Ticket ID:",
+            "ticketCodeLabel": "Ticket Code:",
+            "ticketStatusLabel": "Status:",
+            "priceLabel": "Price:",
+            "createdAtLabel": "Created at:",
+            "ticketInfo": "Ticket Information",
+            "userInfo": "User Information",
+            "usernameLabel": "Username:",
+            "emailLabel": "Email:",
+            "filmInfo": "Film Information",
+            "movieTitleLabel": "Movie Title:",
+            "durationLabel": "Duration:",
+            "startTimeLabel": "Show Start:",
+            "endTimeLabel": "Show End:",
+            "hallInfo": "Hall Information",
+            "hallNameLabel": "Hall Name:",
+            "seatLabel": "Seat:",
+            "cancelReservation": "Cancel Reservation"
+        }
+    }
+}

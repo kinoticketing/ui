@@ -1,0 +1,77 @@
+{
+    "about": {
+        "headerTitle": "Über uns",
+        "ourStoryTitle": "Unsere Geschichte",
+        "ourStoryParagraph": "Dieses Projekt ist eine Zusammenarbeit unter Studierenden, die diese Website als Studienprojekt entwickeln. Wir wollten eine Plattform schaffen, die das Buchen von Kinotickets vereinfacht und gleichzeitig Innovation und Kreativität fördert. Das Ziel ist, dass sich die Website zu einer voll funktionsfähigen Plattform für Kinoliebhaber wie dich entwickelt!",
+        "ourMissionTitle": "Unsere Mission",
+        "missionStatement": "Eine nahtlose und innovative Möglichkeit zu schaffen, Kinotickets zu buchen. Dein nächstes Kinoerlebnis ist nur einen Klick entfernt.",
+        "attentionTitle": "Achtung",
+        "attentionParagraph": "Dies ist ein Studentenprojekt. Wir verkaufen keine echten Tickets. Ein Kino, in dem du unsere Tickets einlösen kannst, existiert nicht.",
+        "coreValuesTitle": "Unsere Werte",
+        "teamTitle": "Unser Team",
+        "coreValues": [
+            {
+                "title": "Innovation",
+                "icon": "🚀",
+                "description": "Wir nutzen die neueste Technologie, um das Ticketbuchen zu vereinfachen. Unser Team erkundet kontinuierlich neue Wege, das Nutzererlebnis zu verbessern – von KI-basierten Empfehlungen bis hin zu Virtual-Reality-Vorschauen von Kinositzen."
+            },
+            {
+                "title": "Zugänglichkeit",
+                "icon": "🌍",
+                "description": "Wir sorgen dafür, dass das Buchen von Tickets einfach und jederzeit verfügbar ist. Unsere Plattform ist nutzerorientiert entwickelt, sodass sie für alle intuitiv bedienbar ist – unabhängig vom technischen Vorwissen."
+            },
+            {
+                "title": "Gemeinschaft",
+                "icon": "🤝",
+                "description": "Wir möchten Menschen durch unvergessliche Kinoerlebnisse zusammenbringen. Unsere Plattform ermöglicht nicht nur die Ticketbuchung, sondern fördert auch den Austausch unter Filmbegeisterten."
+            },
+            {
+                "title": "Exzellenz",
+                "icon": "🏆",
+                "description": "Wir legen Wert auf Komfort, Zufriedenheit und erstklassigen Service in jedem Aspekt unserer Plattform. Von der ersten Nutzung unserer Website bis hin zum Platznehmen im Kino streben wir nach Perfektion."
+            },
+            {
+                "title": "Nachhaltigkeit",
+                "icon": "🌱",
+                "description": "Wir setzen uns für Umweltverantwortung in der Filmbranche ein. Unser digitales Ticketsystem reduziert den Papierverbrauch erheblich, und wir arbeiten mit umweltfreundlichen Kinos zusammen."
+            }
+        ],
+        "teamMembers": [
+            {
+                "key": "0",
+                "name": "Max Mustermann",
+                "role": "Co-Founder & CEO",
+                "bio": "Lisa führt unser Team mit Leidenschaft, um eine einzigartige Buchungsplattform zu schaffen.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "1",
+                "name": "Max Mustermann",
+                "role": "CTO",
+                "bio": "Max konzentriert sich darauf, modernste Technologien einzusetzen und ein reibungsloses Nutzererlebnis sicherzustellen.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "2",
+                "name": "Max Mustermann",
+                "role": "Head of Design",
+                "bio": "Anna stellt sicher, dass jedes Element ansprechend aussieht und benutzerfreundlich ist.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "3",
+                "name": "Max Mustermann",
+                "role": "Marketing Director",
+                "bio": "Thomas entwickelt Strategien, um Filmfans zu erreichen und unsere Nutzerschaft zu vergrößern.",
+                "image": "/PlaceholderBlue.png"
+            },
+            {
+                "key": "4",
+                "name": "Max Mustermann",
+                "role": "Customer Relations Manager",
+                "bio": "Sophia sorgt dafür, dass unsere Nutzer das bestmögliche Erlebnis auf unserer Plattform haben.",
+                "image": "/PlaceholderBlue.png"
+            }
+        ]
+    }
+}

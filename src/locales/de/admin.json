@@ -1,0 +1,10 @@
+{
+    "admin": {
+        "pageTitle": "Admin Dashboard",
+        "welcomeTitle": "Willkommen, Herrscher!",
+        "welcomeParagraph": "Als allmächtiger Herrscher über Säle, Vorstellungen und Reservierungen liegt das Schicksal des Kinos in Deinen Händen. Mögest Du weise über Dein digitales Reich regieren!",
+        "manageHalls": "Säle verwalten",
+        "manageScreenings": "Vorstellungen verwalten",
+        "manageReservations": "Reservierungen verwalten"
+    }
+}

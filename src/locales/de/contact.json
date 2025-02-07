@@ -1,0 +1,24 @@
+{
+    "contact": {
+        "contactUs": "Kontaktieren Sie uns",
+        "nameLabel": "Name",
+        "namePlaceholder": "Ihr Name",
+        "emailLabel": "E-Mail",
+        "emailPlaceholder": "Ihre E-Mail-Adresse",
+        "subjectLabel": "Betreff",
+        "subjectPlaceholder": "Betreff Ihrer Nachricht",
+        "messageLabel": "Nachricht",
+        "messagePlaceholder": "Ihre Nachricht",
+        "sendButton": "Senden",
+        "sendingButton": "Senden...",
+        "successMessage": "Nachricht erfolgreich gesendet.",
+        "errorMessage": "Fehler beim Senden der Nachricht. Bitte versuchen Sie es erneut.",
+        "ourContactDetails": "Unsere Kontaktdaten",
+        "addressColon": "Adresse:",
+        "phoneColon": "Telefon:",
+        "emailColon": "E-Mail:",
+        "fillAllFields": "Bitte füllen Sie alle Felder aus.",
+        "messageSentSuccess": "Ihre Nachricht wurde erfolgreich gesendet. Wir werden uns bald bei Ihnen melden.",
+        "messageSendError": "Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut."
+    }
+}

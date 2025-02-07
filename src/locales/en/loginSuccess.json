@@ -1,0 +1,14 @@
+{
+    "loginSuccess": {
+        "title": "Welcome,",
+        "defaultName": "User",
+        "successMessage": "You've successfully logged in. Where would you like to go?",
+        "homePageTitle": "Home Page",
+        "homePageDescription": "Browse movies and showtimes",
+        "myReservationsTitle": "My Reservations",
+        "myReservationsDescription": "View your booking history",
+        "accountSettingsTitle": "Account Settings",
+        "accountSettingsDescription": "Manage your profile and preferences",
+        "logoutButton": "Logout"
+    }
+}

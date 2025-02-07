@@ -1,87 +1,29 @@
-<script>
-	const missionStatement =
-		'Creating a seamless and innovative way to book your movie tickets. Your next cinematic experience is just a click away.';
-	const coreValues = [
-		{
-			title: 'Innovation',
-			icon: '🚀',
-			description:
-				'We embrace the latest technology to simplify ticket booking. ' +
-				'Our team constantly explores new ways to enhance the user experience, ' +
-				'from AI-powered recommendations to virtual reality previews of cinema seats.'
-		},
-		{
-			title: 'Accessibility',
-			icon: '🌍',
-			description:
-				'We ensure booking tickets is easy and available anytime, anywhere. ' +
-				'Our platform is designed with a user-first approach, making it intuitive for everyone, ' +
-				'regardless of their tech-savviness.'
-		},
-		{
-			title: 'Community',
-			icon: '🤝',
-			description:
-				'We aim to bring people together through unforgettable movie experiences. ' +
-				'Our platform not only facilitates ticket booking but also fosters a sense of ' +
-				'community among film enthusiasts.'
-		},
-		{
-			title: 'Excellence',
-			icon: '🏆',
-			description:
-				'We prioritize comfort, satisfaction, and top-notch service in every ' +
-				'aspect of our platform. From the moment users land on our site to the time ' +
-				"they're seated in the cinema, we strive for excellence."
-		},
-		{
-			title: 'Sustainability',
-			icon: '🌱',
-			description:
-				'We are committed to promoting environmental responsibility in the ' +
-				'movie industry. Our digital ticketing system significantly reduces paper waste, ' +
-				'and we partner with eco-friendly cinemas.'
-		}
-	];
+<script lang="ts">
+	import '../../i18n.js';
+	import { t } from 'svelte-i18n';
 
-	const teamMembers = [
-		{
-			name: 'Max Mustermann',
-			role: 'Co-Founder & CEO',
-			bio: 'Lisa leads our team with passion and determination to create a unique booking platform.',
-			image: '/PlaceholderBlue.png'
-		},
-		{
-			name: 'Max Mustermann',
-			role: 'CTO',
-			bio: 'Max focuses on delivering cutting-edge technology and ensuring smooth user experiences.',
-			image: '/PlaceholderBlue.png'
-		},
-		{
-			name: 'Max Mustermann',
-			role: 'Head of Design',
-			bio: 'Anna ensures that every element looks great and is user-friendly.',
-			image: '/PlaceholderBlue.png'
-		},
-		{
-			name: 'Max Mustermann',
-			role: 'Marketing Director',
-			bio: 'Thomas develops strategies to reach movie enthusiasts and grow our user base.',
-			image: '/PlaceholderBlue.png'
-		},
-		{
-			name: 'Max Mustermann',
-			role: 'Customer Relations Manager',
-			bio: 'Sophia ensures our users have the best possible experience with our platform.',
-			image: '/PlaceholderBlue.png'
-		}
-	];
+	interface CoreValue {
+		title: string;
+		icon: string;
+		description: string;
+	}
+
+	interface TeamMember {
+		key: string;
+		name: string;
+		role: string;
+		bio: string;
+		image: string;
+	}
+
+	$: coreValues = $t('about.coreValues') as unknown as CoreValue[];
+	$: teamMembers = $t('about.teamMembers') as unknown as TeamMember[];
 </script>
 
 <main>
 	<section class="about-us">
 		<div class="header">
-			<h1>About Us</h1>
+			<h1>{$t('about.headerTitle')}</h1>
 		</div>
 
 		<div class="content">
@@ -90,29 +32,26 @@
 					<img src="/PlaceholderBlue.png" alt="Cinema" />
 				</div>
 				<div class="about-text">
-					<h2>Our Story</h2>
-					<p>
-						This project is a collaborative effort among students who are developing this website as
-						a studentprojekt. We wanted to create a platform that simplifies booking movie tickets
-						while also encouraging innovation and creativity. The plan is for the website to grow
-						into a fully functional platform designed for cinema enthusiasts like you!
-					</p>
-					<h2>Our Mission</h2>
-					<p>{missionStatement}</p>
+					<div class="about-text">
+						<h2>{$t('about.ourStoryTitle')}</h2>
+						<p>{$t('about.ourStoryParagraph')}</p>
+
+						<h2>{$t('about.ourMissionTitle')}</h2>
+						<p>{$t('about.missionStatement')}</p>
+					</div>
 				</div>
 			</div>
 			<div>
-				<h2>Attention</h2>
+				<h2>{$t('about.attentionTitle')}</h2>
 				<p>
-					This is a student projekt. We do not sell real tickets. A movietheater where you can watch
-					films with our tickets does not exist.
+					{$t('about.attentionParagraph')}
 				</p>
 			</div>
 
 			<div class="values">
-				<h2>Our Core Values</h2>
+				<h2>{$t('about.coreValuesTitle')}</h2>
 				<div class="value-grid">
-					{#each coreValues as value}
+					{#each coreValues as value (value.title)}
 						<div class="value-card">
 							<div class="icon">{value.icon}</div>
 							<h3>{value.title}</h3>
@@ -123,9 +62,9 @@
 			</div>
 
 			<div class="team">
-				<h2>Meet Our Team</h2>
+				<h2>{$t('about.teamTitle')}</h2>
 				<div class="team-grid">
-					{#each teamMembers as member}
+					{#each teamMembers as member (member.key)}
 						<div class="team-card">
 							<div class="profile-image">
 								<img src={member.image} alt={member.name} />

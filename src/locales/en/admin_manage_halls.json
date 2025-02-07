@@ -1,0 +1,59 @@
+{
+    "admin_manage_halls": {
+        "title": "Manage Halls",
+        "back_button": "Back",
+        "page_header": "All Halls",
+        "capacity_label": "Capacity:",
+        "capacity_unit": "Seats",
+        "no_halls": "No halls available.",
+        "create_hall_button": "Create New Hall"
+    },
+    "admin_manageHalls_createHall": {
+        "title": "Create Hall",
+        "back_button": "Back",
+        "page_header": "Create Hall",
+        "inputs": {
+            "hall_name": "Hall Name",
+            "row_count": "Number of Rows",
+            "col_count": "Seats per Row"
+        },
+        "buttons": {
+            "save": "Save",
+            "delete_all": "Delete All"
+        },
+        "seat_grid": {
+            "seat_label": "Seat",
+            "seat_type": "Seat Type"
+        },
+        "feedback": {
+            "error": "An error occurred."
+        },
+        "seat_types": {
+            "Regular": "Regular",
+            "VIP": "VIP",
+            "Disabled": "Disabled",
+            "Premium": "Premium"
+        }
+    },
+    "admin_manageHalls_hallId": {
+        "back_button": "Back",
+        "edit_mode_on": "Enable Edit Mode",
+        "edit_mode_off": "Disable Edit Mode",
+        "inputs": {
+            "hall_name": "Hall Name",
+            "add_row": "Add Row",
+            "remove_row": "Remove Row",
+            "save": "Save"
+        },
+        "seating_section": {
+            "screen_label": "Screen"
+        },
+        "messages": {
+            "no_hall_found": "No hall found",
+            "enter_hall_name": "Please enter a hall name",
+            "at_least_one_row": "The seating plan must contain at least one row",
+            "save_success": "Changes saved successfully",
+            "save_error": "An error occurred"
+        }
+    }
+}

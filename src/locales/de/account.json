@@ -1,0 +1,30 @@
+{
+    "account": {
+        "backToHome": "Zurück zur Startseite",
+        "title": "Kontoeinstellungen",
+        "personalInfoTitle": "Persönliche Informationen",
+        "emailLabel": "E-Mail",
+        "nameLabel": "Name",
+        "notProvided": "Nicht angegeben",
+        "streetAddressLabel": "Straßenadresse",
+        "cityLabel": "Stadt",
+        "stateLabel": "Bundesland",
+        "postalCodeLabel": "Postleitzahl",
+        "countryLabel": "Land",
+        "viewReservationsButton": "Meine Reservierungen anzeigen",
+        "passwordSettingsTitle": "Passworteinstellungen",
+        "createPasswordButton": "Passwort erstellen",
+        "changePasswordButton": "Passwort ändern",
+        "currentPasswordLabel": "Aktuelles Passwort",
+        "newPasswordLabel": "Neues Passwort",
+        "confirmPasswordLabel": "Passwort bestätigen",
+        "cancelButton": "Abbrechen",
+        "updatePasswordButton": "Passwort aktualisieren",
+        "loadingButton": "Wird geladen...",
+        "addressInfoTitle": "Adressinformationen",
+        "editAddressButton": "Adresse bearbeiten",
+        "updateAddressButton": "Adresse aktualisieren",
+        "loginPrompt": "Bitte melden Sie sich an, um Ihre Kontoinformationen anzuzeigen.",
+        "loginButton": "Anmelden"
+    }
+}

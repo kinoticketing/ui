@@ -2,6 +2,9 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 
+	import '../../../i18n.js';
+	import { t } from 'svelte-i18n';
+
 	interface Showtime {
 		id: number;
 		time: string;
@@ -47,7 +50,7 @@
 			trailerId = trailerData.trailerId;
 		} catch (e) {
 			console.error('Error loading trailer:', e);
-			trailerError = 'Trailer konnte nicht geladen werden';
+			trailerError = $t('movies_id.trailerLoadingError');
 		}
 	});
 </script>
@@ -56,7 +59,7 @@
 	<div class="container">
 		<button class="back-button" on:click={goBackToMovies}>
 			<Icon icon="mdi:arrow-left" width="20" height="20" />
-			Back to Movies
+			{$t('movies_id.backToMovies')}
 		</button>
 
 		<h1 class="movie-title">{data.movie.Title}</h1>
@@ -72,27 +75,27 @@
 					/>
 					<div class="movie-info">
 						<div class="info-item">
-							<span class="info-label">Jahr:</span>
+							<span class="info-label">{$t('movies_id.yearLabel')}</span>
 							<span class="info-value">{data.movie.Year}</span>
 						</div>
 						<div class="info-item">
-							<span class="info-label">Genre:</span>
+							<span class="info-label">{$t('movies_id.genreLabel')}</span>
 							<span class="info-value">{data.movie.Genre}</span>
 						</div>
 						<div class="info-item">
-							<span class="info-label">Regisseur:</span>
+							<span class="info-label">{$t('movies_id.directorLabel')}</span>
 							<span class="info-value">{data.movie.Director}</span>
 						</div>
 						<div class="info-item">
-							<span class="info-label">Darsteller:</span>
+							<span class="info-label">{$t('movies_id.actorsLabel')}</span>
 							<span class="info-value">{data.movie.Actors}</span>
 						</div>
 						<div class="info-item plot">
-							<span class="info-label">Handlung:</span>
+							<span class="info-label">{$t('movies_id.plotLabel')}</span>
 							<span class="info-value">{data.movie.Plot}</span>
 						</div>
 						<div class="info-item">
-							<span class="info-label">IMDb-Bewertung:</span>
+							<span class="info-label">{$t('movies_id.imdbRatingLabel')}</span>
 							<span class="info-value">⭐ {data.movie.imdbRating}</span>
 						</div>
 					</div>
@@ -103,11 +106,11 @@
 			<div class="right-section">
 				<!-- Showtimes -->
 				<div class="showtimes-container">
-					<h2 class="showtimes-title">Vorstellungen</h2>
+					<h2 class="showtimes-title">{$t('movies_id.showtimesTitle')}</h2>
 
 					<div class="showtimes-list">
 						{#if data.showtimes.length === 0}
-							<p class="no-showtimes">Keine Vorstellungen vorhanden.</p>
+							<p class="no-showtimes">{$t('movies_id.noShowtimes')}</p>
 						{:else}
 							{#each data.showtimes as showtime}
 								<a class="showtime-card" href={`/movies/${data.movie.id}/${showtime.id}`}>
@@ -120,11 +123,15 @@
 												day: 'numeric',
 												hour: '2-digit',
 												minute: '2-digit'
-											})} Uhr
+											})}
+											{$t('movies_id.timeSuffix')}
 										</div>
 										<div class="showtime-details">
-											<span class="hall-info">Saal: {showtime.hall_name}</span>
-											<span class="duration-info">Dauer: {data.movie.Runtime}</span>
+											<span class="hall-info">{$t('movies_id.hallLabel')} {showtime.hall_name}</span
+											>
+											<span class="duration-info"
+												>{$t('movies_id.durationLabel')} {data.movie.Runtime}</span
+											>
 										</div>
 									</div>
 								</a>
@@ -135,7 +142,7 @@
 
 				<!-- Trailer Section -->
 				<div class="trailer-container">
-					<h2 class="trailer-title">Filmtrailer</h2>
+					<h2 class="trailer-title">{$t('movies_id.trailerTitle')}</h2>
 					<div class="trailer-wrapper">
 						{#if trailerError}
 							<div class="trailer-error">
@@ -145,13 +152,13 @@
 						{:else if trailerId}
 							<iframe
 								src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1`}
-								title="Filmtrailer"
+								title={$t('movies_id.trailerIframeTitle')}
 								class="trailer-iframe"
 								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 								allowfullscreen
 							></iframe>
 						{:else}
-							<div class="trailer-loading">Trailer wird geladen...</div>
+							<div class="trailer-loading">{$t('movies_id.trailerLoading')}</div>
 						{/if}
 					</div>
 				</div>

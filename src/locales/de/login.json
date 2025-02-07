@@ -1,0 +1,15 @@
+{
+    "login": {
+        "backToHome": "Zurück zur Startseite",
+        "loginTitle": "Anmeldung zum Kino-System",
+        "loginWithGithub": "Mit GitHub anmelden",
+        "orContinueWithEmail": "oder mit E-Mail fortfahren",
+        "emailPlaceholder": "E-Mail oder Benutzername",
+        "passwordPlaceholder": "Passwort",
+        "loginButton": "Anmelden",
+        "forgotPassword": "Passwort vergessen?",
+        "createAccount": "Noch kein Konto? Jetzt registrieren",
+        "loginAttempted": "Anmeldeversuch",
+        "loginSuccess": "Erfolgreich angemeldet."
+    }
+}

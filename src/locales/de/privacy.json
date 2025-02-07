@@ -1,0 +1,78 @@
+{
+    "privacyPolicy": {
+        "title": "Datenschutzerklärung",
+        "section1": {
+            "title": "1. Einleitung",
+            "text": "Willkommen bei [Dein Firmenname]! Der Schutz Ihrer persönlichen Daten ist uns ein wichtiges Anliegen. In dieser Datenschutzerklärung informieren wir Sie darüber, welche Daten wir erheben, wie wir sie verwenden und welche Rechte Sie in Bezug auf Ihre Daten haben."
+        },
+        "section2": {
+            "title": "2. Verantwortliche Stelle",
+            "text": "Verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:",
+            "companyInfo": "[Dein Firmenname]\n[Straße und Hausnummer]\n[PLZ und Ort]\nE-Mail: datenschutz@deinedomain.com"
+        },
+        "section3": {
+            "title": "3. Erhebung und Speicherung personenbezogener Daten",
+            "intro": "Wir erheben und speichern personenbezogene Daten, wenn Sie unsere Dienste nutzen, z.B.:",
+            "list1": [
+                "Registrierung und Kontoverwaltung",
+                "Reservierung und Kauf von Kinotickets",
+                "Kontaktaufnahme mit dem Kundensupport"
+            ],
+            "text2": "Die erhobenen Daten umfassen unter anderem:",
+            "list2": [
+                "Name",
+                "E-Mail-Adresse",
+                "Zahlungsinformationen (über sichere Zahlungsanbieter)",
+                "Kontaktdaten"
+            ]
+        },
+        "section4": {
+            "title": "4. Verwendung der Daten",
+            "intro": "Wir verwenden Ihre Daten für folgende Zwecke:",
+            "list": [
+                "Bereitstellung und Verbesserung unserer Dienste",
+                "Abwicklung von Transaktionen und Zahlungen",
+                "Kommunikation mit Ihnen, z.B. bei Supportanfragen",
+                "Versand von Marketingmaterialien (nur mit Ihrer Zustimmung)"
+            ]
+        },
+        "section5": {
+            "title": "5. Weitergabe von Daten an Dritte",
+            "intro": "Wir geben Ihre personenbezogenen Daten nur dann an Dritte weiter, wenn dies zur Erfüllung unserer Dienstleistungen notwendig ist oder Sie ausdrücklich eingewilligt haben. Dazu gehören:",
+            "list": [
+                "Zahlungsdienstleister",
+                "Technische Dienstleister für Hosting und Wartung",
+                "Rechts- und Steuerberater"
+            ]
+        },
+        "section6": {
+            "title": "6. Verwendung von Cookies",
+            "text": "Unsere Website verwendet Cookies, um die Benutzererfahrung zu verbessern. Cookies sind kleine Textdateien, die auf Ihrem Gerät gespeichert werden. Sie können die Verwendung von Cookies in den Einstellungen Ihres Browsers deaktivieren, beachten Sie jedoch, dass einige Funktionen unserer Website dann möglicherweise nicht mehr voll funktionsfähig sind."
+        },
+        "section7": {
+            "title": "7. Ihre Rechte",
+            "intro": "Sie haben das Recht:",
+            "list": [
+                "Auskunft über die von uns gespeicherten Daten zu erhalten",
+                "Berichtigung unrichtiger Daten zu verlangen",
+                "Die Löschung Ihrer Daten zu verlangen",
+                "Die Einschränkung der Verarbeitung Ihrer Daten zu verlangen",
+                "Widerspruch gegen die Verarbeitung Ihrer Daten einzulegen",
+                "Ihre Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten"
+            ],
+            "text": "Zur Ausübung Ihrer Rechte kontaktieren Sie uns bitte unter datenschutz@deinedomain.com."
+        },
+        "section8": {
+            "title": "8. Datensicherheit",
+            "text": "Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Daten vor Verlust, Zerstörung, Zugriff, Veränderung oder Verbreitung durch unbefugte Personen zu schützen."
+        },
+        "section9": {
+            "title": "9. Änderungen der Datenschutzerklärung",
+            "text": "Wir behalten uns das Recht vor, diese Datenschutzerklärung jederzeit zu ändern. Änderungen werden auf dieser Seite veröffentlicht und treten sofort in Kraft."
+        },
+        "section10": {
+            "title": "10. Kontakt",
+            "text": "Bei Fragen oder Anliegen zu dieser Datenschutzerklärung können Sie uns jederzeit unter datenschutz@deinedomain.com kontaktieren."
+        }
+    }
+}

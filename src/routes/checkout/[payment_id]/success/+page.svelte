@@ -3,6 +3,8 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import Icon from '@iconify/svelte';
+	import '../../../../i18n.js';
+	import { t } from 'svelte-i18n';
 
 	export let data: PageData;
 	const { payment } = data;
@@ -32,16 +34,16 @@
 
 <main>
 	<div class="container">
-		<h1 class="page-title">Payment Successful!</h1>
+		<h1 class="page-title">{$t('payment_successful.paymentSuccessful')}</h1>
 
 		<div class="success-content">
 			<div class="success-header">
 				<div class="success-icon">
 					<Icon icon="mdi:check-circle" class="text-green-500 w-16 h-16" />
 				</div>
-				<p class="confirmation-text">Thank you for your purchase</p>
+				<p class="confirmation-text">{$t('payment_successful.thankYou')}</p>
 				<div class="total-amount">
-					<span class="label">Total Amount Paid:</span>
+					<span class="label">{$t('payment_successful.totalAmountPaid')}</span>
 					<span class="value">${formatPrice(payment.amount)}</span>
 				</div>
 			</div>
@@ -50,7 +52,10 @@
 				<div class="screening-details">
 					<div class="details-header">
 						<h2>{screening.movie_title}</h2>
-						<p class="screening-time">Screening: {formatDateTime(screening.screening_time)}</p>
+						<p class="screening-time">
+							{$t('payment_successful.screeningLabel')}
+							{formatDateTime(screening.screening_time)}
+						</p>
 					</div>
 
 					<div class="tickets-grid">
@@ -58,17 +63,25 @@
 							<div class="ticket-item">
 								<div class="ticket-content">
 									<div class="seat-info">
-										<span class="seat-label">Seat {ticket.seat_label}</span>
+										<span class="seat-label">
+											{$t('payment_successful.seatLabel')}
+											{ticket.seat_label}
+										</span>
 									</div>
 									<div class="ticket-code">
-										Code: {ticket.ticket_code}
+										{$t('payment_successful.codeLabel')}
+										{ticket.ticket_code}
 									</div>
+
 									{#await generateTicketQRCode(createTicketInfo(ticket, screening.screening_time))}
-										<p>Generating QR Code...</p>
+										<p>{$t('payment_successful.generatingQrCode')}</p>
 									{:then qrCodeDataUrl}
 										<img src={qrCodeDataUrl} alt="Ticket QR Code" class="qr-code" />
 									{:catch error}
-										<p>Error generating QR Code: {error.message}</p>
+										<p>
+											{$t('payment_successful.errorGeneratingQrCode')}
+											{error.message}
+										</p>
 									{/await}
 								</div>
 							</div>
@@ -78,7 +91,9 @@
 			{/each}
 
 			<div class="actions">
-				<a href="/" class="button home-button">Return to Home</a>
+				<a href="/" class="button home-button">
+					{$t('payment_successful.returnToHome')}
+				</a>
 				<form
 					method="POST"
 					action="?/sendEmail"

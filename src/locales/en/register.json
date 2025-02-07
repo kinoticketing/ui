@@ -1,0 +1,14 @@
+{
+    "register": {
+        "title": "Create Your Cinema Account",
+        "signUpWithGoogle": "Sign up with Google",
+        "signUpWithGithub": "Sign up with GitHub",
+        "or": "or",
+        "usernamePlaceholder": "Username",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Password",
+        "confirmPasswordPlaceholder": "Confirm Password",
+        "createAccountButton": "Create Account",
+        "alreadyHaveAccount": "Already have an account? Log In"
+    }
+}
