@@ -1,10 +1,9 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
-// import { skip } from 'node:test';
-const { Pool } = pkg;
 
+const { Pool } = pkg;
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL
 });
@@ -12,13 +11,26 @@ const pool = new Pool({
 export const actions: Actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
-		const username = formData.get('username');
-		const email = formData.get('email');
-		const password = formData.get('password') as string;
-        let canDirect = false;
+		const username = formData.get('username')?.toString();
+		const email = formData.get('email')?.toString();
+		const password = formData.get('password')?.toString();
+		const confirmPassword = formData.get('confirmPassword')?.toString();
 
-		if (!username || !email || !password) {
-			return fail(400, { message: 'Missing required fields' });
+		// Validation
+		if (!username || !email || !password || !confirmPassword) {
+			return fail(400, {
+				message: 'All fields are required',
+				username,
+				email
+			});
+		}
+
+		if (password !== confirmPassword) {
+			return fail(400, {
+				message: 'Passwords do not match',
+				username,
+				email
+			});
 		}
 
 		try {
@@ -32,29 +44,40 @@ export const actions: Actions = {
 
 			if (existingUser.rows.length > 0) {
 				client.release();
-				return fail(400, { message: 'Username or email already exists' });
+				return fail(400, {
+					message: 'Username or email already exists',
+					username,
+					email
+				});
 			}
 
-			// TODO: Hash the password (use a proper hashing library like bcrypt in production)
+			// Hash the password
 			const hashedPassword = await bcrypt.hash(password, 10);
 
-			// Insert new user
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const result = await client.query(
-				'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
-				[username, email, hashedPassword]
+			// Insert new user with has_password flag set to true
+			await client.query(
+				`INSERT INTO users (
+          username, 
+          email, 
+          password_hash,
+          has_password,
+          created_at,
+          updated_at
+        ) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+				[username, email, hashedPassword, true]
 			);
 
 			client.release();
 
-			// Flag for redirect
-            canDirect = true;
+			// Instead of throwing a redirect, return a success status
+			return { success: true };
 		} catch (error) {
 			console.error('Error creating account:', error);
-			return fail(500, { message: 'An error occurred while creating the account' });
+			return fail(500, {
+				message: 'An error occurred while creating the account',
+				username,
+				email
+			});
 		}
-        if (canDirect){
-            throw redirect(303, '/auth/login')
-        }
 	}
 };

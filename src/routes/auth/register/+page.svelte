@@ -22,6 +22,7 @@
 	let confirmPassword = '';
 	let showPassword = false;
 	let showConfirmPassword = false;
+	let isLoading = false;
 
 	function togglePasswordVisibility(field: 'password' | 'confirmPassword') {
 		if (field === 'password') {
@@ -30,93 +31,126 @@
 			showConfirmPassword = !showConfirmPassword;
 		}
 	}
+	function validateForm() {
+		if (password !== confirmPassword) {
+			return 'Passwords do not match';
+		}
+		return null;
+	}
+	async function handleSubmit() {
+		const error = validateForm();
+		if (error) {
+			return;
+		}
+		isLoading = true;
+		return async ({ result, update }: { result: any; update: any }) => {
+			if (result.type === 'success') {
+				window.location.href = '/auth/login';
+			}
+			await update();
+			isLoading = false;
+		};
+	}
+	function handleFormComplete() {
+		isLoading = false;
+	}
 </script>
 
 {#if loaded}
-	<div class="create-account-container">
-		<h2>{$t('register.title')}</h2>
+	<main>
+		<div class="create-account-container">
+			<h2>{$t('register.title')}</h2>
 
-		<div class="auth-providers">
-			<button on:click={() => signIn('google')} class="provider-btn google">
-				<Icon icon="logos:google-icon" />
-				{$t('register.signUpWithGoogle')}
-			</button>
-
-			<button on:click={() => signIn('github')} class="provider-btn github">
-				<Icon icon="mdi:github" />
-				{$t('register.signUpWithGithub')}
-			</button>
-		</div>
-
-		<div class="spacer">
-			<span>{$t('register.or')}</span>
-		</div>
-
-		<form method="POST" use:enhance>
-			<div class="input-group">
-				<input
-					name="username"
-					type="text"
-					bind:value={username}
-					placeholder={$t('register.usernamePlaceholder')}
-					required
-				/>
-			</div>
-
-			<div class="input-group">
-				<input
-					name="email"
-					type="email"
-					bind:value={email}
-					placeholder={$t('register.emailPlaceholder')}
-					required
-				/>
-			</div>
-
-			<div class="input-group password-group">
-				<input
-					name="password"
-					type={showPassword ? 'text' : 'password'}
-					placeholder={$t('register.passwordPlaceholder')}
-					required
-				/>
-				<button
-					type="button"
-					class="toggle-password"
-					on:click={() => togglePasswordVisibility('password')}
-				>
-					<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+			<div class="auth-providers">
+				<button on:click={() => signIn('github')} class="provider-btn github">
+					<Icon icon="mdi:github" />
+					{$t('register.signUpWithGithub')}
 				</button>
 			</div>
 
-			<div class="input-group password-group">
-				<input
-					type={showConfirmPassword ? 'text' : 'password'}
-					placeholder={$t('register.confirmPasswordPlaceholder')}
-					required
-				/>
-				<button
-					type="button"
-					class="toggle-password"
-					on:click={() => togglePasswordVisibility('confirmPassword')}
-				>
-					<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
-				</button>
+			<div class="spacer">
+				<span>{$t('register.or')}</span>
 			</div>
 
-			{#if form?.message}
-				<p class="error">{form.message}</p>
-			{/if}
+			<form
+				method="POST"
+				use:enhance={() => {
+					return handleSubmit();
+				}}
+				on:submit={() => {
+					const error = validateForm();
+					if (error) {
+						form = { message: error, username: undefined, email: undefined };
+						return false;
+					}
+				}}
+			>
+				<div class="input-group">
+					<input
+						name="username"
+						type="text"
+						bind:value={username}
+						placeholder={$t('register.usernamePlaceholder')}
+						required
+					/>
+				</div>
 
-			<button type="submit" class="create-btn">
-				{$t('register.createAccountButton')}
-			</button>
-		</form>
+				<div class="input-group">
+					<input
+						name="email"
+						type="email"
+						bind:value={email}
+						placeholder={$t('register.emailPlaceholder')}
+						required
+					/>
+				</div>
 
-		<p class="login-link">
-			<a href="/auth/login">{$t('register.alreadyHaveAccount')}</a>
-		</p>
-	</div>
+				<div class="input-group password-group">
+					<input
+						name="password"
+						type={showPassword ? 'text' : 'password'}
+						placeholder={$t('register.passwordPlaceholder')}
+						required
+					/>
+					<button
+						type="button"
+						class="toggle-password"
+						on:click={() => togglePasswordVisibility('password')}
+					>
+						<Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+					</button>
+				</div>
+
+				<div class="input-group password-group">
+					<input
+						name="confirmPassword"
+						type={showConfirmPassword ? 'text' : 'password'}
+						placeholder={$t('register.confirmPasswordPlaceholder')}
+						required
+					/>
+					<button
+						type="button"
+						class="toggle-password"
+						on:click={() => togglePasswordVisibility('confirmPassword')}
+					>
+						<Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+					</button>
+				</div>
+
+				{#if form?.message}
+					<p class="error">{form.message}</p>
+				{/if}
+
+				<button type="submit" class="create-btn">
+					{$t('register.createAccountButton')}
+				</button>
+			</form>
+
+			<p class="login-link">
+				<a href="/auth/login">{$t('register.alreadyHaveAccount')}</a>
+			</p>
+		</div>
+	</main>
 {/if}
 
 <style>
@@ -153,11 +187,6 @@
 		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.9rem;
-	}
-
-	.google {
-		background-color: #4285f4;
-		color: white;
 	}
 
 	.github {
